@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Auther:   Stanley Huang
-# Project:  PicoDrone 0.7
+# Project:  PicoDrone 0.8
 # Date:     2022-11-25
 #
 # The flight controller of PicoDrone
@@ -260,9 +260,9 @@ class flight_ctr_br(flight_ctr):
 
 
 ### figuring out the baseline of acc sum
-def acc_sum_base(imu):
+def acc_sum_base(imu, bb):
     import time
-    print('    figuring out the baseline of acc sum')
+    bb.write('    figuring out the baseline of acc sum')
     ACC_BASE_SAMPLING_COUNT = 30
     acc_sum = [0, 0, 0]
     for i in range(ACC_BASE_SAMPLING_COUNT):
@@ -275,19 +275,20 @@ def acc_sum_base(imu):
     acc_base[1] = int(acc_sum[1]/ACC_BASE_SAMPLING_COUNT)
     acc_base[2] = int(acc_sum[2]/ACC_BASE_SAMPLING_COUNT)
     acc_sum_base = acc_base[0]**2 + acc_base[1]**2 + acc_base[2]**2
-    print('    Base G: ',str(acc_sum_base))
+    bb.write('    Base G: '+str(acc_sum_base))
     return acc_sum_base
 
 
 ### figuring out the acc sum at the boundary of escape gravity
 def acc_sum_escape_g(imu, st0, st1, st2, 
                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-                     motor_0, motor_1, motor_2, motor_3):
+                     motor_0, motor_1, motor_2, motor_3,
+                     bb):
     import time
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    print('    figuring out the acc sum at the boundary of escape gravity')
+    bb.write('    figuring out the acc sum at the boundary of escape gravity')
     # i, az, delta-az, acc_sum, delta-acc_sum
     G_TEST_COUNT = 30
     data = []
@@ -338,18 +339,17 @@ def acc_sum_escape_g(imu, st0, st1, st2,
         time.sleep(0.1)
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
     for i in nlarge_delta_acc_sum:
-        print('    ', str(i))
-    print('    Escape G: ',str(nlarge_delta_acc_sum[0]['acc_sum']))
+        bb.write('    '+str(i))
+    bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
     return nlarge_delta_acc_sum[0]['acc_sum']
 
 
 ### entering the main loop
 def main_loop(imu, st0, st1, st2, 
               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-              motor_0, motor_1, motor_2, motor_3):
+              motor_0, motor_1, motor_2, motor_3,
+              bb):
     import time
-    from flight_data import flight_data
-    bb = flight_data(b_debug=True)
 
     ST_PROB_FREQ = 10
     MOTOR_ADJ_FREQ = 10

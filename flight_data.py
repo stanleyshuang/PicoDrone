@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Auther:   Stanley Huang
-# Project:  PicoDrone 0.7
+# Project:  PicoDrone 0.8
 # Date:     2022-11-25
 #
 '''
@@ -31,6 +31,15 @@ class flight_data():
     def __init__(self, b_debug=False):
         self._acc_sum_prop = [0, 15000, 0] # now, min, max
         self._b_debug = b_debug
+        if b_debug:
+            self._fd = open('data.txt', 'w')
+
+    def write(self, msg, end='\n'):
+        if self._b_debug:
+            print(msg, end=end)
+            if self._fd:
+                self._fd.write(msg+'\n')
+                self._fd.flush()
 
     def update(self, acc_vals, gyro_vals, tem, m0, m1, m2, m3):
         acc_sum = int(acc_vals[0]*100)**2+int(acc_vals[1]*100)**2+int(acc_vals[2]*100)**2
@@ -81,4 +90,4 @@ class flight_data():
             msg += str(val)
 
         msg += '        '
-        print(msg, end='\r')
+        self.write(msg, end='\r')
