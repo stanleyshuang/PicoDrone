@@ -1,11 +1,9 @@
+under construction..
 # _PicoDrone_
 A drone software in MicroPython on Raspberry Pi Pico.
 
-[![Badges @ Shields IO][shield-badges]][shields]
 [![Version?][shield-version]][shields]
-[![Build passed?][shield-build]][shields]
-[![Language?][shield-markdown]][shields]
-[![Tested?][shield-tested]][shields]
+[![Language?][shield-micropython]][shields]
 [![License?][shield-license]][shields]
 
     // Code for existing users 
@@ -88,21 +86,12 @@ A section listing and thanking people who contributed to the project in a non-te
 
 ## References
 
-- [Writing a Friendly README][friendly-readme]
-    - [The full README][full-readme]
 - [Shields IO][shields]
 
 
-
-[friendly-readme]: https://rowanmanning.com/posts/writing-a-friendly-readme/
-[full-readme]:     https://gist.github.com/rowanmanning/77f31b2392dda1b58674#file-readme-md
-[markdown]:        https://en.wikipedia.org/wiki/Markdown
 [shields]:         https://shields.io/
-[shield-badges]:   https://img.shields.io/badge/badges-@Shields%20IO-ff69b4.svg
-[shield-version]:  https://img.shields.io/badge/version-1.0-blue.svg
-[shield-build]:    https://img.shields.io/badge/build-passed-brightgreen.svg
-[shield-markdown]: https://img.shields.io/badge/markdown-1.0.1-blue.svg
-[shield-tested]:   https://img.shields.io/badge/tested-true-brightgreen.svg
+[shield-version]:  https://img.shields.io/badge/version-0.7-blue.svg
+[shield-micropython]: https://img.shields.io/badge/micropython-1.19.1-blue.svg
 [shield-license]:  https://img.shields.io/badge/license-MIT-blue.svg
 [mpu-6050]:        https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/
 [r8ef]:            https://www.radiolink.com/r8ef
