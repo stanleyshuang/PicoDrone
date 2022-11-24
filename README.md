@@ -27,10 +27,10 @@ A drone software in MicroPython on Raspberry Pi Pico.
 
 _PicoDrone_ requires the following to run - assume zero prior knowledge when documenting:
 
-- [MPU-6050][https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/] - Six-Axis (Gyro + Accelerometer) MEMS MotionTracking™ Devices
+- [MPU-6050][mpu-6050] - Six-Axis (Gyro + Accelerometer) MEMS MotionTracking™ Devices
 
-- [R8EF][https://www.radiolink.com/r8ef] - Radiolink R8EF 8 Channels 2.4G RC Receiver SBUS/PPM/PWM Long Range Control RX for Aircraft Vehicles Transmitter T8FB T8S 
-- [SimonK][https://www.robotshop.com/media/files/pdf/lynxmotion-simonk-esc-guide.pdf] - SimonK firmware is a firmware specifically for ESCs (electronic speed controllers) developed by
+- [R8EF][r8ef] - Radiolink R8EF 8 Channels 2.4G RC Receiver SBUS/PPM/PWM Long Range Control RX for Aircraft Vehicles Transmitter T8FB T8S 
+- [SimonK][simonk] - SimonK firmware is a firmware specifically for ESCs (electronic speed controllers) developed by
 Simon Kirby.
 
 ## Usage
@@ -104,3 +104,7 @@ A section listing and thanking people who contributed to the project in a non-te
 [shield-markdown]: https://img.shields.io/badge/markdown-1.0.1-blue.svg
 [shield-tested]:   https://img.shields.io/badge/tested-true-brightgreen.svg
 [shield-license]:  https://img.shields.io/badge/license-MIT-blue.svg
+[mpu-6050]:        https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/
+[r8ef]:            https://www.radiolink.com/r8ef
+[simonk]:          https://www.robotshop.com/media/files/pdf/lynxmotion-simonk-esc-guide.pdf
+
