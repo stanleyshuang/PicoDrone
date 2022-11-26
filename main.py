@@ -99,10 +99,10 @@ motor_3.duty(m_range_3[0])
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr(st_range, m_range_0, 1.07)
+flight_ctr_0 = flight_ctr_fr(st_range, m_range_0, m_val_cr=1.07)
 flight_ctr_1 = flight_ctr_fl(st_range, m_range_1)
 flight_ctr_2 = flight_ctr_bl(st_range, m_range_2)
-flight_ctr_3 = flight_ctr_br(st_range, m_range_3, 1.13)
+flight_ctr_3 = flight_ctr_br(st_range, m_range_3, m_val_cr=1.13)
 
 
 ### before taking off, initialize PicoDrone

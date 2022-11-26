@@ -32,7 +32,7 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, st_range, m_range, power=1):
+    def __init__(self, st_range, m_range, m_val_cr=1.0):
         self._BASED_ACC_SUM = 0
         self._BASED_ACC_SUM_30 = 0
         self._BASED_ACC_SUM_60 = 0
@@ -45,11 +45,6 @@ class flight_ctr():
         self._gyro_vals = [0, 0, 0]
 
         self._ST_RANGE = st_range # stick parameters
-        self._JOYSTICK_66 = [0, 0, 0]
-        self._JOYSTICK_33 = [0, 0, 0]
-        for i in range(3):
-            self._JOYSTICK_66[i] = self._ST_RANGE[i][0]+int((self._ST_RANGE[i][2]-self._ST_RANGE[i][0])*0.66)
-            self._JOYSTICK_33[i] = self._ST_RANGE[i][0]+int((self._ST_RANGE[i][2]-self._ST_RANGE[i][0])*0.33)
         st_q_size = 10
         st0_q = moving_average(st_q_size+1)
         st1_q = moving_average(st_q_size+1)
@@ -57,7 +52,8 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*power)
+        self._M_UNIT = 5
+        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*m_val_cr)
         self._5_PERMILLE = self._1_PERMILLE * 5
         self._10_PERMILLE = self._1_PERMILLE * 10
         self._pwm_value = m_range[0]
@@ -116,16 +112,13 @@ class flight_ctr():
             self._st_q[i].update_val(st_vals[i])
 
     @property
-    def _1_permille(self):
+    def one_permille(self):
         return self._1_PERMILLE
     
 
-    def power(self):
+    def joystick_2(self):
         st_val_2 = self._st_q[2].average
-        if st_val_2<self._JOYSTICK_33[2]:
-            self._pwm_value -= self._10_PERMILLE
-        elif st_val_2>self._JOYSTICK_66[2]:
-            self._pwm_value += self._10_PERMILLE
+        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*((st_val_2-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
         return self._pwm_value
 
     def fall_protect(self):
@@ -145,7 +138,7 @@ class flight_ctr():
             pwm_value += 1
         ### 沒加油門時，爆升時減速
         st_val_2 = self._st_q[2].average
-        if st_val_2<self._JOYSTICK_66[2]:
+        if st_val_2<self._ST_RANGE[2][0]+int((self._ST_RANGE[2][2]-self._ST_RANGE[2][0])*0.66):
             if acc_sum>self._ES_ACC_SUM_130:
                 pwm_value -= self._1_PERMILLE
             elif acc_sum>self._ES_ACC_SUM_110:
@@ -154,59 +147,23 @@ class flight_ctr():
         return self._pwm_value
 
     def left(self):
-        pwm_value = self._pwm_value
         ay = self._acc_vals[1]
-        if ay<-30:
-            pwm_value += self._1_PERMILLE
-        elif ay<-15:
-            pwm_value += 1
-        elif ay>30:
-            pwm_value -= self._1_PERMILLE
-        elif ay>15:
-            pwm_value -= 1
-        self._pwm_value = pwm_value
+        self._pwm_value -= int(self._1_PERMILLE*self._M_UNIT*30/ay)
         return self._pwm_value
 
     def right(self):
-        pwm_value = self._pwm_value
         ay = self._acc_vals[1]
-        if ay>30:
-            pwm_value += self._1_PERMILLE
-        elif ay>15:
-            pwm_value += 1
-        elif ay<-30:
-            pwm_value -= self._1_PERMILLE
-        elif ay<-15:
-            pwm_value -= 1
-        self._pwm_value = pwm_value
+        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*30/ay)
         return self._pwm_value
 
     def front(self):
-        pwm_value = self._pwm_value
         ax = self._acc_vals[0]
-        if ax<-30:
-            pwm_value += self._1_PERMILLE
-        elif ax<-15:
-            pwm_value += 1
-        elif ax>30:
-            pwm_value -= self._1_PERMILLE
-        elif ax>15:
-            pwm_value -= 1
-        self._pwm_value = pwm_value
+        self._pwm_value -= int(self._1_PERMILLE*self._M_UNIT*30/ax)
         return self._pwm_value
 
     def back(self):
-        pwm_value = self._pwm_value
         ax = self._acc_vals[0]
-        if ax>30:
-            pwm_value += self._1_PERMILLE
-        elif ax>15:
-            pwm_value += 1
-        elif ax<-30:
-            pwm_value -= self._1_PERMILLE
-        elif ax<-15:
-            pwm_value -= 1
-        self._pwm_value = pwm_value
+        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*30/ax)
         return self._pwm_value
 
     def range_protect(self):
@@ -221,7 +178,7 @@ class flight_ctr():
 
 class flight_ctr_fr(flight_ctr):
     def motor_pwn_value(self):
-        self.power()
+        self.joystick_2()
         self.right()
         self.front()
         self.fall_protect()
@@ -231,7 +188,7 @@ class flight_ctr_fr(flight_ctr):
 
 class flight_ctr_fl(flight_ctr):
     def motor_pwn_value(self):
-        self.power()
+        self.joystick_2()
         self.left()
         self.front()
         self.fall_protect()
@@ -241,7 +198,7 @@ class flight_ctr_fl(flight_ctr):
 
 class flight_ctr_bl(flight_ctr):
     def motor_pwn_value(self):
-        self.power()
+        self.joystick_2()
         self.left()
         self.back()
         self.fall_protect()
@@ -251,7 +208,7 @@ class flight_ctr_bl(flight_ctr):
 
 class flight_ctr_br(flight_ctr):
     def motor_pwn_value(self):
-        self.power()
+        self.joystick_2()
         self.right()
         self.back()
         self.fall_protect()
