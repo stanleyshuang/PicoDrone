@@ -2,6 +2,8 @@ under construction..
 # _PicoDrone_
 A drone software in MicroPython on Raspberry Pi Pico.
 
+[Youtube][v0.7_youtube]
+
 [![Version?][shield-version]][shields]
 [![Language?][shield-micropython]][shields]
 [![License?][shield-license]][shields]
@@ -96,4 +98,5 @@ A section listing and thanking people who contributed to the project in a non-te
 [mpu-6050]:        https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/
 [r8ef]:            https://www.radiolink.com/r8ef
 [simonk]:          https://www.robotshop.com/media/files/pdf/lynxmotion-simonk-esc-guide.pdf
+[v0.7_youtube]:    https://www.youtube.com/watch?v=KBGchHt3AzA
 
