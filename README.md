@@ -14,8 +14,6 @@ Check the demo at [Youtube][v0.7_youtube]
 - [Contributing](#contributing)
 - [Support and Migration](#support-and-migration)
 - [License](#license)
-- [Thanks](#thanks)
-- [Other Sections](#other-sections)
 
 ## Requirements
 
