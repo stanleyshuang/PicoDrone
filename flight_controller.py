@@ -32,7 +32,7 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, st_range, m_range):
+    def __init__(self, st_range, m_range, power=1):
         self._BASED_ACC_SUM = 0
         self._BASED_ACC_SUM_30 = 0
         self._BASED_ACC_SUM_60 = 0
@@ -57,7 +57,7 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000)
+        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*power)
         self._5_PERMILLE = self._1_PERMILLE * 5
         self._10_PERMILLE = self._1_PERMILLE * 10
         self._pwm_value = m_range[0]
@@ -262,7 +262,7 @@ class flight_ctr_br(flight_ctr):
 ### figuring out the baseline of acc sum
 def acc_sum_base(imu, bb):
     import time
-    bb.write('    figuring out the baseline of acc sum')
+    bb.write('    figuring out the baseline of acc sum..')
     ACC_BASE_SAMPLING_COUNT = 30
     acc_sum = [0, 0, 0]
     for i in range(ACC_BASE_SAMPLING_COUNT):
@@ -280,7 +280,7 @@ def acc_sum_base(imu, bb):
 
 
 ### figuring out the acc sum at the boundary of escape gravity
-def acc_sum_escape_g(imu, st0, st1, st2, 
+def acc_sum_escape_g(imu, 
                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                      motor_0, motor_1, motor_2, motor_3,
                      bb):
@@ -288,9 +288,9 @@ def acc_sum_escape_g(imu, st0, st1, st2,
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    bb.write('    figuring out the acc sum at the boundary of escape gravity')
+    bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 30
+    G_TEST_COUNT = 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -304,10 +304,6 @@ def acc_sum_escape_g(imu, st0, st1, st2,
         az = int(acc_vals[2]*100)
         acc_sum = ax**2 + ay**2 + az**2
 
-        item = {'i': i, 'az': az, 'delta-az': az-prev_az, 'acc_sum': acc_sum, 'delta-acc_sum': acc_sum-prev_acc_sum}
-        if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
-            data.append(item)
-
         flight_ctr_0.acc_vals = acc_vals
         flight_ctr_1.acc_vals = acc_vals
         flight_ctr_2.acc_vals = acc_vals
@@ -318,9 +314,9 @@ def acc_sum_escape_g(imu, st0, st1, st2,
         flight_ctr_2.gyro_vals = gyro_vals
         flight_ctr_3.gyro_vals = gyro_vals
 
-        st_vals[0] = st0.const_scale(5000)
-        st_vals[1] = st1.const_scale(5000)
-        st_vals[2] = st2.const_scale(7500)
+        st_vals[0] = 5000
+        st_vals[1] = 5000
+        st_vals[2] = 7500
         flight_ctr_0.st_vals = st_vals
         flight_ctr_1.st_vals = st_vals
         flight_ctr_2.st_vals = st_vals
@@ -336,12 +332,117 @@ def acc_sum_escape_g(imu, st0, st1, st2,
         motor_2.duty(m2)
         motor_3.duty(m3)
 
+        item = {'i': i,
+                'az': az,
+                'delta-az': az-prev_az,
+                'acc_sum': acc_sum,
+                'delta-acc_sum': acc_sum-prev_acc_sum,
+                'm0': m0,
+                'm1': m1,
+                'm2': m2,
+                'm3': m3,}
+        if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
+            data.append(item)
+
         time.sleep(0.1)
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
-    for i in nlarge_delta_acc_sum:
-        bb.write('    '+str(i))
+    for item in nlarge_delta_acc_sum:
+        bb.write('    '+str(item))
+    '''
+    bb.write('')
+    for item in data:
+        bb.write('    '+str(item))
+    '''
     bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
     return nlarge_delta_acc_sum[0]['acc_sum']
+
+
+def shutdown(imu, 
+             flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+             motor_0, motor_1, motor_2, motor_3,
+             m_range_0, m_range_1, m_range_2, m_range_3,
+             bb):
+    import sys, time
+    acc_vals = [0.0, 0.0, 0.0]
+    gyro_vals = [0.0, 0.0, 0.0]
+    st_vals = [0, 0, 0]
+    bb.write('shutdowning PicoDrone..')
+    # i, az, delta-az, acc_sum, delta-acc_sum
+    SHUTDOWN_COUNT = 500
+    data = []
+    for i in range(SHUTDOWN_COUNT):
+        prev_ax = int(acc_vals[0]*100)
+        prev_ay = int(acc_vals[1]*100)
+        prev_az = int(acc_vals[2]*100)
+        prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
+
+        acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
+        ax = int(acc_vals[0]*100)
+        ay = int(acc_vals[1]*100)
+        az = int(acc_vals[2]*100)
+        acc_sum = ax**2 + ay**2 + az**2
+
+        flight_ctr_0.acc_vals = acc_vals
+        flight_ctr_1.acc_vals = acc_vals
+        flight_ctr_2.acc_vals = acc_vals
+        flight_ctr_3.acc_vals = acc_vals
+
+        flight_ctr_0.gyro_vals = gyro_vals
+        flight_ctr_1.gyro_vals = gyro_vals
+        flight_ctr_2.gyro_vals = gyro_vals
+        flight_ctr_3.gyro_vals = gyro_vals
+
+        st_vals[0] = 5000
+        st_vals[1] = 5000
+        st_vals[2] = 2500
+        flight_ctr_0.st_vals = st_vals
+        flight_ctr_1.st_vals = st_vals
+        flight_ctr_2.st_vals = st_vals
+        flight_ctr_3.st_vals = st_vals
+
+        m0 = flight_ctr_0.motor_pwn_value()
+        m1 = flight_ctr_1.motor_pwn_value()
+        m2 = flight_ctr_2.motor_pwn_value()
+        m3 = flight_ctr_3.motor_pwn_value()
+
+        motor_0.duty(m0)
+        motor_1.duty(m1)
+        motor_2.duty(m2)
+        motor_3.duty(m3)
+
+        item = {'i': i,
+                'az': az,
+                'delta-az': az-prev_az,
+                'acc_sum': acc_sum,
+                'delta-acc_sum': acc_sum-prev_acc_sum,
+                'm0': m0,
+                'm1': m1,
+                'm2': m2,
+                'm3': m3,}
+        if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
+            data.append(item)
+        
+        if m0<=m_range_0[0] and m1<=m_range_1[0] and m2<=m_range_2[0] and m3<=m_range_3[0]:
+            bb.write('    shutdown completed, i='+str(i))
+            break
+
+        time.sleep(0.1)    
+    motor_0.duty(m_range_0[2])
+    motor_1.duty(m_range_1[2])
+    motor_2.duty(m_range_2[2])
+    motor_3.duty(m_range_3[2])
+
+    nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
+    for item in nsmall_delta_acc_sum:
+        bb.write('    '+str(item))
+    '''
+    bb.write('')
+    for item in data:
+        bb.write('    '+str(item))
+    '''
+    if len(nsmall_delta_acc_sum)>0:
+        bb.write('    Shuting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
+    sys.exit()
 
 
 ### entering the main loop

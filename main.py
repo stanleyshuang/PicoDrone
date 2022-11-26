@@ -42,7 +42,7 @@ from state_machine import R8EF_channel
 from simonk_pwm import ZMR
 
 # Flight Controller -----------------------------------------------------------
-from flight_controller import acc_sum_base, acc_sum_escape_g, main_loop
+from flight_controller import acc_sum_base, acc_sum_escape_g, shutdown, main_loop
 from flight_controller import flight_ctr_fr, flight_ctr_fl
 from flight_controller import flight_ctr_bl, flight_ctr_br
 
@@ -80,24 +80,29 @@ st_range = [ # min, mid, max
 
 ### initializing SimonK PWM
 bb.write('initializing SimonK')
-m_range_0 = [320, 8425]
-m_range_1 = [210, 8405]
-m_range_2 = [540, 8745]
-m_range_3 = [3740, 8685]
+# min, max, init, limit
+m_range_0 = [110, 7800, 50, 8500]
+m_range_1 = [215, 5700, 100, 8400]
+m_range_2 = [545, 7900, 400, 8700]
+m_range_3 = [3750, 6400, 3600, 8700]
 
-motor_0 = ZMR(Pin(6), duty=m_range_0[0])
-motor_1 = ZMR(Pin(7), duty=m_range_1[0])
-motor_2 = ZMR(Pin(8), duty=m_range_2[0])
-motor_3 = ZMR(Pin(9), duty=m_range_3[0])
+motor_0 = ZMR(Pin(6), duty=m_range_0[2])
+motor_1 = ZMR(Pin(7), duty=m_range_1[2])
+motor_2 = ZMR(Pin(8), duty=m_range_2[2])
+motor_3 = ZMR(Pin(9), duty=m_range_3[2])
 time.sleep(1.0)
+motor_0.duty(m_range_0[0])
+motor_1.duty(m_range_1[0])
+motor_2.duty(m_range_2[0])
+motor_3.duty(m_range_3[0])
 
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr(st_range, m_range_0)
+flight_ctr_0 = flight_ctr_fr(st_range, m_range_0, 1.07)
 flight_ctr_1 = flight_ctr_fl(st_range, m_range_1)
 flight_ctr_2 = flight_ctr_bl(st_range, m_range_2)
-flight_ctr_3 = flight_ctr_br(st_range, m_range_3)
+flight_ctr_3 = flight_ctr_br(st_range, m_range_3, 1.13)
 
 
 ### before taking off, initialize PicoDrone
@@ -111,7 +116,7 @@ flight_ctr_3.based_acc_sum = based_acc_sum
 
 
 # figuring out the acc sum at the boundary of escape gravity
-es_acc_sum = acc_sum_escape_g(imu, st0, st1, st2, 
+es_acc_sum = acc_sum_escape_g(imu, 
                               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                               motor_0, motor_1, motor_2, motor_3,
                               bb)
@@ -120,6 +125,13 @@ flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum
 flight_ctr_3.es_acc_sum = es_acc_sum
 
+time.sleep(2.0)
+
+shutdown(imu, 
+         flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+         motor_0, motor_1, motor_2, motor_3, 
+         m_range_0, m_range_1, m_range_2, m_range_3, 
+         bb)
 
 
 ### entering the main loop
