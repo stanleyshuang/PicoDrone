@@ -52,7 +52,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 [shield-version]:  https://img.shields.io/badge/version-0.7-blue.svg
 [shield-micropython]: https://img.shields.io/badge/micropython-1.19.1-blue.svg
 [shield-license]:  https://img.shields.io/badge/license-MIT-blue.svg
-[mpu-6050]:        https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/
+[mpu-6050]:        https://microcontrollerslab.com/mpu6050-raspberry-pi-pico-micropython-tutorial/
 [r8ef]:            https://www.radiolink.com/r8ef
 [simonk]:          https://www.robotshop.com/media/files/pdf/lynxmotion-simonk-esc-guide.pdf
 [v0.7_youtube]:    https://www.youtube.com/watch?v=KBGchHt3AzA
