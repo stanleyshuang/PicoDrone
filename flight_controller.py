@@ -52,10 +52,10 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        self._M_UNIT = 5
         self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*m_val_cr)
-        self._5_PERMILLE = self._1_PERMILLE * 5
-        self._10_PERMILLE = self._1_PERMILLE * 10
+        self._M_UNIT = 5 * self._1_PERMILLE
+        self._10_M_UNIT = self._M_UNIT * 10
+        self._100_M_UNIT = self._M_UNIT * 100
         self._pwm_value = m_range[0]
 
 
@@ -117,53 +117,46 @@ class flight_ctr():
     
 
     def joystick_2(self):
-        st_val_2 = self._st_q[2].average
-        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*((st_val_2-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+        st_2_val = self._st_q[2].average
+        if st_2_val>self._ST_RANGE[2][1]:
+            self._pwm_value += int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
+        else:
+            self._pwm_value -= int(self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
         return self._pwm_value
 
     def fall_protect(self):
-        pwm_value = self._pwm_value
         ax = self._acc_vals[0]
         ay = self._acc_vals[1]
         az = self._acc_vals[2]
         acc_sum = ax**2 + ay**2 + az**2
-        ### 下墜時加速
-        if acc_sum<self._BASED_ACC_SUM_30:
-            pwm_value += self._10_PERMILLE
-        elif acc_sum<self._BASED_ACC_SUM_60:
-            pwm_value += self._5_PERMILLE
-        elif acc_sum<self._BASED_ACC_SUM_80:
-            pwm_value += self._1_PERMILLE
-        elif acc_sum<self._BASED_ACC_SUM_90:
-            pwm_value += 1
-        ### 沒加油門時，爆升時減速
-        st_val_2 = self._st_q[2].average
-        if st_val_2<self._ST_RANGE[2][0]+int((self._ST_RANGE[2][2]-self._ST_RANGE[2][0])*0.66):
-            if acc_sum>self._ES_ACC_SUM_130:
-                pwm_value -= self._1_PERMILLE
-            elif acc_sum>self._ES_ACC_SUM_110:
-                pwm_value -= 1
-        self._pwm_value = pwm_value
+        if acc_sum < self._BASED_ACC_SUM:
+            ### 下墜時加速
+            self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
+        else:
+            ### 沒加油門時，爆升時減速
+            st_2_val = self._st_q[2].average
+            if st_2_val<=self._ST_RANGE[2][1]:
+                self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
         return self._pwm_value
 
     def left(self):
         ay = self._acc_vals[1]
-        self._pwm_value -= int(self._1_PERMILLE*self._M_UNIT*30/ay)
+        self._pwm_value -= int(self._10_M_UNIT*ay/30)
         return self._pwm_value
 
     def right(self):
         ay = self._acc_vals[1]
-        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*30/ay)
+        self._pwm_value += int(self._10_M_UNIT*ay/30)
         return self._pwm_value
 
     def front(self):
         ax = self._acc_vals[0]
-        self._pwm_value -= int(self._1_PERMILLE*self._M_UNIT*30/ax)
+        self._pwm_value -= int(self._10_M_UNIT*ax/30)
         return self._pwm_value
 
     def back(self):
         ax = self._acc_vals[0]
-        self._pwm_value += int(self._1_PERMILLE*self._M_UNIT*30/ax)
+        self._pwm_value += int(self._10_M_UNIT*ax/30)
         return self._pwm_value
 
     def range_protect(self):
@@ -247,7 +240,7 @@ def acc_sum_escape_g(imu,
     st_vals = [0, 0, 0]
     bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 35
+    G_TEST_COUNT = 30
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)

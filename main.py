@@ -125,7 +125,7 @@ flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum
 flight_ctr_3.es_acc_sum = es_acc_sum
 
-time.sleep(2.0)
+#time.sleep(2.0)
 
 shutdown(imu, 
          flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
