@@ -32,9 +32,11 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, name, bb, st_range, m_range, m_val_cr=1.0):
+    def __init__(self, name, st_range, m_range, debug=None, m_val_cr=1.0):
         self.name = name
-        self.bb = bb
+        self.bb = debug
+        self.m_val_cr = m_val_cr
+
         self._BASED_ACC_SUM = 0
         self._ES_ACC_SUM = 0
         self._acc_vals = [0, 0, 0]
@@ -48,7 +50,7 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*m_val_cr)
+        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*self.m_val_cr)
         self._M_UNIT = 5 * self._1_PERMILLE
         self._10_M_UNIT = self._M_UNIT * 10
         self._100_M_UNIT = self._M_UNIT * 100
@@ -111,19 +113,21 @@ class flight_ctr():
         if st_2_val>self._ST_RANGE[2][1]:
             delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
             self._pwm_value += delta
-            if delta>0:
-                sign = '+'
-            else:
-                sign = ''
-            self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
+            if self.bb:
+                if delta>0:
+                    sign = '+'
+                else:
+                    sign = ''
+                self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
             delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
-            if delta>0:
-                sign = '+'
-            else:
-                sign = ''
-            self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
+            if self.bb:
+                if delta>0:
+                    sign = '+'
+                else:
+                    sign = ''
+                self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def fall_protect(self):
@@ -135,76 +139,84 @@ class flight_ctr():
             ### 下墜時加速
             delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
             self._pwm_value += delta
-            if delta>0:
-                sign = '+'
-            else:
-                sign = ''
-            self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
+            if self.bb:
+                if delta>0:
+                    sign = '+'
+                else:
+                    sign = ''
+                self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
         if self._ES_ACC_SUM!=0 and acc_sum > self._ES_ACC_SUM:
             ### 沒加油門時，爆升時減速
             st_2_val = self._st_q[2].average
             if st_2_val<=self._ST_RANGE[2][1]:
                 delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
                 self._pwm_value += delta
-                if delta>0:
-                    sign = '+'
-                else:
-                    sign = ''
-                self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
+                if self.bb:
+                    if delta>0:
+                        sign = '+'
+                    else:
+                        sign = ''
+                    self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def left(self):
         ay = self._acc_vals[1]
         delta = int(-1*self._M_UNIT*ay)
         self._pwm_value += delta
-        if delta>0:
-            sign = '+'
-        else:
-            sign = ''
-        self.bb.write('    '+self.name+'.'+'left:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
+        if self.bb:
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'left:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def right(self):
         ay = self._acc_vals[1]
         delta = int(self._M_UNIT*ay)
         self._pwm_value += delta
-        if delta>0:
-            sign = '+'
-        else:
-            sign = ''
-        self.bb.write('    '+self.name+'.'+'right:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
+        if self.bb:
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'right:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def front(self):
         ax = self._acc_vals[0]
         delta = int(-1*self._M_UNIT*ax)
         self._pwm_value += delta
-        if delta>0:
-            sign = '+'
-        else:
-            sign = ''
-        self.bb.write('    '+self.name+'.'+'front:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
+        if self.bb:
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'front:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def back(self):
         ax = self._acc_vals[0]
         delta = int(self._M_UNIT*ax)
         self._pwm_value += delta
-        if delta>0:
-            sign = '+'
-        else:
-            sign = ''
-        self.bb.write('    '+self.name+'.'+'back:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
+        if self.bb:
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'back:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def range_protect(self):
         pwm_value = self._pwm_value
         if pwm_value>self._M_RANGE[1]:
             pwm_value = self._M_RANGE[1]
-            self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
+            if self.bb:
+                self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         if pwm_value<self._M_RANGE[0]:
             pwm_value = self._M_RANGE[0]
-            self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
+            if self.bb:
+                self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         self._pwm_value = pwm_value
         return self._pwm_value
 
