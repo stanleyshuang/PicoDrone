@@ -34,13 +34,7 @@ from moving_average import moving_average
 class flight_ctr():
     def __init__(self, st_range, m_range, m_val_cr=1.0):
         self._BASED_ACC_SUM = 0
-        self._BASED_ACC_SUM_30 = 0
-        self._BASED_ACC_SUM_60 = 0
-        self._BASED_ACC_SUM_80 = 0
-        self._BASED_ACC_SUM_90 = 0
         self._ES_ACC_SUM = 0
-        self._ES_ACC_SUM_110 = 0
-        self._ES_ACC_SUM_130 = 0
         self._acc_vals = [0, 0, 0]
         self._gyro_vals = [0, 0, 0]
 
@@ -84,10 +78,6 @@ class flight_ctr():
     @based_acc_sum.setter
     def based_acc_sum(self, based_acc_sum):
         self._BASED_ACC_SUM = based_acc_sum
-        self._BASED_ACC_SUM_30 = int(based_acc_sum*0.3)
-        self._BASED_ACC_SUM_60 = int(based_acc_sum*0.6)
-        self._BASED_ACC_SUM_80 = int(based_acc_sum*0.8)
-        self._BASED_ACC_SUM_90 = int(based_acc_sum*0.9)
 
     @property
     def es_acc_sum(self):
@@ -96,8 +86,6 @@ class flight_ctr():
     @es_acc_sum.setter
     def es_acc_sum(self, es_acc_sum):
         self._ES_ACC_SUM = es_acc_sum
-        self._ES_ACC_SUM_110 = int(es_acc_sum*1.1)
-        self._ES_ACC_SUM_130 = int(es_acc_sum*1.3)
 
     @property
     def st_vals(self):
@@ -125,6 +113,9 @@ class flight_ctr():
         return self._pwm_value
 
     def fall_protect(self):
+        if self._BASED_ACC_SUM==0:
+            return self._pwm_value
+
         ax = self._acc_vals[0]
         ay = self._acc_vals[1]
         az = self._acc_vals[2]
@@ -132,11 +123,11 @@ class flight_ctr():
         if acc_sum < self._BASED_ACC_SUM:
             ### 下墜時加速
             self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
-        else:
+        if acc_sum > self._ES_ACC_SUM:
             ### 沒加油門時，爆升時減速
             st_2_val = self._st_q[2].average
             if st_2_val<=self._ST_RANGE[2][1]:
-                self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
+                self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
         return self._pwm_value
 
     def left(self):
