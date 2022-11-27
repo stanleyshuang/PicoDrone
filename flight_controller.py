@@ -228,7 +228,7 @@ def acc_sum_escape_g(imu,
     st_vals = [0, 0, 0]
     bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 30
+    G_TEST_COUNT = 10 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -286,11 +286,9 @@ def acc_sum_escape_g(imu,
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
     for item in nlarge_delta_acc_sum:
         bb.write('    '+str(item))
-    '''
     bb.write('')
     for item in data:
         bb.write('    '+str(item))
-    '''
     bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
     return nlarge_delta_acc_sum[0]['acc_sum']
 
@@ -373,11 +371,9 @@ def shutdown(imu,
     nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
     for item in nsmall_delta_acc_sum:
         bb.write('    '+str(item))
-    '''
     bb.write('')
     for item in data:
         bb.write('    '+str(item))
-    '''
     if len(nsmall_delta_acc_sum)>0:
         bb.write('    Shuting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
     sys.exit()
