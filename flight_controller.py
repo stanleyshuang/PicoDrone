@@ -32,7 +32,9 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, st_range, m_range, m_val_cr=1.0):
+    def __init__(self, name, bb, st_range, m_range, m_val_cr=1.0):
+        self.name = name
+        self.bb = bb
         self._BASED_ACC_SUM = 0
         self._ES_ACC_SUM = 0
         self._acc_vals = [0, 0, 0]
@@ -107,9 +109,21 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self._ST_RANGE[2][1]:
-            self._pwm_value += int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
+            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
+            self._pwm_value += delta
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            self._pwm_value -= int(self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
+            self._pwm_value += delta
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def fall_protect(self):
@@ -119,40 +133,78 @@ class flight_ctr():
         acc_sum = ax**2 + ay**2 + az**2
         if self._BASED_ACC_SUM!=0 and acc_sum < self._BASED_ACC_SUM:
             ### 下墜時加速
-            self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
+            delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
+            self._pwm_value += delta
+            if delta>0:
+                sign = '+'
+            else:
+                sign = ''
+            self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
         if self._ES_ACC_SUM!=0 and acc_sum > self._ES_ACC_SUM:
             ### 沒加油門時，爆升時減速
             st_2_val = self._st_q[2].average
             if st_2_val<=self._ST_RANGE[2][1]:
-                self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
+                delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
+                self._pwm_value += delta
+                if delta>0:
+                    sign = '+'
+                else:
+                    sign = ''
+                self.bb.write('    '+self.name+'.'+'fall_protect:  '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def left(self):
         ay = self._acc_vals[1]
-        self._pwm_value -= int(self._10_M_UNIT*ay/30)
+        delta = int(-1*self._M_UNIT*ay)
+        self._pwm_value += delta
+        if delta>0:
+            sign = '+'
+        else:
+            sign = ''
+        self.bb.write('    '+self.name+'.'+'left:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def right(self):
         ay = self._acc_vals[1]
-        self._pwm_value += int(self._10_M_UNIT*ay/30)
+        delta = int(self._M_UNIT*ay)
+        self._pwm_value += delta
+        if delta>0:
+            sign = '+'
+        else:
+            sign = ''
+        self.bb.write('    '+self.name+'.'+'right:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def front(self):
         ax = self._acc_vals[0]
-        self._pwm_value -= int(self._10_M_UNIT*ax/30)
+        delta = int(-1*self._M_UNIT*ax)
+        self._pwm_value += delta
+        if delta>0:
+            sign = '+'
+        else:
+            sign = ''
+        self.bb.write('    '+self.name+'.'+'front:         '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def back(self):
         ax = self._acc_vals[0]
-        self._pwm_value += int(self._10_M_UNIT*ax/30)
+        delta = int(self._M_UNIT*ax)
+        self._pwm_value += delta
+        if delta>0:
+            sign = '+'
+        else:
+            sign = ''
+        self.bb.write('    '+self.name+'.'+'back:          '+str(self._pwm_value)+', '+str(sign)+str(delta))
         return self._pwm_value
 
     def range_protect(self):
         pwm_value = self._pwm_value
         if pwm_value>self._M_RANGE[1]:
             pwm_value = self._M_RANGE[1]
+            self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         if pwm_value<self._M_RANGE[0]:
             pwm_value = self._M_RANGE[0]
+            self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         self._pwm_value = pwm_value
         return self._pwm_value
 
@@ -207,7 +259,10 @@ def acc_sum_base(imu, bb):
         acc_sum[0] += int(imu.accel.x * 100)
         acc_sum[1] += int(imu.accel.y * 100)
         acc_sum[2] += int(imu.accel.z * 100)
+        if i%10==0:
+            bb.write('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
         time.sleep(0.1)
+    bb.write('    countdown: 0 sec.')
     acc_base = [0, 0, 0]
     acc_base[0] = int(acc_sum[0]/ACC_BASE_SAMPLING_COUNT)
     acc_base[1] = int(acc_sum[1]/ACC_BASE_SAMPLING_COUNT)
@@ -282,14 +337,18 @@ def acc_sum_escape_g(imu,
         if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
             data.append(item)
 
+        if i%10==0:
+            bb.write('    countdown: '+str(int((G_TEST_COUNT-i)/10))+' sec.', end='\r')
         time.sleep(0.1)
+    bb.write('    countdown: 0 sec.')
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
+    bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
+
     for item in nlarge_delta_acc_sum:
         bb.write('    '+str(item))
     bb.write('')
     for item in data:
         bb.write('    '+str(item))
-    bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
     return nlarge_delta_acc_sum[0]['acc_sum']
 
 
@@ -362,6 +421,8 @@ def shutdown(imu,
             bb.write('    shutdown completed, i='+str(i))
             break
 
+        if i%10==0:
+            bb.write('    '+str(int(i/10))+' sec.', end='\r')
         time.sleep(0.1)    
     motor_0.duty(m_range_0[2])
     motor_1.duty(m_range_1[2])
