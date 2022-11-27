@@ -113,17 +113,14 @@ class flight_ctr():
         return self._pwm_value
 
     def fall_protect(self):
-        if self._BASED_ACC_SUM==0:
-            return self._pwm_value
-
         ax = self._acc_vals[0]
         ay = self._acc_vals[1]
         az = self._acc_vals[2]
         acc_sum = ax**2 + ay**2 + az**2
-        if acc_sum < self._BASED_ACC_SUM:
+        if self._BASED_ACC_SUM!=0 and acc_sum < self._BASED_ACC_SUM:
             ### 下墜時加速
             self._pwm_value += int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
-        if acc_sum > self._ES_ACC_SUM:
+        if self._ES_ACC_SUM!=0 and acc_sum > self._ES_ACC_SUM:
             ### 沒加油門時，爆升時減速
             st_2_val = self._st_q[2].average
             if st_2_val<=self._ST_RANGE[2][1]:
