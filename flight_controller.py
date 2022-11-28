@@ -260,6 +260,15 @@ class flight_ctr_br(flight_ctr):
         self.range_protect()
         return self._pwm_value
 
+# format debug message
+def dump_flight_data(debug, flight_data):
+    for item in flight_data:
+        msg = '{'
+        for key in sorted(item.keys()):
+            msg += " '"+key+"':"+str(item[key])+","
+        msg += '}'
+        debug.write('    '+msg)
+
 
 ### figuring out the baseline of acc sum
 def acc_sum_base(imu, bb):
@@ -338,6 +347,8 @@ def acc_sum_escape_g(imu,
         motor_3.duty(m3)
 
         item = {'i': i,
+                'ax': ax,
+                'ay': ay,
                 'az': az,
                 'delta-az': az-prev_az,
                 'acc_sum': acc_sum,
@@ -356,11 +367,9 @@ def acc_sum_escape_g(imu,
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
     bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
 
-    for item in nlarge_delta_acc_sum:
-        bb.write('    '+str(item))
+    dump_flight_data(bb, nlarge_delta_acc_sum)
     bb.write('')
-    for item in data:
-        bb.write('    '+str(item))
+    dump_flight_data(bb, data)
     return nlarge_delta_acc_sum[0]['acc_sum']
 
 
@@ -373,7 +382,7 @@ def shutdown(imu,
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    bb.write('shutdowning PicoDrone..')
+    bb.write('shuttdowning PicoDrone..')
     # i, az, delta-az, acc_sum, delta-acc_sum
     SHUTDOWN_COUNT = 500
     data = []
@@ -418,6 +427,8 @@ def shutdown(imu,
         motor_3.duty(m3)
 
         item = {'i': i,
+                'ax': ax,
+                'ay': ay,
                 'az': az,
                 'delta-az': az-prev_az,
                 'acc_sum': acc_sum,
@@ -442,13 +453,13 @@ def shutdown(imu,
     motor_3.duty(m_range_3[2])
 
     nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
-    for item in nsmall_delta_acc_sum:
-        bb.write('    '+str(item))
+
+    dump_flight_data(bb, nsmall_delta_acc_sum)
     bb.write('')
-    for item in data:
-        bb.write('    '+str(item))
+    dump_flight_data(bb, data)
+
     if len(nsmall_delta_acc_sum)>0:
-        bb.write('    Shuting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
+        bb.write('    Shutting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
     sys.exit()
 
 
