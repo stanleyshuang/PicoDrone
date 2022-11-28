@@ -5,7 +5,7 @@ A drone software in MicroPython on Raspberry Pi Pico.
 [![Language?][shield-micropython]][shields]
 [![License?][shield-license]][shields]
 
-![Pictures](https://www.instagram.com/p/ClgbQVmPWUI/?utm_source=ig_web_copy_link)
+![Pictures](https://github.com/stanleyshuang/PicoDrone/pictures/IMG_8807.HEIC)
 Check the demo at [Youtube][v0.7_youtube]
 
 ## Table of Contents
