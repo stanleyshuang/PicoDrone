@@ -50,8 +50,13 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*self.m_val_cr)
+        # self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*self.m_val_cr)
+        self._1_PERMILLE = int(2.5*self.m_val_cr)
+        
+        self._M_UNIT_BAL = 1 * self._1_PERMILLE
         self._M_UNIT = 5 * self._1_PERMILLE
+        if self.bb:
+            self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
         self._100_M_UNIT = self._M_UNIT * 100
         self._pwm_value = m_range[0]
@@ -161,7 +166,7 @@ class flight_ctr():
 
     def left(self):
         ay = self._acc_vals[1]
-        delta = int(-1*self._M_UNIT*ay)
+        delta = int(-1*self._M_UNIT_BAL*ay)
         self._pwm_value += delta
         if self.bb:
             if delta>0:
@@ -173,7 +178,7 @@ class flight_ctr():
 
     def right(self):
         ay = self._acc_vals[1]
-        delta = int(self._M_UNIT*ay)
+        delta = int(self._M_UNIT_BAL*ay)
         self._pwm_value += delta
         if self.bb:
             if delta>0:
@@ -185,7 +190,7 @@ class flight_ctr():
 
     def front(self):
         ax = self._acc_vals[0]
-        delta = int(-1*self._M_UNIT*ax)
+        delta = int(-1*self._M_UNIT_BAL*ax)
         self._pwm_value += delta
         if self.bb:
             if delta>0:
@@ -197,7 +202,7 @@ class flight_ctr():
 
     def back(self):
         ax = self._acc_vals[0]
-        delta = int(self._M_UNIT*ax)
+        delta = int(self._M_UNIT_BAL*ax)
         self._pwm_value += delta
         if self.bb:
             if delta>0:
@@ -209,8 +214,8 @@ class flight_ctr():
 
     def range_protect(self):
         pwm_value = self._pwm_value
-        if pwm_value>self._M_RANGE[1]:
-            pwm_value = self._M_RANGE[1]
+        if pwm_value>self._M_RANGE[4]:
+            pwm_value = self._M_RANGE[4]
             if self.bb:
                 self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         if pwm_value<self._M_RANGE[0]:
@@ -267,29 +272,33 @@ def dump_flight_data(debug, flight_data):
         for key in sorted(item.keys()):
             msg += " '"+key+"':"+str(item[key])+","
         msg += '}'
-        debug.write('    '+msg)
+        if debug:
+            debug.write('    '+msg)
 
 
 ### figuring out the baseline of acc sum
-def acc_sum_base(imu, bb):
+def acc_sum_base(imu, bb=None):
     import time
-    bb.write('    figuring out the baseline of acc sum..')
+    if bb:
+        bb.write('    figuring out the baseline of acc sum..')
     ACC_BASE_SAMPLING_COUNT = 30
     acc_sum = [0, 0, 0]
     for i in range(ACC_BASE_SAMPLING_COUNT):
         acc_sum[0] += int(imu.accel.x * 100)
         acc_sum[1] += int(imu.accel.y * 100)
         acc_sum[2] += int(imu.accel.z * 100)
-        if i%10==0:
+        if i%10==0 and bb:
             bb.write('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
         time.sleep(0.1)
-    bb.write('    countdown: 0 sec.')
+    if bb:
+        bb.write('    countdown: 0 sec.')
     acc_base = [0, 0, 0]
     acc_base[0] = int(acc_sum[0]/ACC_BASE_SAMPLING_COUNT)
     acc_base[1] = int(acc_sum[1]/ACC_BASE_SAMPLING_COUNT)
     acc_base[2] = int(acc_sum[2]/ACC_BASE_SAMPLING_COUNT)
     acc_sum_base = acc_base[0]**2 + acc_base[1]**2 + acc_base[2]**2
-    bb.write('    Base G: '+str(acc_sum_base))
+    if bb:
+        bb.write('    Base G: '+str(acc_sum_base))
     return acc_sum_base
 
 
@@ -297,14 +306,15 @@ def acc_sum_base(imu, bb):
 def acc_sum_escape_g(imu, 
                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                      motor_0, motor_1, motor_2, motor_3,
-                     bb):
+                     bb=None):
     import time
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    bb.write('    figuring out the acc sum at the boundary of escape gravity..')
+    if bb:
+        bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 10 # 10 - 35
+    G_TEST_COUNT = 18 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -330,7 +340,7 @@ def acc_sum_escape_g(imu,
 
         st_vals[0] = 5000
         st_vals[1] = 5000
-        st_vals[2] = 7500
+        st_vals[2] = 5500
         flight_ctr_0.st_vals = st_vals
         flight_ctr_1.st_vals = st_vals
         flight_ctr_2.st_vals = st_vals
@@ -359,16 +369,18 @@ def acc_sum_escape_g(imu,
                 'm3': m3,}
         if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
             data.append(item)
-
-        if i%10==0:
+        if i%10==0 and bb:
             bb.write('    countdown: '+str(int((G_TEST_COUNT-i)/10))+' sec.', end='\r')
         time.sleep(0.1)
-    bb.write('    countdown: 0 sec.')
+    if bb:
+        bb.write('    countdown: 0 sec.')
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
-    bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
+    if bb:
+        bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
 
     dump_flight_data(bb, nlarge_delta_acc_sum)
-    bb.write('')
+    if bb:
+        bb.write('')
     dump_flight_data(bb, data)
     return nlarge_delta_acc_sum[0]['acc_sum']
 
@@ -377,12 +389,13 @@ def shutdown(imu,
              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
              motor_0, motor_1, motor_2, motor_3,
              m_range_0, m_range_1, m_range_2, m_range_3,
-             bb):
+             bb=None):
     import sys, time
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    bb.write('shuttdowning PicoDrone..')
+    if bb:
+        bb.write('shuttdowning PicoDrone..')
     # i, az, delta-az, acc_sum, delta-acc_sum
     SHUTDOWN_COUNT = 500
     data = []
@@ -441,10 +454,11 @@ def shutdown(imu,
             data.append(item)
         
         if m0<=m_range_0[0] and m1<=m_range_1[0] and m2<=m_range_2[0] and m3<=m_range_3[0]:
-            bb.write('    shutdown completed, i='+str(i))
+            if bb:
+                bb.write('    shutdown completed, i='+str(i))
             break
 
-        if i%10==0:
+        if i%10==0 and bb:
             bb.write('    '+str(int(i/10))+' sec.', end='\r')
         time.sleep(0.1)    
     motor_0.duty(m_range_0[2])
@@ -455,10 +469,11 @@ def shutdown(imu,
     nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
 
     dump_flight_data(bb, nsmall_delta_acc_sum)
-    bb.write('')
+    if bb:
+        bb.write('')
     dump_flight_data(bb, data)
 
-    if len(nsmall_delta_acc_sum)>0:
+    if len(nsmall_delta_acc_sum)>0 and bb:
         bb.write('    Shutting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
     sys.exit()
 
@@ -467,7 +482,7 @@ def shutdown(imu,
 def main_loop(imu, st0, st1, st2, 
               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
               motor_0, motor_1, motor_2, motor_3,
-              bb):
+              bb=None):
     import time
 
     ST_PROB_FREQ = 10
@@ -518,8 +533,9 @@ def main_loop(imu, st0, st1, st2,
             motor_2.duty(m2)
             motor_3.duty(m3)
 
-        bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
-        bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+        if bb:
+            bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+            bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
 
         time.sleep(1.0/ST_PROB_FREQ)
         tickcount += 1
