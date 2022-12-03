@@ -306,7 +306,8 @@ def acc_sum_base(imu, bb=None):
 def acc_sum_escape_g(imu, 
                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                      motor_0, motor_1, motor_2, motor_3,
-                     bb=None):
+                     bb=None,
+                     st0_val=0, st1_val=0, st2_val=0):
     import time
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
@@ -314,7 +315,7 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 18 # 10 - 35
+    G_TEST_COUNT = 15 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -338,9 +339,9 @@ def acc_sum_escape_g(imu,
         flight_ctr_2.gyro_vals = gyro_vals
         flight_ctr_3.gyro_vals = gyro_vals
 
-        st_vals[0] = 5000
-        st_vals[1] = 5000
-        st_vals[2] = 5500
+
+        st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
+        
         flight_ctr_0.st_vals = st_vals
         flight_ctr_1.st_vals = st_vals
         flight_ctr_2.st_vals = st_vals
@@ -371,7 +372,7 @@ def acc_sum_escape_g(imu,
             data.append(item)
         if i%10==0 and bb:
             bb.write('    countdown: '+str(int((G_TEST_COUNT-i)/10))+' sec.', end='\r')
-        time.sleep(0.1)
+        time.sleep(0.05)
     if bb:
         bb.write('    countdown: 0 sec.')
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
@@ -479,20 +480,30 @@ def shutdown(imu,
 
 
 ### entering the main loop
-def main_loop(imu, st0, st1, st2, 
+def main_loop(imu, st0, st1, st2,
               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
               motor_0, motor_1, motor_2, motor_3,
-              bb=None):
+              bb=None, sec=None,
+              st0_val=0, st1_val=0, st2_val=0):
     import time
+    if bb and sec!=None:
+        bb.write('entering the main loop. period: '+str(sec)+' sec.')
+    elif bb:
+        bb.write('entering the main loop')
 
-    ST_PROB_FREQ = 10
-    MOTOR_ADJ_FREQ = 10
+    ST_PROB_FREQ = 20
+    MOTOR_ADJ_FREQ = 20
     tickcount = 0
 
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
     st_vals = [0, 0, 0]
-    while True:
+    st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
+    if sec==None:
+        tickcount_limit = 0
+    else:
+        tickcount_limit = int(sec*ST_PROB_FREQ)
+    while sec==None or tickcount<tickcount_limit:
         if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
             acc_vals[0] = imu.accel.x
             acc_vals[1] = imu.accel.y
@@ -511,11 +522,11 @@ def main_loop(imu, st0, st1, st2,
             flight_ctr_1.gyro_vals = gyro_vals
             flight_ctr_2.gyro_vals = gyro_vals
             flight_ctr_3.gyro_vals = gyro_vals
-
+        '''
         st_vals[0] = st0.abs_scale()
         st_vals[1] = st1.abs_scale()
         st_vals[2] = st2.abs_scale()
-        
+        '''
         flight_ctr_0.st_vals = st_vals
         flight_ctr_1.st_vals = st_vals
         flight_ctr_2.st_vals = st_vals

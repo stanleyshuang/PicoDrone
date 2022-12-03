@@ -99,10 +99,10 @@ motor_3.duty(m_range_3[0])
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr('fc0', st_range, m_range_0, m_val_cr=0.95, debug=bb)
-flight_ctr_1 = flight_ctr_fl('fc1', st_range, m_range_1, m_val_cr=1.06, debug=bb)
-flight_ctr_2 = flight_ctr_bl('fc2', st_range, m_range_2, m_val_cr=0.91, debug=bb)
-flight_ctr_3 = flight_ctr_br('fc3', st_range, m_range_3, m_val_cr=0.93, debug=bb)
+flight_ctr_0 = flight_ctr_fr('fc0', st_range, m_range_0, m_val_cr=0.96, debug=bb)
+flight_ctr_1 = flight_ctr_fl('fc1', st_range, m_range_1, m_val_cr=1.1, debug=bb)
+flight_ctr_2 = flight_ctr_bl('fc2', st_range, m_range_2, m_val_cr=0.92, debug=bb)
+flight_ctr_3 = flight_ctr_br('fc3', st_range, m_range_3, m_val_cr=0.87, debug=bb)
 
 
 ### before taking off, initialize PicoDrone
@@ -119,19 +119,24 @@ flight_ctr_3.based_acc_sum = based_acc_sum
 es_acc_sum = acc_sum_escape_g(imu, 
                               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                               motor_0, motor_1, motor_2, motor_3,
-                              bb)
+                              bb=bb,
+                              st0_val=5000, st1_val=5000, st2_val=5500)
 flight_ctr_0.es_acc_sum = es_acc_sum
 flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum
 flight_ctr_3.es_acc_sum = es_acc_sum
 
-time.sleep(1.0)
+main_loop(imu, st0, st1, st2, 
+          flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+          motor_0, motor_1, motor_2, motor_3,
+          bb=bb, sec=1,
+          st0_val=5000, st1_val=5000, st2_val=5500)
 
 shutdown(imu, 
          flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
          motor_0, motor_1, motor_2, motor_3, 
          m_range_0, m_range_1, m_range_2, m_range_3, 
-         bb)
+         bb=bb)
 
 
 ### entering the main loop
