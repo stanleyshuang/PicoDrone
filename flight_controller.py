@@ -54,7 +54,7 @@ class flight_ctr():
         # self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*self.m_val_cr)
         self._1_PERMILLE = int(2.5*self.m_val_cr)
         
-        self._M_UNIT_BAL = 1 * self._1_PERMILLE
+        self._M_UNIT_BAL = 0 * self._1_PERMILLE
         self._M_UNIT = 5 * self._1_PERMILLE
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
