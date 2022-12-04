@@ -32,10 +32,11 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, name, st_range, m_range, debug=None, m_val_cr=1.0):
+    def __init__(self, name, st_range, m_range, debug_obj=None, m_val_cr=1.0):
         self.name = name
-        self.bb = debug
+        self.bb = debug_obj
         self.m_val_cr = m_val_cr
+        self.debug_show_detail = False
 
         self._BASED_ACC_SUM = 0
         self._ES_ACC_SUM = 0
@@ -118,7 +119,7 @@ class flight_ctr():
         if st_2_val>self._ST_RANGE[2][1]:
             delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
             self._pwm_value += delta
-            if self.bb:
+            if self.bb and self.debug_show_detail:
                 if delta>0:
                     sign = '+'
                 else:
@@ -127,7 +128,7 @@ class flight_ctr():
         else:
             delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
-            if self.bb:
+            if self.bb and self.debug_show_detail:
                 if delta>0:
                     sign = '+'
                 else:
@@ -144,7 +145,7 @@ class flight_ctr():
             ### 下墜時加速
             delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._BASED_ACC_SUM))
             self._pwm_value += delta
-            if self.bb:
+            if self.bb and self.debug_show_detail:
                 if delta>0:
                     sign = '+'
                 else:
@@ -156,7 +157,7 @@ class flight_ctr():
             if st_2_val<=self._ST_RANGE[2][1]:
                 delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
                 self._pwm_value += delta
-                if self.bb:
+                if self.bb and self.debug_show_detail:
                     if delta>0:
                         sign = '+'
                     else:
@@ -168,7 +169,7 @@ class flight_ctr():
         ay = self._acc_vals[1]
         delta = int(-1*self._M_UNIT_BAL*ay)
         self._pwm_value += delta
-        if self.bb:
+        if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
             else:
@@ -180,7 +181,7 @@ class flight_ctr():
         ay = self._acc_vals[1]
         delta = int(self._M_UNIT_BAL*ay)
         self._pwm_value += delta
-        if self.bb:
+        if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
             else:
@@ -192,7 +193,7 @@ class flight_ctr():
         ax = self._acc_vals[0]
         delta = int(-1*self._M_UNIT_BAL*ax)
         self._pwm_value += delta
-        if self.bb:
+        if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
             else:
@@ -204,7 +205,7 @@ class flight_ctr():
         ax = self._acc_vals[0]
         delta = int(self._M_UNIT_BAL*ax)
         self._pwm_value += delta
-        if self.bb:
+        if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
             else:
@@ -216,11 +217,11 @@ class flight_ctr():
         pwm_value = self._pwm_value
         if pwm_value>self._M_RANGE[4]:
             pwm_value = self._M_RANGE[4]
-            if self.bb:
+            if self.bb and self.debug_show_detail:
                 self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         if pwm_value<self._M_RANGE[0]:
             pwm_value = self._M_RANGE[0]
-            if self.bb:
+            if self.bb and self.debug_show_detail:
                 self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         self._pwm_value = pwm_value
         return self._pwm_value
@@ -315,7 +316,7 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 15 # 10 - 35
+    G_TEST_COUNT = 20 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -460,7 +461,7 @@ def shutdown(imu,
             break
 
         if i%10==0 and bb:
-            bb.write('    '+str(int(i/10))+' sec.', end='\r')
+            bb.write('    '+str(int(i/10))+' sec.') # , end='\r')
         time.sleep(0.1)    
     motor_0.duty(m_range_0[2])
     motor_1.duty(m_range_1[2])
