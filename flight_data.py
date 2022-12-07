@@ -32,7 +32,7 @@ class flight_data():
         self._acc_sum_prop = [0, 15000, 0] # now, min, max
         self._b_debug = b_debug
         if b_debug:
-            self._fd = open('data.txt', 'w')
+            self._fd = open('data.txt', 'a+')
 
     def write(self, msg, end='\n'):
         if self._b_debug:
