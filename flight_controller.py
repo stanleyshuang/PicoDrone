@@ -32,10 +32,10 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, name, st_range, m_range, debug_obj=None, m_val_cr=1.0):
+    def __init__(self, name, st_range, m_range, debug_obj=None, pwr_cr=1):
         self.name = name
         self.bb = debug_obj
-        self.m_val_cr = m_val_cr
+        self.pwr_cr = pwr_cr
         self.debug_show_detail = False
 
         self._BASED_ACC_SUM = 0
@@ -51,11 +51,9 @@ class flight_ctr():
         self._st_q = [st0_q, st1_q, st2_q]
 
         self._M_RANGE = m_range # simonk pwm parameters
-        # self._1_PERMILLE = int((self._M_RANGE[1]-self._M_RANGE[0])/1000*self.m_val_cr)
-        self._1_PERMILLE = int(2.5*self.m_val_cr)
         
-        self._M_UNIT_BAL = 0 * self._1_PERMILLE
-        self._M_UNIT = self._1_PERMILLE
+        self._M_UNIT_BAL = 0 * self.pwr_cr
+        self._M_UNIT = self.pwr_cr
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
@@ -110,14 +108,14 @@ class flight_ctr():
             self._st_q[i].update_val(st_vals[i])
 
     @property
-    def one_permille(self):
-        return self._1_PERMILLE
+    def power_conversion_rate(self):
+        return self.pwr_cr
     
 
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self._ST_RANGE[2][1]:
-            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
+            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -126,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
