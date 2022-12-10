@@ -32,7 +32,7 @@ SOFTWARE.
 from moving_average import moving_average
 
 class flight_ctr():
-    def __init__(self, name, st_range, m_range, debug_obj=None, pwr_cr=1):
+    def __init__(self, name, st_range, motor, debug_obj=None, pwr_cr=1):
         self.name = name
         self.bb = debug_obj
         self.pwr_cr = pwr_cr
@@ -50,7 +50,7 @@ class flight_ctr():
         st2_q = moving_average(st_q_size+1)
         self._st_q = [st0_q, st1_q, st2_q]
 
-        self._M_RANGE = m_range # simonk pwm parameters
+        self._MOTOR = motor # SimonK ESC pwm duty parameters
         
         self._M_UNIT_BAL = 0 # self.pwr_cr/2
         self._M_UNIT = self.pwr_cr
@@ -58,7 +58,7 @@ class flight_ctr():
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
         self._25_M_UNIT = self._M_UNIT * 25
-        self._pwm_value = m_range[0]
+        self._pwm_value = motor.min_duty
 
 
     @property
@@ -213,12 +213,12 @@ class flight_ctr():
 
     def range_protect(self):
         pwm_value = self._pwm_value
-        if pwm_value>self._M_RANGE[4]:
-            pwm_value = self._M_RANGE[4]
+        if pwm_value>self._MOTOR.seatbelt_duty:
+            pwm_value = self._MOTOR.seatbelt_duty
             if self.bb and self.debug_show_detail:
                 self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
-        if pwm_value<self._M_RANGE[0]:
-            pwm_value = self._M_RANGE[0]
+        if pwm_value<self._MOTOR.min_duty:
+            pwm_value = self._MOTOR.min_duty
             if self.bb and self.debug_show_detail:
                 self.bb.write('    '+self.name+'.'+'range_protect: '+str(pwm_value))
         self._pwm_value = pwm_value
@@ -396,7 +396,6 @@ def acc_sum_escape_g(imu,
 def shutdown(imu, 
              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
              motor_0, motor_1, motor_2, motor_3,
-             m_range_0, m_range_1, m_range_2, m_range_3,
              bb=None):
     import sys, time
     acc_vals = [0.0, 0.0, 0.0]
@@ -461,7 +460,7 @@ def shutdown(imu,
         if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
             data.append(item)
         
-        if m0<=m_range_0[0] and m1<=m_range_1[0] and m2<=m_range_2[0] and m3<=m_range_3[0]:
+        if m0<=motor_0.min_duty and m1<=motor_1.min_duty and m2<=motor_2.min_duty and m3<=motor_3.min_duty:
             if bb:
                 bb.write('    shutdown completed, i='+str(i))
             break
@@ -469,10 +468,10 @@ def shutdown(imu,
         if i%10==0 and bb:
             bb.write('    '+str(int(i/10))+' sec.') # , end='\r')
         time.sleep(0.1)    
-    motor_0.duty(m_range_0[2])
-    motor_1.duty(m_range_1[2])
-    motor_2.duty(m_range_2[2])
-    motor_3.duty(m_range_3[2])
+    motor_0.duty(motor_0.init_duty)
+    motor_1.duty(motor_1.init_duty)
+    motor_2.duty(motor_2.init_duty)
+    motor_3.duty(motor_3.init_duty)
 
     nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
 
