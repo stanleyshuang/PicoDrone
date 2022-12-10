@@ -52,12 +52,12 @@ class flight_ctr():
 
         self._M_RANGE = m_range # simonk pwm parameters
         
-        self._M_UNIT_BAL = self.pwr_cr/2
+        self._M_UNIT_BAL = 0 # self.pwr_cr/2
         self._M_UNIT = self.pwr_cr
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._500_M_UNIT = self._M_UNIT * 500
+        self._100_M_UNIT = self._M_UNIT * 100
         self._pwm_value = m_range[0]
 
 
@@ -115,7 +115,7 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self._ST_RANGE[2][1]:
-            delta = int(self._500_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._500_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -314,64 +314,72 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 16 # 10 - 35
+    G_TEST_COUNT = 20 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
-        prev_ax = int(acc_vals[0]*100)
-        prev_ay = int(acc_vals[1]*100)
-        prev_az = int(acc_vals[2]*100)
-        prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
+        try:
+            prev_ax = int(acc_vals[0]*100)
+            prev_ay = int(acc_vals[1]*100)
+            prev_az = int(acc_vals[2]*100)
+            prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
 
-        acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
-        ax = int(acc_vals[0]*100)
-        ay = int(acc_vals[1]*100)
-        az = int(acc_vals[2]*100)
-        acc_sum = ax**2 + ay**2 + az**2
+            acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
+            ax = int(acc_vals[0]*100)
+            ay = int(acc_vals[1]*100)
+            az = int(acc_vals[2]*100)
+            acc_sum = ax**2 + ay**2 + az**2
 
-        flight_ctr_0.acc_vals = acc_vals
-        flight_ctr_1.acc_vals = acc_vals
-        flight_ctr_2.acc_vals = acc_vals
-        flight_ctr_3.acc_vals = acc_vals
+            flight_ctr_0.acc_vals = acc_vals
+            flight_ctr_1.acc_vals = acc_vals
+            flight_ctr_2.acc_vals = acc_vals
+            flight_ctr_3.acc_vals = acc_vals
 
-        flight_ctr_0.gyro_vals = gyro_vals
-        flight_ctr_1.gyro_vals = gyro_vals
-        flight_ctr_2.gyro_vals = gyro_vals
-        flight_ctr_3.gyro_vals = gyro_vals
+            flight_ctr_0.gyro_vals = gyro_vals
+            flight_ctr_1.gyro_vals = gyro_vals
+            flight_ctr_2.gyro_vals = gyro_vals
+            flight_ctr_3.gyro_vals = gyro_vals
 
 
-        st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
-        
-        flight_ctr_0.st_vals = st_vals
-        flight_ctr_1.st_vals = st_vals
-        flight_ctr_2.st_vals = st_vals
-        flight_ctr_3.st_vals = st_vals
+            st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
+            
+            flight_ctr_0.st_vals = st_vals
+            flight_ctr_1.st_vals = st_vals
+            flight_ctr_2.st_vals = st_vals
+            flight_ctr_3.st_vals = st_vals
 
-        m0 = flight_ctr_0.motor_pwn_value()
-        m1 = flight_ctr_1.motor_pwn_value()
-        m2 = flight_ctr_2.motor_pwn_value()
-        m3 = flight_ctr_3.motor_pwn_value()
+            m0 = flight_ctr_0.motor_pwn_value()
+            m1 = flight_ctr_1.motor_pwn_value()
+            m2 = flight_ctr_2.motor_pwn_value()
+            m3 = flight_ctr_3.motor_pwn_value()
 
-        motor_0.duty(m0)
-        motor_1.duty(m1)
-        motor_2.duty(m2)
-        motor_3.duty(m3)
+            motor_0.duty(m0)
+            motor_1.duty(m1)
+            motor_2.duty(m2)
+            motor_3.duty(m3)
 
-        item = {'i': i,
-                'ax': ax,
-                'ay': ay,
-                'az': az,
-                'delta-az': az-prev_az,
-                'acc_sum': acc_sum,
-                'delta-acc_sum': acc_sum-prev_acc_sum,
-                'm0': m0,
-                'm1': m1,
-                'm2': m2,
-                'm3': m3,}
-        if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
-            data.append(item)
-        if i%10==0 and bb:
-            bb.write('    countdown: '+str(int((G_TEST_COUNT-i)/10))+' sec.', end='\r')
-        time.sleep(0.05)
+            item = {'i': i,
+                    'ax': ax,
+                    'ay': ay,
+                    'az': az,
+                    'delta-az': az-prev_az,
+                    'acc_sum': acc_sum,
+                    'delta-acc_sum': acc_sum-prev_acc_sum,
+                    'm0': m0,
+                    'm1': m1,
+                    'm2': m2,
+                    'm3': m3,}
+            if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
+                data.append(item)
+            if i%10==0 and bb:
+                bb.write('    countdown: '+str(int((G_TEST_COUNT-i)/10))+' sec.', end='\r')
+            time.sleep(0.05)
+        except Exception as e:
+            print(str(e))
+        else:
+            pass
+        finally:
+            pass
+            
     if bb:
         bb.write('    countdown: 0 sec.')
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]

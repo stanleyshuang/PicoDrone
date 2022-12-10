@@ -81,10 +81,10 @@ st_range = [ # min, mid, max
 ### initializing SimonK PWM
 bb.write('initializing SimonK ESC')
 # min, max, init, limit, seatbelt
-m_range_0 = [880, 62400, 400, 68000, 48000]
-m_range_1 = [1720, 45600, 800, 67200, 48000]
-m_range_2 = [4360, 63200, 3200, 69600, 48000]
-m_range_3 = [26214, 51200, 28800, 69600, 48000]
+m_range_0 = [8000, 62400, 400, 68000, 48000]
+m_range_1 = [11000, 45600, 800, 67200, 48000]
+m_range_2 = [10000, 63200, 3200, 69600, 48000]
+m_range_3 = [31000, 51200, 26214, 69600, 48000]
 motor_0 = ZMR(Pin(6), duty=m_range_0[2])
 motor_1 = ZMR(Pin(7), duty=m_range_1[2])
 motor_2 = ZMR(Pin(8), duty=m_range_2[2])
@@ -98,10 +98,10 @@ motor_3.duty(m_range_3[0])
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr('fc0', st_range, m_range_0, pwr_cr=15, debug_obj=bb)
-flight_ctr_1 = flight_ctr_fl('fc1', st_range, m_range_1, pwr_cr=12, debug_obj=bb)
-flight_ctr_2 = flight_ctr_bl('fc2', st_range, m_range_2, pwr_cr=13, debug_obj=bb)
-flight_ctr_3 = flight_ctr_br('fc3', st_range, m_range_3, pwr_cr=8, debug_obj=bb)
+flight_ctr_0 = flight_ctr_fr('fc0', st_range, m_range_0, pwr_cr=17, debug_obj=bb)
+flight_ctr_1 = flight_ctr_fl('fc1', st_range, m_range_1, pwr_cr=18, debug_obj=bb)
+flight_ctr_2 = flight_ctr_bl('fc2', st_range, m_range_2, pwr_cr=14, debug_obj=bb)
+flight_ctr_3 = flight_ctr_br('fc3', st_range, m_range_3, pwr_cr=15, debug_obj=bb)
 
 
 ### before taking off, initialize PicoDrone
