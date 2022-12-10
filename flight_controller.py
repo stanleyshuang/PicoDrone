@@ -57,7 +57,7 @@ class flight_ctr():
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._100_M_UNIT = self._M_UNIT * 100
+        self._25_M_UNIT = self._M_UNIT * 25
         self._pwm_value = m_range[0]
 
 
@@ -115,7 +115,7 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self._ST_RANGE[2][1]:
-            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(self._25_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._25_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -314,7 +314,7 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 20 # 10 - 35
+    G_TEST_COUNT = 25 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         try:
