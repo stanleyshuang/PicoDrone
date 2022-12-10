@@ -52,12 +52,12 @@ class flight_ctr():
 
         self._M_RANGE = m_range # simonk pwm parameters
         
-        self._M_UNIT_BAL = 0 * self.pwr_cr
+        self._M_UNIT_BAL = 0
         self._M_UNIT = self.pwr_cr
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._100_M_UNIT = self._M_UNIT * 100
+        self._100_M_UNIT = self._M_UNIT * 500
         self._pwm_value = m_range[0]
 
 
@@ -314,7 +314,7 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 20 # 10 - 35
+    G_TEST_COUNT = 19 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
