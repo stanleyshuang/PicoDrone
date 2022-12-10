@@ -32,7 +32,7 @@ SOFTWARE.
 from machine import PWM
 
 class ZMR():
-    def __init__(self, pin, freq=50, duty=0):
+    def __init__(self, pin, freq=400, duty=0):
         self.pwm = PWM(pin)
         self.pwm.freq(freq)
         self.pwm.duty_u16(duty)

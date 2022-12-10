@@ -81,31 +81,14 @@ st_range = [ # min, mid, max
 ### initializing SimonK PWM
 bb.write('initializing SimonK ESC')
 # min, max, init, limit, seatbelt
-'''
-m_range_0 = [110, 7800, 50, 8500, 6000]
-m_range_1 = [215, 5700, 100, 8400, 6000]
-m_range_2 = [545, 7900, 400, 8700, 6000]
-m_range_3 = [3750, 6400, 3600, 8700, 6000]
-
-m_range_0 = [220, 15600, 100, 17000, 12000]
-m_range_1 = [430, 11400, 200, 16800, 12000]
-m_range_2 = [1090, 15800, 800, 17400, 12000]
-m_range_3 = [7500, 12800, 7200, 17400, 12000]
-
-motor_0 = ZMR(Pin(6), duty=m_range_0[2])
-motor_1 = ZMR(Pin(7), duty=m_range_1[2])
-motor_2 = ZMR(Pin(8), duty=m_range_2[2])
-motor_3 = ZMR(Pin(9), duty=m_range_3[2])
-'''
-
 m_range_0 = [880, 62400, 400, 68000, 48000]
 m_range_1 = [1720, 45600, 800, 67200, 48000]
 m_range_2 = [4360, 63200, 3200, 69600, 48000]
 m_range_3 = [30000, 51200, 28800, 69600, 48000]
-motor_0 = ZMR(Pin(6), duty=m_range_0[2], freq=400)
-motor_1 = ZMR(Pin(7), duty=m_range_1[2], freq=400)
-motor_2 = ZMR(Pin(8), duty=m_range_2[2], freq=400)
-motor_3 = ZMR(Pin(9), duty=m_range_3[2], freq=400)
+motor_0 = ZMR(Pin(6), duty=m_range_0[2])
+motor_1 = ZMR(Pin(7), duty=m_range_1[2])
+motor_2 = ZMR(Pin(8), duty=m_range_2[2])
+motor_3 = ZMR(Pin(9), duty=m_range_3[2])
 time.sleep(1.0)
 motor_0.duty(m_range_0[0])
 motor_1.duty(m_range_1[0])
