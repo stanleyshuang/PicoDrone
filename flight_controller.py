@@ -314,7 +314,7 @@ def acc_sum_escape_g(imu,
     if bb:
         bb.write('    figuring out the acc sum at the boundary of escape gravity..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 15 # 10 - 35
+    G_TEST_COUNT = 16 # 10 - 35
     data = []
     for i in range(G_TEST_COUNT):
         prev_ax = int(acc_vals[0]*100)
@@ -503,49 +503,59 @@ def main_loop(imu, st0, st1, st2,
     else:
         tickcount_limit = int(sec*ST_PROB_FREQ)
     while sec==None or tickcount<tickcount_limit:
-        if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-            acc_vals[0] = imu.accel.x
-            acc_vals[1] = imu.accel.y
-            acc_vals[2] = imu.accel.z
-            gyro_vals[0] = imu.gyro.x
-            gyro_vals[1] = imu.gyro.y
-            gyro_vals[2] = imu.gyro.z
-            imu_tem = imu.temperature
+        try:
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                acc_vals[0] = imu.accel.x
+                acc_vals[1] = imu.accel.y
+                acc_vals[2] = imu.accel.z
+                gyro_vals[0] = imu.gyro.x
+                gyro_vals[1] = imu.gyro.y
+                gyro_vals[2] = imu.gyro.z
+                imu_tem = imu.temperature
 
-            flight_ctr_0.acc_vals = acc_vals
-            flight_ctr_1.acc_vals = acc_vals
-            flight_ctr_2.acc_vals = acc_vals
-            flight_ctr_3.acc_vals = acc_vals
+                flight_ctr_0.acc_vals = acc_vals
+                flight_ctr_1.acc_vals = acc_vals
+                flight_ctr_2.acc_vals = acc_vals
+                flight_ctr_3.acc_vals = acc_vals
 
-            flight_ctr_0.gyro_vals = gyro_vals
-            flight_ctr_1.gyro_vals = gyro_vals
-            flight_ctr_2.gyro_vals = gyro_vals
-            flight_ctr_3.gyro_vals = gyro_vals
-        '''
-        st_vals[0] = st0.abs_scale()
-        st_vals[1] = st1.abs_scale()
-        st_vals[2] = st2.abs_scale()
-        '''
-        flight_ctr_0.st_vals = st_vals
-        flight_ctr_1.st_vals = st_vals
-        flight_ctr_2.st_vals = st_vals
-        flight_ctr_3.st_vals = st_vals
+                flight_ctr_0.gyro_vals = gyro_vals
+                flight_ctr_1.gyro_vals = gyro_vals
+                flight_ctr_2.gyro_vals = gyro_vals
+                flight_ctr_3.gyro_vals = gyro_vals
+            '''
+            st_vals[0] = st0.abs_scale()
+            st_vals[1] = st1.abs_scale()
+            st_vals[2] = st2.abs_scale()
+            '''
+            flight_ctr_0.st_vals = st_vals
+            flight_ctr_1.st_vals = st_vals
+            flight_ctr_2.st_vals = st_vals
+            flight_ctr_3.st_vals = st_vals
 
-        if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-            m0 = flight_ctr_0.motor_pwn_value()
-            m1 = flight_ctr_1.motor_pwn_value()
-            m2 = flight_ctr_2.motor_pwn_value()
-            m3 = flight_ctr_3.motor_pwn_value()
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                m0 = flight_ctr_0.motor_pwn_value()
+                m1 = flight_ctr_1.motor_pwn_value()
+                m2 = flight_ctr_2.motor_pwn_value()
+                m3 = flight_ctr_3.motor_pwn_value()
 
-        if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-            motor_0.duty(m0)
-            motor_1.duty(m1)
-            motor_2.duty(m2)
-            motor_3.duty(m3)
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                motor_0.duty(m0)
+                motor_1.duty(m1)
+                motor_2.duty(m2)
+                motor_3.duty(m3)
 
-        if bb:
-            bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
-            bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+            if bb:
+                bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+                bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
 
-        time.sleep(1.0/ST_PROB_FREQ)
-        tickcount += 1
+            time.sleep(1.0/ST_PROB_FREQ)
+            
+            if sec and tickcount%ST_PROB_FREQ==0 and bb:
+                bb.write('    '+str(int(tickcount/ST_PROB_FREQ))+' sec.') # , end='\r')
+            tickcount += 1
+        except Exception as e:
+            print(str(e))
+        else:
+            pass
+        finally:
+            pass
