@@ -57,7 +57,7 @@ class flight_ctr():
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._25_M_UNIT = self._M_UNIT * 25
+        self._100_M_UNIT = self._M_UNIT * 100
         self._pwm_value = motor.min_duty
 
 
@@ -115,7 +115,7 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self._ST_RANGE[2][1]:
-            delta = int(self._25_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._25_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][2]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -301,22 +301,34 @@ def acc_sum_base(imu, bb=None):
     return acc_sum_base
 
 
-### figuring out the acc sum at the boundary of escape gravity
-def acc_sum_escape_g(imu, 
-                     flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-                     motor_0, motor_1, motor_2, motor_3,
-                     bb=None,
-                     st0_val=0, st1_val=0, st2_val=0):
+### The UFO Floating
+def ufo_floating_set_flight_ctr_st2_val(st_vals, motor, flight_ctr):
+    if motor.duty<motor.balance_duty and motor.balance_duty-motor.duty>=motor.power_conversion_rate*100:
+        st_vals[2] = flight_ctr.st_vals[2]
+        flight_ctr.st_vals = st_vals
+    elif motor.duty<motor.balance_duty and motor.balance_duty-motor.duty<motor.power_conversion_rate*100:
+        st_vals[2] = flight_ctr.st_vals[1]+(flight_ctr.st_vals[2]-flight_ctr.st_vals[1])*((motor.balance_duty-motor.duty)/motor.power_conversion_rate*100)
+        flight_ctr.st_vals = st_vals
+    else:
+        st_vals[2] = flight_ctr.st_vals[1]
+        flight_ctr.st_vals = st_vals
+
+def ufo_float(imu, 
+              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+              motor_0, motor_1, motor_2, motor_3,
+              bb=None):
     import time
     acc_vals = [0.0, 0.0, 0.0]
     gyro_vals = [0.0, 0.0, 0.0]
-    st_vals = [0, 0, 0]
+    st_vals = [5000, 5000, 0]
     if bb:
-        bb.write('    figuring out the acc sum at the boundary of escape gravity..')
+        bb.write('    make UFO floating..')
     # i, az, delta-az, acc_sum, delta-acc_sum
-    G_TEST_COUNT = 25 # 10 - 35
     data = []
-    for i in range(G_TEST_COUNT):
+    while motor_0.duty<motor_0.balance_duty and 
+          motor_1.duty<motor_1.balance_duty and 
+          motor_2.duty<motor_2.balance_duty and 
+          motor_3.duty<motor_3.balance_duty:
         try:
             prev_ax = int(acc_vals[0]*100)
             prev_ay = int(acc_vals[1]*100)
@@ -339,13 +351,10 @@ def acc_sum_escape_g(imu,
             flight_ctr_2.gyro_vals = gyro_vals
             flight_ctr_3.gyro_vals = gyro_vals
 
-
-            st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
-            
-            flight_ctr_0.st_vals = st_vals
-            flight_ctr_1.st_vals = st_vals
-            flight_ctr_2.st_vals = st_vals
-            flight_ctr_3.st_vals = st_vals
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_0, flight_ctr_0)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_1, flight_ctr_1)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_2, flight_ctr_2)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_3, flight_ctr_3)
 
             m0 = flight_ctr_0.motor_pwn_value()
             m1 = flight_ctr_1.motor_pwn_value()

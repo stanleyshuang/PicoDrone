@@ -42,7 +42,7 @@ from state_machine import R8EF_channel
 from simonk_pwm import ZMR
 
 # Flight Controller -----------------------------------------------------------
-from flight_controller import acc_sum_base, acc_sum_escape_g, shutdown, main_loop
+from flight_controller import acc_sum_base, ufo_float, shutdown, main_loop
 from flight_controller import flight_ctr_fr, flight_ctr_fl
 from flight_controller import flight_ctr_bl, flight_ctr_br
 
@@ -111,11 +111,10 @@ flight_ctr_3.based_acc_sum = based_acc_sum
 
 
 # figuring out the acc sum at the boundary of escape gravity
-es_acc_sum = acc_sum_escape_g(imu, 
-                              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-                              motor_0, motor_1, motor_2, motor_3,
-                              bb=bb,
-                              st0_val=5000, st1_val=5000, st2_val=6500)
+ufo_float = ufo_float(imu, 
+                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+                      motor_0, motor_1, motor_2, motor_3,
+                      bb=bb)
 flight_ctr_0.es_acc_sum = es_acc_sum
 flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum

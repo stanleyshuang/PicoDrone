@@ -33,14 +33,21 @@ from machine import PWM
 
 class ZMR():
     def __init__(self, pin, freq=400, dutys=[26214, 52428, 26214, 52428, 39321]):
-        # dutys = [min, max, init, limit, seatbelt]
+        # dutys = [min, max, init, limit, balance]
         self._pwm = PWM(pin)
         self._pwm.freq(freq)
         self._pwm.duty_u16(dutys[2])
+        self._duty = dutys[2]
         self._dutys = dutys
+
+    @property
+    def duty(self):
+        return self._duty
     
+    @duty.setter
     def duty(self, duty):
         self._pwm.duty_u16(duty)
+        self._duty = duty
 
     @property
     def min_duty(self):
@@ -59,7 +66,7 @@ class ZMR():
         return self._dutys[3]
 
     @property
-    def seatbelt_duty(self):
+    def balance_duty(self):
         return self._dutys[4]
 
 
