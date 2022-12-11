@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 # Auther:   Stanley Huang
-# Project:  PicoDrone 0.7
-# Date:     2022-11-25
+# Project:  PicoDrone 0.8
+# Date:     2022-12-12
 #
 # ZMR SimonK initialization and control
 #
