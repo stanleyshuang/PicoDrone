@@ -36,14 +36,14 @@ class flight_ctr():
         self.name = name
         self.bb = debug_obj
         self.pwr_cr = pwr_cr
-        self.debug_show_detail = True
+        self.debug_show_detail = False
 
         self._BASED_ACC_SUM = 0
         self._ES_ACC_SUM = 0
         self._acc_vals = [0, 0, 0]
         self._gyro_vals = [0, 0, 0]
 
-        self._ST_RANGE = st_range # stick parameters
+        self.ST_RANGE = st_range # stick parameters
         st_q_size = 10
         st0_q = moving_average(st_q_size+1)
         st1_q = moving_average(st_q_size+1)
@@ -114,8 +114,8 @@ class flight_ctr():
 
     def joystick_2(self):
         st_2_val = self._st_q[2].average
-        if st_2_val>self._ST_RANGE[2][1]:
-            delta = int(self._100_M_UNIT*((st_2_val-self._ST_RANGE[2][1])/(self._ST_RANGE[2][2]-self._ST_RANGE[2][1])))
+        if st_2_val>self.ST_RANGE[2][1]:
+            delta = int(self._100_M_UNIT*((st_2_val-self.ST_RANGE[2][1])/(self.ST_RANGE[2][2]-self.ST_RANGE[2][1])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._100_M_UNIT*((self._ST_RANGE[2][1]-st_2_val)/(self._ST_RANGE[2][1]-self._ST_RANGE[2][0])))
+            delta = int(-1*self._100_M_UNIT*((self.ST_RANGE[2][1]-st_2_val)/(self.ST_RANGE[2][1]-self.ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -152,7 +152,7 @@ class flight_ctr():
         if self._ES_ACC_SUM!=0 and acc_sum > self._ES_ACC_SUM:
             ### 沒加油門時，爆升時減速
             st_2_val = self._st_q[2].average
-            if st_2_val<=self._ST_RANGE[2][1]:
+            if st_2_val<=self.ST_RANGE[2][1]:
                 delta = int(self._10_M_UNIT * (1.0 - acc_sum/self._ES_ACC_SUM))
                 self._pwm_value += delta
                 if self.bb and self.debug_show_detail:
@@ -304,13 +304,13 @@ def acc_sum_base(imu, bb=None):
 ### The UFO Floating
 def ufo_floating_set_flight_ctr_st2_val(st_vals, motor, flight_ctr):
     if motor.duty<motor.balance_duty and motor.balance_duty-motor.duty>=flight_ctr.power_conversion_rate*100:
-        st_vals[2] = flight_ctr.st_vals[2]
+        st_vals[2] = flight_ctr.ST_RANGE[2][2]
         flight_ctr.st_vals = st_vals
     elif motor.duty<motor.balance_duty and motor.balance_duty-motor.duty<flight_ctr.power_conversion_rate*100:
-        st_vals[2] = flight_ctr.st_vals[1]+(flight_ctr.st_vals[2]-flight_ctr.st_vals[1])*((motor.balance_duty-motor.duty)/flight_ctr.power_conversion_rate*100)
+        st_vals[2] = flight_ctr.ST_RANGE[2][1]+(flight_ctr.ST_RANGE[2][2]-flight_ctr.ST_RANGE[2][1])*((motor.balance_duty-motor.duty)/flight_ctr.power_conversion_rate*100)
         flight_ctr.st_vals = st_vals
     else:
-        st_vals[2] = flight_ctr.st_vals[1]
+        st_vals[2] = flight_ctr.ST_RANGE[2][1]
         flight_ctr.st_vals = st_vals
 
 def ufo_float(imu, 
@@ -327,9 +327,9 @@ def ufo_float(imu,
     data = []
     i = 0
     while (motor_0.duty<motor_0.balance_duty and 
-          motor_1.duty<motor_1.balance_duty and 
-          motor_2.duty<motor_2.balance_duty and 
-          motor_3.duty<motor_3.balance_duty):
+           motor_1.duty<motor_1.balance_duty and 
+           motor_2.duty<motor_2.balance_duty and 
+           motor_3.duty<motor_3.balance_duty):
         try:
             prev_ax = int(acc_vals[0]*100)
             prev_ay = int(acc_vals[1]*100)
@@ -395,14 +395,16 @@ def ufo_float(imu,
     if bb:
         bb.write('    countdown: 0 sec.')
     nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
-    if bb:
+    if bb and len(nlarge_delta_acc_sum)>0:
         bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
 
     dump_flight_data(bb, nlarge_delta_acc_sum)
     if bb:
         bb.write('')
     dump_flight_data(bb, data)
-    return nlarge_delta_acc_sum[0]['acc_sum']
+    if len(nlarge_delta_acc_sum)>0:
+        return nlarge_delta_acc_sum[0]['acc_sum']
+    return 20000
 
 
 def shutdown(imu, 

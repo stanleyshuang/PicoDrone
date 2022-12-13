@@ -81,10 +81,10 @@ st_range = [ # min, mid, max
 ### initializing SimonK PWM
 bb.write('initializing SimonK ESC')
 # dutys = [min, max, init, limit, seatbelt]
-motor_0 = ZMR(Pin(6), dutys=[1300, 62400, 400, 68000, 1700])
-motor_1 = ZMR(Pin(7), dutys=[1400, 45600, 800, 67200, 1900])
-motor_2 = ZMR(Pin(8), dutys=[1400, 63200, 3200, 69600, 1900])
-motor_3 = ZMR(Pin(9), dutys=[3200, 51200, 26214, 69600, 3700])
+motor_0 = ZMR(Pin(6), dutys=[13000, 62400, 400, 68000, 17000])
+motor_1 = ZMR(Pin(7), dutys=[14000, 45600, 800, 67200, 19000])
+motor_2 = ZMR(Pin(8), dutys=[14000, 63200, 3200, 69600, 19000])
+motor_3 = ZMR(Pin(9), dutys=[32000, 51200, 26214, 69600, 37000])
 time.sleep(1.0)
 motor_0.duty = motor_0.min_duty
 motor_1.duty = motor_1.min_duty
@@ -111,10 +111,10 @@ flight_ctr_3.based_acc_sum = based_acc_sum
 
 
 # figuring out the acc sum at the boundary of escape gravity
-ufo_float = ufo_float(imu, 
-                      flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-                      motor_0, motor_1, motor_2, motor_3,
-                      bb=bb)
+es_acc_sum = ufo_float(imu, 
+                       flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+                       motor_0, motor_1, motor_2, motor_3,
+                       bb=bb)
 flight_ctr_0.es_acc_sum = es_acc_sum
 flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum
