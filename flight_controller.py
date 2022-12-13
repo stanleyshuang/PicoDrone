@@ -404,7 +404,7 @@ def ufo_float(imu,
     dump_flight_data(bb, data)
     if len(nlarge_delta_acc_sum)>0:
         return nlarge_delta_acc_sum[0]['acc_sum']
-    return 20000
+    return 0
 
 
 def shutdown(imu, 

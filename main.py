@@ -115,6 +115,9 @@ es_acc_sum = ufo_float(imu,
                        flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
                        motor_0, motor_1, motor_2, motor_3,
                        bb=bb)
+if es_acc_sum==0:
+    es_acc_sum = based_acc_sum
+    
 flight_ctr_0.es_acc_sum = es_acc_sum
 flight_ctr_1.es_acc_sum = es_acc_sum
 flight_ctr_2.es_acc_sum = es_acc_sum
