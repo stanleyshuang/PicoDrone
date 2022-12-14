@@ -326,9 +326,9 @@ def ufo_float(imu,
     # i, az, delta-az, acc_sum, delta-acc_sum
     data = []
     i = 0
-    while (motor_0.duty<motor_0.balance_duty and 
-           motor_1.duty<motor_1.balance_duty and 
-           motor_2.duty<motor_2.balance_duty and 
+    while (motor_0.duty<motor_0.balance_duty or 
+           motor_1.duty<motor_1.balance_duty or 
+           motor_2.duty<motor_2.balance_duty or 
            motor_3.duty<motor_3.balance_duty):
         try:
             prev_ax = int(acc_vals[0]*100)
