@@ -266,10 +266,17 @@ class flight_ctr_br(flight_ctr):
 
 # format debug message
 def dump_flight_data(debug, flight_data):
+    digits = [5, 3, 3, 3, 4, 3, 2, 5, 5, 5, 5]
     for item in flight_data:
+        d = 0
         msg = '{'
         for key in sorted(item.keys()):
-            msg += " '"+key+"':"+str(item[key])+","
+            msg += " '"+key+"':"
+            the_str = str(item[key])
+            for i in range(digits[d]-len(the_str)):
+                msg += ' '
+            msg += the_str+","
+            d += 1
         msg += '}'
         if debug:
             debug.write('    '+msg)
