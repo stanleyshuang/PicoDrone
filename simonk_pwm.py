@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 # Auther:   Stanley Huang
-# Project:  PicoDrone 0.7
-# Date:     2022-11-25
+# Project:  PicoDrone 0.8
+# Date:     2022-12-12
 #
 # ZMR SimonK initialization and control
 #
@@ -32,22 +32,51 @@ SOFTWARE.
 from machine import PWM
 
 class ZMR():
-    def __init__(self, pin, freq=50, duty=0):
-        self.pwm = PWM(pin)
-        self.pwm.freq(freq)
-        self.pwm.duty_u16(duty)
+    def __init__(self, pin, freq=400, dutys=[26214, 52428, 26214, 52428, 39321]):
+        # dutys = [min, max, init, limit, balance]
+        self._pwm = PWM(pin)
+        self._pwm.freq(freq)
+        self._pwm.duty_u16(dutys[2])
+        self._duty = dutys[2]
+        self._dutys = dutys
+
+    @property
+    def duty(self):
+        return self._duty
     
+    @duty.setter
     def duty(self, duty):
-        self.pwm.duty_u16(duty)
+        self._pwm.duty_u16(duty)
+        self._duty = duty
+
+    @property
+    def min_duty(self):
+        return self._dutys[0]
+
+    @property
+    def max_duty(self):
+        return self._dutys[1]
+
+    @property
+    def init_duty(self):
+        return self._dutys[2]
+
+    @property
+    def limit_duty(self):
+        return self._dutys[3]
+
+    @property
+    def balance_duty(self):
+        return self._dutys[4]
 
 
 def test_zmrs():
     from machine import Pin
     import time
-    motor_0 = ZMR(Pin(6))
-    motor_1 = ZMR(Pin(7))
-    motor_2 = ZMR(Pin(8))
-    motor_3 = ZMR(Pin(9))
+    motor_0 = ZMR(Pin(6), dutys=[ 2900, 62400,   200, 68000, 18800,  2250,  7950, 15350, 23100])
+    motor_1 = ZMR(Pin(7), dutys=[ 2525, 45600,   400, 67200, 14598,  2825,  7100, 12500, 17750])
+    motor_2 = ZMR(Pin(8), dutys=[ 5400, 63200,  2000, 69600, 21556,  5825, 11500, 18500, 25750])
+    motor_3 = ZMR(Pin(9), dutys=[30500, 51200, 20000, 69600, 34544, 30980, 32250, 33850, 35500])
     m0 = m1 = m2 = m3 = 0
     while True:
         the_input = input("輸入馬達 PWM Duty Cycle: (例如: a30) ")
@@ -62,10 +91,10 @@ def test_zmrs():
             elif the_input[0] == 'd':
                 m3 = int(duty)
         print(m0, m1, m2, m3)
-        motor_0.duty(m0)
-        motor_1.duty(m1)
-        motor_2.duty(m2)
-        motor_3.duty(m3)
+        motor_0.duty = m0
+        motor_1.duty = m1
+        motor_2.duty = m2
+        motor_3.duty = m3
         time.sleep(0.2)
 
 
