@@ -57,7 +57,7 @@ class flight_ctr():
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._100_M_UNIT = self._M_UNIT * 100
+        self._20_M_UNIT = self._M_UNIT * 20
         self._pwm_value = motor.min_duty
 
 
@@ -115,7 +115,7 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self.ST_RANGE[2][1]:
-            delta = int(self._100_M_UNIT*((st_2_val-self.ST_RANGE[2][1])/(self.ST_RANGE[2][2]-self.ST_RANGE[2][1])))
+            delta = int(self._20_M_UNIT*((st_2_val-self.ST_RANGE[2][1])/(self.ST_RANGE[2][2]-self.ST_RANGE[2][1])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +124,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._100_M_UNIT*((self.ST_RANGE[2][1]-st_2_val)/(self.ST_RANGE[2][1]-self.ST_RANGE[2][0])))
+            delta = int(-1*self._20_M_UNIT*((self.ST_RANGE[2][1]-st_2_val)/(self.ST_RANGE[2][1]-self.ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
