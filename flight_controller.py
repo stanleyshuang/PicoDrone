@@ -52,7 +52,7 @@ class flight_ctr():
 
         self._MOTOR = motor # SimonK ESC pwm duty parameters
         
-        self._M_UNIT_BAL = 0 # self.pwr_cr/2
+        self._M_UNIT_BAL = 0 # self.pwr_cr
         self._M_UNIT = self.pwr_cr
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))

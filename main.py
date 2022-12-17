@@ -81,10 +81,10 @@ st_range = [ # min, mid, max
 ### initializing SimonK PWM
 bb.write('initializing SimonK ESC')
 # dutys = [min, max, init, limit, seatbelt]
-motor_0 = ZMR(Pin(6), dutys=[ 1000, 62400,   400, 68000, 13000])
-motor_1 = ZMR(Pin(7), dutys=[ 3100, 45600,   800, 67200, 15000])
-motor_2 = ZMR(Pin(8), dutys=[ 3750, 63200,  3200, 69600, 15500])
-motor_3 = ZMR(Pin(9), dutys=[31000, 51200, 26214, 69600, 34000])
+motor_0 = ZMR(Pin(6), dutys=[ 2900, 62400,   200, 68000, 18800,  2250,  7950, 15350, 23100])
+motor_1 = ZMR(Pin(7), dutys=[ 2525, 45600,   400, 67200, 14598,  2825,  7100, 12500, 17750])
+motor_2 = ZMR(Pin(8), dutys=[ 5400, 63200,  2000, 69600, 21556,  5825, 11500, 18500, 25750])
+motor_3 = ZMR(Pin(9), dutys=[30500, 51200, 20000, 69600, 34544, 30980, 32250, 33850, 35500])
 time.sleep(1.0)
 motor_0.duty = motor_0.min_duty
 motor_1.duty = motor_1.min_duty
@@ -95,7 +95,7 @@ motor_3.duty = motor_3.min_duty
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
 flight_ctr_0 = flight_ctr_fr('fc0', st_range, motor_0, pwr_cr=4, debug_obj=bb)
-flight_ctr_1 = flight_ctr_fl('fc1', st_range, motor_1, pwr_cr=4, debug_obj=bb)
+flight_ctr_1 = flight_ctr_fl('fc1', st_range, motor_1, pwr_cr=3, debug_obj=bb)
 flight_ctr_2 = flight_ctr_bl('fc2', st_range, motor_2, pwr_cr=4, debug_obj=bb)
 flight_ctr_3 = flight_ctr_br('fc3', st_range, motor_3, pwr_cr=1, debug_obj=bb)
 
