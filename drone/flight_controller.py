@@ -31,6 +31,7 @@ SOFTWARE.
 '''
 from moving_average import moving_average
 
+
 class flight_ctr():
     def __init__(self, name, st_range, motor, debug_obj=None, pwr_cr=1):
         self.name = name
@@ -49,15 +50,19 @@ class flight_ctr():
         st1_q = moving_average(st_q_size+1)
         st2_q = moving_average(st_q_size+1)
         self._st_q = [st0_q, st1_q, st2_q]
+        for i in range(st_q_size):
+            self._st_q[0].update_val(self.ST_RANGE[0][1])
+            self._st_q[1].update_val(self.ST_RANGE[1][1])
+            self._st_q[2].update_val(self.ST_RANGE[2][1])
 
         self._MOTOR = motor # SimonK ESC pwm duty parameters
         
-        self._M_UNIT_BAL = 0 # self.pwr_cr
-        self._M_UNIT = self.pwr_cr
+        self._M_UNIT = int(self.pwr_cr * (motor.max_duty - motor.min_duty)/4000.0)
+        self._M_UNIT_BAL = self._M_UNIT
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
-        self._20_M_UNIT = self._M_UNIT * 20
+        self._30_M_UNIT = self._M_UNIT * 30
         self._pwm_value = motor.min_duty
 
 
@@ -115,7 +120,7 @@ class flight_ctr():
     def joystick_2(self):
         st_2_val = self._st_q[2].average
         if st_2_val>self.ST_RANGE[2][1]:
-            delta = int(self._20_M_UNIT*((st_2_val-self.ST_RANGE[2][1])/(self.ST_RANGE[2][2]-self.ST_RANGE[2][1])))
+            delta = int(self._30_M_UNIT*((st_2_val-self.ST_RANGE[2][1])/(self.ST_RANGE[2][2]-self.ST_RANGE[2][1])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -124,7 +129,7 @@ class flight_ctr():
                     sign = ''
                 self.bb.write('    '+self.name+'.'+'joystick_2:    '+str(self._pwm_value)+', '+str(sign)+str(delta))
         else:
-            delta = int(-1*self._20_M_UNIT*((self.ST_RANGE[2][1]-st_2_val)/(self.ST_RANGE[2][1]-self.ST_RANGE[2][0])))
+            delta = int(-1*self._30_M_UNIT*((self.ST_RANGE[2][1]-st_2_val)/(self.ST_RANGE[2][1]-self.ST_RANGE[2][0])))
             self._pwm_value += delta
             if self.bb and self.debug_show_detail:
                 if delta>0:
@@ -165,8 +170,9 @@ class flight_ctr():
 
     def left(self):
         ay = self._acc_vals[1]
-        delta = int(-1*self._M_UNIT_BAL*ay)
-        self._pwm_value += delta
+        delta = int(-1*self._M_UNIT_BAL*ay**2/10)
+        if delta>0:
+            self._pwm_value += delta
         if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
@@ -177,8 +183,9 @@ class flight_ctr():
 
     def right(self):
         ay = self._acc_vals[1]
-        delta = int(self._M_UNIT_BAL*ay)
-        self._pwm_value += delta
+        delta = int(self._M_UNIT_BAL*ay**2/10)
+        if delta>0:
+            self._pwm_value += delta
         if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
@@ -189,8 +196,9 @@ class flight_ctr():
 
     def front(self):
         ax = self._acc_vals[0]
-        delta = int(-1*self._M_UNIT_BAL*ax)
-        self._pwm_value += delta
+        delta = int(-1*self._M_UNIT_BAL*ax**2/10)
+        if delta>0:
+            self._pwm_value += delta
         if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
@@ -201,8 +209,9 @@ class flight_ctr():
 
     def back(self):
         ax = self._acc_vals[0]
-        delta = int(self._M_UNIT_BAL*ax)
-        self._pwm_value += delta
+        delta = int(self._M_UNIT_BAL*ax**2/10)
+        if delta>0:
+            self._pwm_value += delta
         if self.bb and self.debug_show_detail:
             if delta>0:
                 sign = '+'
@@ -264,6 +273,7 @@ class flight_ctr_br(flight_ctr):
         self.range_protect()
         return self._pwm_value
 
+
 # format debug message
 def dump_flight_data(debug, flight_data):
     digits = [5, 3, 3, 3, 4, 3, 2, 5, 5, 5, 5]
@@ -310,15 +320,272 @@ def acc_sum_base(imu, bb=None):
 
 ### The UFO Floating
 def ufo_floating_set_flight_ctr_st2_val(st_vals, motor, flight_ctr):
-    if motor.duty<motor.balance_duty and motor.balance_duty-motor.duty>=flight_ctr.power_conversion_rate*100:
+    if motor.duty<motor.balance_duty and motor.balance_duty-motor.duty>=flight_ctr._30_M_UNIT:
         st_vals[2] = flight_ctr.ST_RANGE[2][2]
         flight_ctr.st_vals = st_vals
-    elif motor.duty<motor.balance_duty and motor.balance_duty-motor.duty<flight_ctr.power_conversion_rate*100:
-        st_vals[2] = flight_ctr.ST_RANGE[2][1]+(flight_ctr.ST_RANGE[2][2]-flight_ctr.ST_RANGE[2][1])*((motor.balance_duty-motor.duty)/flight_ctr.power_conversion_rate*100)
+    elif motor.duty<motor.balance_duty and motor.balance_duty-motor.duty<flight_ctr._30_M_UNIT:
+        st_vals[2] = flight_ctr.ST_RANGE[2][1]+(flight_ctr.ST_RANGE[2][2]-flight_ctr.ST_RANGE[2][1])*((motor.balance_duty-motor.duty)/flight_ctr._30_M_UNIT)
         flight_ctr.st_vals = st_vals
     else:
         st_vals[2] = flight_ctr.ST_RANGE[2][1]
         flight_ctr.st_vals = st_vals
+
+
+def ufo_float_v2(imu, 
+                 flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+                 motor_0, motor_1, motor_2, motor_3,
+                 bb=None):
+    import sys, time
+    acc_vals = [0.0, 0.0, 0.0]
+    gyro_vals = [0.0, 0.0, 0.0]
+    st_vals = [5000, 5000, 0]
+    if bb:
+        bb.write('    make UFO floating..')
+    # i, az, delta-az, acc_sum, delta-acc_sum
+    data = []
+    i = 0
+    while (motor_0.duty<motor_0.balance_duty or 
+           motor_1.duty<motor_1.balance_duty or 
+           motor_2.duty<motor_2.balance_duty or 
+           motor_3.duty<motor_3.balance_duty):
+        try:
+            prev_ax = int(acc_vals[0]*100)
+            prev_ay = int(acc_vals[1]*100)
+            prev_az = int(acc_vals[2]*100)
+            prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
+
+            acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
+            ax = int(acc_vals[0]*100)
+            ay = int(acc_vals[1]*100)
+            az = int(acc_vals[2]*100)
+            acc_sum = ax**2 + ay**2 + az**2
+            imu_tem = imu.temperature
+
+            flight_ctr_0.acc_vals = acc_vals
+            flight_ctr_1.acc_vals = acc_vals
+            flight_ctr_2.acc_vals = acc_vals
+            flight_ctr_3.acc_vals = acc_vals
+
+            flight_ctr_0.gyro_vals = gyro_vals
+            flight_ctr_1.gyro_vals = gyro_vals
+            flight_ctr_2.gyro_vals = gyro_vals
+            flight_ctr_3.gyro_vals = gyro_vals
+
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_0, flight_ctr_0)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_1, flight_ctr_1)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_2, flight_ctr_2)
+            ufo_floating_set_flight_ctr_st2_val(st_vals, motor_3, flight_ctr_3)
+
+            m0 = flight_ctr_0.motor_pwn_value()
+            m1 = flight_ctr_1.motor_pwn_value()
+            m2 = flight_ctr_2.motor_pwn_value()
+            m3 = flight_ctr_3.motor_pwn_value()
+
+            motor_0.duty = m0
+            motor_1.duty = m1
+            motor_2.duty = m2
+            motor_3.duty = m3
+
+            item = {'i': i,
+                    'ax': ax,
+                    'ay': ay,
+                    'az': az,
+                    'delta-az': az-prev_az,
+                    'acc_sum': acc_sum,
+                    'delta-acc_sum': acc_sum-prev_acc_sum,
+                    'm0': m0,
+                    'm1': m1,
+                    'm2': m2,
+                    'm3': m3,}
+            if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
+                data.append(item)
+            if i%10==0 and bb:
+                bb.write('    countdown: '+str(int(i/10))+' sec.', end='\r')
+            if bb:
+                bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+                bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+            time.sleep(0.1)
+            i += 1
+        except Exception as e:
+            print('!!! Exception: ' + str(e))
+            sys.exit()
+        else:
+            pass
+        finally:
+            pass
+            
+    if bb:
+        bb.write('    countdown: 0 sec.')
+    nlarge_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'], reverse = True)[:5]
+    if bb and len(nlarge_delta_acc_sum)>0:
+        bb.write('    Escape G: '+str(nlarge_delta_acc_sum[0]['acc_sum']))
+
+    dump_flight_data(bb, nlarge_delta_acc_sum)
+    if bb:
+        bb.write('')
+    dump_flight_data(bb, data)
+    if len(nlarge_delta_acc_sum)>0:
+        return nlarge_delta_acc_sum[0]['acc_sum']
+    return 0
+
+
+def shutdown(imu, 
+             flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+             motor_0, motor_1, motor_2, motor_3,
+             bb=None):
+    import sys, time
+    acc_vals = [0.0, 0.0, 0.0]
+    gyro_vals = [0.0, 0.0, 0.0]
+    st_vals = [0, 0, 0]
+    if bb:
+        bb.write('shuttdowning PicoDrone..')
+    # i, az, delta-az, acc_sum, delta-acc_sum
+    SHUTDOWN_COUNT = 500
+    data = []
+    for i in range(SHUTDOWN_COUNT):
+        prev_ax = int(acc_vals[0]*100)
+        prev_ay = int(acc_vals[1]*100)
+        prev_az = int(acc_vals[2]*100)
+        prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
+
+        acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
+        ax = int(acc_vals[0]*100)
+        ay = int(acc_vals[1]*100)
+        az = int(acc_vals[2]*100)
+        acc_sum = ax**2 + ay**2 + az**2
+        imu_tem = imu.temperature
+
+        flight_ctr_0.acc_vals = acc_vals
+        flight_ctr_1.acc_vals = acc_vals
+        flight_ctr_2.acc_vals = acc_vals
+        flight_ctr_3.acc_vals = acc_vals
+
+        flight_ctr_0.gyro_vals = gyro_vals
+        flight_ctr_1.gyro_vals = gyro_vals
+        flight_ctr_2.gyro_vals = gyro_vals
+        flight_ctr_3.gyro_vals = gyro_vals
+
+        st_vals[0] = 5000
+        st_vals[1] = 5000
+        st_vals[2] = 1000
+        flight_ctr_0.st_vals = st_vals
+        flight_ctr_1.st_vals = st_vals
+        flight_ctr_2.st_vals = st_vals
+        flight_ctr_3.st_vals = st_vals
+
+        m0 = flight_ctr_0.motor_pwn_value()
+        m1 = flight_ctr_1.motor_pwn_value()
+        m2 = flight_ctr_2.motor_pwn_value()
+        m3 = flight_ctr_3.motor_pwn_value()
+
+        motor_0.duty = m0
+        motor_1.duty = m1
+        motor_2.duty = m2
+        motor_3.duty = m3
+        
+        if m0<=motor_0.min_duty and m1<=motor_1.min_duty and m2<=motor_2.min_duty and m3<=motor_3.min_duty:
+            if bb:
+                bb.write('    shutdown completed, i='+str(i))
+            break
+
+        if i%10==0 and bb:
+            bb.write('    '+str(int(i/10))+' sec.') # , end='\r')
+        '''
+        if bb:
+            bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+            bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+        '''
+        time.sleep(0.1)    
+    motor_0.duty = motor_0.init_duty
+    motor_1.duty = motor_1.init_duty
+    motor_2.duty = motor_2.init_duty
+    motor_3.duty = motor_3.init_duty
+
+    if len(nsmall_delta_acc_sum)>0 and bb:
+        bb.write('    Shutting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
+    sys.exit()
+
+
+### entering the main loop
+def main_loop(imu, st0, st1, st2,
+              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+              motor_0, motor_1, motor_2, motor_3,
+              bb=None, sec=None,
+              st0_val=0, st1_val=0, st2_val=0):
+    import time
+    if bb and sec!=None:
+        bb.write('entering the main loop. period: '+str(sec)+' sec.')
+    elif bb:
+        bb.write('entering the main loop')
+
+    ST_PROB_FREQ = 20
+    MOTOR_ADJ_FREQ = 20
+    tickcount = 0
+
+    acc_vals = [0.0, 0.0, 0.0]
+    gyro_vals = [0.0, 0.0, 0.0]
+    st_vals = [0, 0, 0]
+    st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
+    if sec==None:
+        tickcount_limit = 0
+    else:
+        tickcount_limit = int(sec*ST_PROB_FREQ)
+    while sec==None or tickcount<tickcount_limit:
+        try:
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                acc_vals[0] = imu.accel.x
+                acc_vals[1] = imu.accel.y
+                acc_vals[2] = imu.accel.z
+                gyro_vals[0] = imu.gyro.x
+                gyro_vals[1] = imu.gyro.y
+                gyro_vals[2] = imu.gyro.z
+                imu_tem = imu.temperature
+
+                flight_ctr_0.acc_vals = acc_vals
+                flight_ctr_1.acc_vals = acc_vals
+                flight_ctr_2.acc_vals = acc_vals
+                flight_ctr_3.acc_vals = acc_vals
+
+                flight_ctr_0.gyro_vals = gyro_vals
+                flight_ctr_1.gyro_vals = gyro_vals
+                flight_ctr_2.gyro_vals = gyro_vals
+                flight_ctr_3.gyro_vals = gyro_vals
+            '''
+            st_vals[0] = st0.abs_scale()
+            st_vals[1] = st1.abs_scale()
+            st_vals[2] = st2.abs_scale()
+            '''
+            flight_ctr_0.st_vals = st_vals
+            flight_ctr_1.st_vals = st_vals
+            flight_ctr_2.st_vals = st_vals
+            flight_ctr_3.st_vals = st_vals
+
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                m0 = flight_ctr_0.motor_pwn_value()
+                m1 = flight_ctr_1.motor_pwn_value()
+                m2 = flight_ctr_2.motor_pwn_value()
+                m3 = flight_ctr_3.motor_pwn_value()
+
+            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
+                motor_0.duty = m0
+                motor_1.duty = m1
+                motor_2.duty = m2
+                motor_3.duty = m3
+            if bb:
+                bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+                bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
+            time.sleep(1.0/ST_PROB_FREQ)
+            
+            if sec and tickcount%ST_PROB_FREQ==0 and bb:
+                bb.write('    '+str(int(tickcount/ST_PROB_FREQ))+' sec.') # , end='\r')
+            tickcount += 1
+        except Exception as e:
+            print('!!! Exception: ' + str(e))
+        else:
+            pass
+        finally:
+            pass
+
 
 def ufo_float(imu, 
               flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
@@ -412,178 +679,3 @@ def ufo_float(imu,
     if len(nlarge_delta_acc_sum)>0:
         return nlarge_delta_acc_sum[0]['acc_sum']
     return 0
-
-
-def shutdown(imu, 
-             flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-             motor_0, motor_1, motor_2, motor_3,
-             bb=None):
-    import sys, time
-    acc_vals = [0.0, 0.0, 0.0]
-    gyro_vals = [0.0, 0.0, 0.0]
-    st_vals = [0, 0, 0]
-    if bb:
-        bb.write('shuttdowning PicoDrone..')
-    # i, az, delta-az, acc_sum, delta-acc_sum
-    SHUTDOWN_COUNT = 500
-    data = []
-    for i in range(SHUTDOWN_COUNT):
-        prev_ax = int(acc_vals[0]*100)
-        prev_ay = int(acc_vals[1]*100)
-        prev_az = int(acc_vals[2]*100)
-        prev_acc_sum = prev_ax**2 + prev_ay**2 + prev_az**2
-
-        acc_vals[0], acc_vals[1], acc_vals[2] = imu.accel.x, imu.accel.y, imu.accel.z
-        ax = int(acc_vals[0]*100)
-        ay = int(acc_vals[1]*100)
-        az = int(acc_vals[2]*100)
-        acc_sum = ax**2 + ay**2 + az**2
-
-        flight_ctr_0.acc_vals = acc_vals
-        flight_ctr_1.acc_vals = acc_vals
-        flight_ctr_2.acc_vals = acc_vals
-        flight_ctr_3.acc_vals = acc_vals
-
-        flight_ctr_0.gyro_vals = gyro_vals
-        flight_ctr_1.gyro_vals = gyro_vals
-        flight_ctr_2.gyro_vals = gyro_vals
-        flight_ctr_3.gyro_vals = gyro_vals
-
-        st_vals[0] = 5000
-        st_vals[1] = 5000
-        st_vals[2] = 2500
-        flight_ctr_0.st_vals = st_vals
-        flight_ctr_1.st_vals = st_vals
-        flight_ctr_2.st_vals = st_vals
-        flight_ctr_3.st_vals = st_vals
-
-        m0 = flight_ctr_0.motor_pwn_value()
-        m1 = flight_ctr_1.motor_pwn_value()
-        m2 = flight_ctr_2.motor_pwn_value()
-        m3 = flight_ctr_3.motor_pwn_value()
-
-        motor_0.duty = m0
-        motor_1.duty = m1
-        motor_2.duty = m2
-        motor_3.duty = m3
-
-        item = {'i': i,
-                'ax': ax,
-                'ay': ay,
-                'az': az,
-                'delta-az': az-prev_az,
-                'acc_sum': acc_sum,
-                'delta-acc_sum': acc_sum-prev_acc_sum,
-                'm0': m0,
-                'm1': m1,
-                'm2': m2,
-                'm3': m3,}
-        if i>0: # skip the first run, becasue the value of delta-az and delta-acc_sum are meaningless.
-            data.append(item)
-        
-        if m0<=motor_0.min_duty and m1<=motor_1.min_duty and m2<=motor_2.min_duty and m3<=motor_3.min_duty:
-            if bb:
-                bb.write('    shutdown completed, i='+str(i))
-            break
-
-        if i%10==0 and bb:
-            bb.write('    '+str(int(i/10))+' sec.') # , end='\r')
-        time.sleep(0.1)    
-    motor_0.duty = motor_0.init_duty
-    motor_1.duty = motor_1.init_duty
-    motor_2.duty = motor_2.init_duty
-    motor_3.duty = motor_3.init_duty
-
-    nsmall_delta_acc_sum = sorted(data, key = lambda x: x['delta-acc_sum'])[:5]
-
-    dump_flight_data(bb, nsmall_delta_acc_sum)
-    if bb:
-        bb.write('')
-    dump_flight_data(bb, data)
-
-    if len(nsmall_delta_acc_sum)>0 and bb:
-        bb.write('    Shutting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
-    sys.exit()
-
-
-### entering the main loop
-def main_loop(imu, st0, st1, st2,
-              flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-              motor_0, motor_1, motor_2, motor_3,
-              bb=None, sec=None,
-              st0_val=0, st1_val=0, st2_val=0):
-    import time
-    if bb and sec!=None:
-        bb.write('entering the main loop. period: '+str(sec)+' sec.')
-    elif bb:
-        bb.write('entering the main loop')
-
-    ST_PROB_FREQ = 20
-    MOTOR_ADJ_FREQ = 20
-    tickcount = 0
-
-    acc_vals = [0.0, 0.0, 0.0]
-    gyro_vals = [0.0, 0.0, 0.0]
-    st_vals = [0, 0, 0]
-    st_vals[0], st_vals[1], st_vals[2] = st0_val, st1_val, st2_val
-    if sec==None:
-        tickcount_limit = 0
-    else:
-        tickcount_limit = int(sec*ST_PROB_FREQ)
-    while sec==None or tickcount<tickcount_limit:
-        try:
-            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-                acc_vals[0] = imu.accel.x
-                acc_vals[1] = imu.accel.y
-                acc_vals[2] = imu.accel.z
-                gyro_vals[0] = imu.gyro.x
-                gyro_vals[1] = imu.gyro.y
-                gyro_vals[2] = imu.gyro.z
-                imu_tem = imu.temperature
-
-                flight_ctr_0.acc_vals = acc_vals
-                flight_ctr_1.acc_vals = acc_vals
-                flight_ctr_2.acc_vals = acc_vals
-                flight_ctr_3.acc_vals = acc_vals
-
-                flight_ctr_0.gyro_vals = gyro_vals
-                flight_ctr_1.gyro_vals = gyro_vals
-                flight_ctr_2.gyro_vals = gyro_vals
-                flight_ctr_3.gyro_vals = gyro_vals
-            '''
-            st_vals[0] = st0.abs_scale()
-            st_vals[1] = st1.abs_scale()
-            st_vals[2] = st2.abs_scale()
-            '''
-            flight_ctr_0.st_vals = st_vals
-            flight_ctr_1.st_vals = st_vals
-            flight_ctr_2.st_vals = st_vals
-            flight_ctr_3.st_vals = st_vals
-
-            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-                m0 = flight_ctr_0.motor_pwn_value()
-                m1 = flight_ctr_1.motor_pwn_value()
-                m2 = flight_ctr_2.motor_pwn_value()
-                m3 = flight_ctr_3.motor_pwn_value()
-
-            if tickcount%(ST_PROB_FREQ/MOTOR_ADJ_FREQ)==0:
-                motor_0.duty = m0
-                motor_1.duty = m1
-                motor_2.duty = m2
-                motor_3.duty = m3
-
-            if bb:
-                bb.update(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
-                bb.show_status(acc_vals, gyro_vals, imu_tem, m0, m1, m2, m3)
-
-            time.sleep(1.0/ST_PROB_FREQ)
-            
-            if sec and tickcount%ST_PROB_FREQ==0 and bb:
-                bb.write('    '+str(int(tickcount/ST_PROB_FREQ))+' sec.') # , end='\r')
-            tickcount += 1
-        except Exception as e:
-            print('!!! Exception: ' + str(e))
-        else:
-            pass
-        finally:
-            pass

@@ -32,12 +32,12 @@ SOFTWARE.
 from machine import PWM
 
 class ZMR():
-    def __init__(self, pin, freq=400, dutys=[26214, 52428, 26214, 52428, 39321]):
-        # dutys = [min, max, init, limit, balance]
+    def __init__(self, pin, freq=400, dutys=[26214, 26214, 39321, 52428, 52428]):
+        # dutys = [init, min, balance, max, limit]
         self._pwm = PWM(pin)
         self._pwm.freq(freq)
-        self._pwm.duty_u16(dutys[2])
-        self._duty = dutys[2]
+        self._pwm.duty_u16(dutys[0])
+        self._duty = dutys[0]
         self._dutys = dutys
 
     @property
@@ -50,33 +50,33 @@ class ZMR():
         self._duty = duty
 
     @property
-    def min_duty(self):
+    def init_duty(self):
         return self._dutys[0]
 
     @property
-    def max_duty(self):
+    def min_duty(self):
         return self._dutys[1]
 
     @property
-    def init_duty(self):
+    def balance_duty(self):
         return self._dutys[2]
 
     @property
-    def limit_duty(self):
+    def max_duty(self):
         return self._dutys[3]
 
     @property
-    def balance_duty(self):
+    def limit_duty(self):
         return self._dutys[4]
 
 
 def test_zmrs():
     from machine import Pin
     import time
-    motor_0 = ZMR(Pin(6), dutys=[ 3000, 62400,   200, 68000, 20710,  2250,  7950, 15350, 23100])
-    motor_1 = ZMR(Pin(7), dutys=[ 2600, 45600,   400, 67200, 14710,  2825,  7100, 12500, 17750])
-    motor_2 = ZMR(Pin(8), dutys=[ 5400, 63200,  2000, 69600, 21445,  5825, 11500, 18500, 25750])
-    motor_3 = ZMR(Pin(9), dutys=[30500, 51200, 20000, 69600, 34548, 30980, 32250, 33850, 35500])
+    motor_0 = ZMR(Pin(6), dutys=[  200,  3000, 20710, 62400, 68000,  2250,  7950, 15350, 23100])
+    motor_1 = ZMR(Pin(7), dutys=[  400,  2600, 14710, 45600, 67200,  2825,  7100, 12500, 17750])
+    motor_2 = ZMR(Pin(8), dutys=[ 2000,  5400, 21445, 63200, 69600,  5825, 11500, 18500, 25750])
+    motor_3 = ZMR(Pin(9), dutys=[20000, 30500, 34548, 51200, 69600, 30980, 32250, 33850, 35500])
     m0 = m1 = m2 = m3 = 0
     while True:
         the_input = input("輸入馬達 PWM Duty Cycle: (例如: a30) ")

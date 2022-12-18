@@ -42,7 +42,7 @@ from state_machine import R8EF_channel
 from simonk_pwm import ZMR
 
 # Flight Controller -----------------------------------------------------------
-from flight_controller import acc_sum_base, ufo_float, shutdown, main_loop
+from flight_controller import acc_sum_base, ufo_float_v2, shutdown, main_loop
 from flight_controller import flight_ctr_fr, flight_ctr_fl
 from flight_controller import flight_ctr_bl, flight_ctr_br
 
@@ -80,11 +80,11 @@ st_range = [ # min, mid, max
 
 ### initializing SimonK PWM
 bb.write('initializing SimonK ESC')
-# dutys = [min, max, init, limit, seatbelt]
-motor_0 = ZMR(Pin(6), dutys=[ 3000, 62400,   200, 68000, 20710,  2250,  7950, 15350, 23100])
-motor_1 = ZMR(Pin(7), dutys=[ 2600, 45600,   400, 67200, 14710,  2825,  7100, 12500, 17750])
-motor_2 = ZMR(Pin(8), dutys=[ 5400, 63200,  2000, 69600, 21445,  5825, 11500, 18500, 25750])
-motor_3 = ZMR(Pin(9), dutys=[30500, 51200, 20000, 69600, 34548, 30980, 32250, 33850, 35500])
+# dutys =                   [ init,   min, balance,   max, limit]
+motor_0 = ZMR(Pin(6), dutys=[  200,  2250,   20710, 23100, 62400,  2250,  7950, 15350, 23100])
+motor_1 = ZMR(Pin(7), dutys=[  400,  2825,   14710, 17750, 45600,  2825,  7100, 12500, 17750])
+motor_2 = ZMR(Pin(8), dutys=[ 2000,  5825,   21445, 25750, 63200,  5825, 11500, 18500, 25750])
+motor_3 = ZMR(Pin(9), dutys=[20000, 30980,   34548, 35500, 51200, 30980, 32250, 33850, 35500])
 time.sleep(1.0)
 motor_0.duty = motor_0.min_duty
 motor_1.duty = motor_1.min_duty
@@ -94,10 +94,10 @@ motor_3.duty = motor_3.min_duty
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr('fc0', st_range, motor_0, pwr_cr=4, debug_obj=bb)
+flight_ctr_0 = flight_ctr_fr('fc0', st_range, motor_0, pwr_cr=3, debug_obj=bb)
 flight_ctr_1 = flight_ctr_fl('fc1', st_range, motor_1, pwr_cr=3, debug_obj=bb)
-flight_ctr_2 = flight_ctr_bl('fc2', st_range, motor_2, pwr_cr=4, debug_obj=bb)
-flight_ctr_3 = flight_ctr_br('fc3', st_range, motor_3, pwr_cr=1, debug_obj=bb)
+flight_ctr_2 = flight_ctr_bl('fc2', st_range, motor_2, pwr_cr=2, debug_obj=bb)
+flight_ctr_3 = flight_ctr_br('fc3', st_range, motor_3, pwr_cr=2, debug_obj=bb)
 
 
 ### before taking off, initialize PicoDrone
@@ -111,10 +111,10 @@ flight_ctr_3.based_acc_sum = based_acc_sum
 
 
 # figuring out the acc sum at the boundary of escape gravity
-es_acc_sum = ufo_float(imu, 
-                       flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
-                       motor_0, motor_1, motor_2, motor_3,
-                       bb=bb)
+es_acc_sum = ufo_float_v2(imu, 
+                          flight_ctr_0, flight_ctr_1, flight_ctr_2, flight_ctr_3, 
+                          motor_0, motor_1, motor_2, motor_3,
+                          bb=bb)
 if es_acc_sum==0:
     es_acc_sum = based_acc_sum
     

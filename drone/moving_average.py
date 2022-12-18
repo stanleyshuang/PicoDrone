@@ -27,7 +27,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
-from .circular_queue import circular_queue
+from circular_queue import circular_queue
 
 class moving_average(circular_queue):
     def __init__(self, size=8):
