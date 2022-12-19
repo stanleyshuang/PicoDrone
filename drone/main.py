@@ -94,8 +94,8 @@ motor_3.duty = motor_3.min_duty
 
 ### initializing Flight Controllers
 bb.write('initializing Flight Controllers')
-flight_ctr_0 = flight_ctr_fr('fc0', st_range, motor_0, pwr_cr=3, debug_obj=bb)
-flight_ctr_1 = flight_ctr_fl('fc1', st_range, motor_1, pwr_cr=3, debug_obj=bb)
+flight_ctr_0 = flight_ctr_fr('fc0', st_range, motor_0, pwr_cr=2, debug_obj=bb)
+flight_ctr_1 = flight_ctr_fl('fc1', st_range, motor_1, pwr_cr=2, debug_obj=bb)
 flight_ctr_2 = flight_ctr_bl('fc2', st_range, motor_2, pwr_cr=2, debug_obj=bb)
 flight_ctr_3 = flight_ctr_br('fc3', st_range, motor_3, pwr_cr=2, debug_obj=bb)
 

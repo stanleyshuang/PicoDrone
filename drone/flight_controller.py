@@ -58,12 +58,13 @@ class flight_ctr():
         self._MOTOR = motor # SimonK ESC pwm duty parameters
         
         self._M_UNIT = int(self.pwr_cr * (motor.max_duty - motor.min_duty)/4000.0)
-        self._M_UNIT_BAL = self._M_UNIT
+        self._M_UNIT_BAL = 0 #self._M_UNIT
         if self.bb:
             self.bb.write('    '+self.name+'.'+'_M_UNIT:          '+str(self._M_UNIT))
         self._10_M_UNIT = self._M_UNIT * 10
         self._30_M_UNIT = self._M_UNIT * 30
         self._pwm_value = motor.min_duty
+        self._c = 100
 
 
     @property
@@ -170,7 +171,7 @@ class flight_ctr():
 
     def left(self):
         ay = self._acc_vals[1]
-        delta = int(-1*self._M_UNIT_BAL*ay**2/10)
+        delta = int(-1*self._M_UNIT_BAL*ay**2/self._c)
         if delta>0:
             self._pwm_value += delta
         if self.bb and self.debug_show_detail:
@@ -183,7 +184,7 @@ class flight_ctr():
 
     def right(self):
         ay = self._acc_vals[1]
-        delta = int(self._M_UNIT_BAL*ay**2/10)
+        delta = int(self._M_UNIT_BAL*ay**2/self._c)
         if delta>0:
             self._pwm_value += delta
         if self.bb and self.debug_show_detail:
@@ -196,7 +197,7 @@ class flight_ctr():
 
     def front(self):
         ax = self._acc_vals[0]
-        delta = int(-1*self._M_UNIT_BAL*ax**2/10)
+        delta = int(-1*self._M_UNIT_BAL*ax**2/self._c)
         if delta>0:
             self._pwm_value += delta
         if self.bb and self.debug_show_detail:
@@ -209,7 +210,7 @@ class flight_ctr():
 
     def back(self):
         ax = self._acc_vals[0]
-        delta = int(self._M_UNIT_BAL*ax**2/10)
+        delta = int(self._M_UNIT_BAL*ax**2/self._c)
         if delta>0:
             self._pwm_value += delta
         if self.bb and self.debug_show_detail:
@@ -500,9 +501,6 @@ def shutdown(imu,
     motor_1.duty = motor_1.init_duty
     motor_2.duty = motor_2.init_duty
     motor_3.duty = motor_3.init_duty
-
-    if len(nsmall_delta_acc_sum)>0 and bb:
-        bb.write('    Shutting down G: '+str(nsmall_delta_acc_sum[0]['acc_sum']))
     sys.exit()
 
 
