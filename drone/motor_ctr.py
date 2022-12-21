@@ -33,10 +33,11 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    def __init__(self, duties=[26214, 26214,   39321, 52428, 52428]):
+    def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         self._duties = duties # SimonK ESC pwm duty parameters
         self._M_UNIT = (self.max_duty - self.min_duty)/3000
+        self._CR = cr # conversion rate
 
 
     @property
@@ -58,6 +59,10 @@ class motor_ctr():
     @property
     def limit_duty(self):
         return self._duties[4]
+        
+    @property
+    def conversion_rate(self):
+        return self._CR
 
     def duty2rpm(self, duty):
         return int(2000 + (duty-self.min_duty)/self._M_UNIT)

@@ -84,10 +84,11 @@ time.sleep(1.0)
 
 ### initializing Motor Controllers
 bb.write('initializing Motor Controllers')
-motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 62400,  2250,  7950, 15350, 23100])
-motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 45600,  2825,  7100, 12500, 17750])
-motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 63200,  5825, 11500, 18500, 25750])
-motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 51200, 30980, 32250, 33850, 35500])
+#                          duties=[ init,   min, balance,   max, limit]
+motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 35617], cr=1.01) # pwm = 6.70833 x rpm - 11341.66
+motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 26663], cr=1.0)  # pwm = 4.7866  x rpm -  6843.33
+motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 37740], cr=0.95) # pwm = 6.42    x rpm -  7200
+motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 38232], cr=1.0)  # pwm = 1.4633  x rpm + 27988.4
 
 esc_0.duty = motor_ctr_0.init_duty
 esc_1.duty = motor_ctr_1.init_duty

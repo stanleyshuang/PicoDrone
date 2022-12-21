@@ -108,10 +108,10 @@ class flight_controller():
         i = 0
         for rpm in range(start, stop, step):
             try:
-                m0 = self._m0.rpm2duty(rpm * 1.01)
-                m1 = self._m1.rpm2duty(rpm)
-                m2 = self._m2.rpm2duty(rpm * 0.99)
-                m3 = self._m3.rpm2duty(rpm)
+                m0 = self._m0.rpm2duty(rpm * self._m0.conversion_rate)
+                m1 = self._m1.rpm2duty(rpm * self._m1.conversion_rate)
+                m2 = self._m2.rpm2duty(rpm * self._m2.conversion_rate)
+                m3 = self._m3.rpm2duty(rpm * self._m3.conversion_rate)
                 self._ESC0.duty = m0
                 self._ESC1.duty = m1
                 self._ESC2.duty = m2
@@ -140,8 +140,8 @@ class flight_controller():
 
 
     def takeoff(self):
-        self.simple_mode('    Take off..', 2000, 4500, 50)
+        self.simple_mode('    Take off..', 2000, 5000, 50)
 
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4500, 2000, -50)
+        self.simple_mode('    Shutdown..', 5000, 2000, -50)
