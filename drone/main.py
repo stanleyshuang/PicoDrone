@@ -79,20 +79,20 @@ esc_0 = ESC(Pin(6))
 esc_1 = ESC(Pin(7))
 esc_2 = ESC(Pin(8))
 esc_3 = ESC(Pin(9))
-time.sleep(0.5)
+time.sleep(1.0)
 
 
 ### initializing Motor Controllers
 bb.write('initializing Motor Controllers')
-motor_ctr_0 = motor_ctr_fr(duties=[  200,  2250,   20710, 23100, 62400,  2250,  7950, 15350, 23100])
-motor_ctr_1 = motor_ctr_fl(duties=[  400,  2825,   14710, 17750, 45600,  2825,  7100, 12500, 17750])
-motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5825,   21445, 25750, 63200,  5825, 11500, 18500, 25750])
-motor_ctr_3 = motor_ctr_br(duties=[20000, 30980,   34548, 35500, 51200, 30980, 32250, 33850, 35500])
+motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 62400,  2250,  7950, 15350, 23100])
+motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 45600,  2825,  7100, 12500, 17750])
+motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 63200,  5825, 11500, 18500, 25750])
+motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 51200, 30980, 32250, 33850, 35500])
 
-esc_0.duty = motor_ctr_0.min_duty
-esc_1.duty = motor_ctr_1.min_duty
-esc_2.duty = motor_ctr_2.min_duty
-esc_3.duty = motor_ctr_3.min_duty
+esc_0.duty = motor_ctr_0.init_duty
+esc_1.duty = motor_ctr_1.init_duty
+esc_2.duty = motor_ctr_2.init_duty
+esc_3.duty = motor_ctr_3.init_duty
 
 
 ### before taking off, initialize FlightController
@@ -112,4 +112,5 @@ flight_ctr = flight_controller(imu, st0, st1, st2, st_matrics,
 
 flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
 flight_ctr.takeoff()
+time.sleep(1.0)
 flight_ctr.shutdown()

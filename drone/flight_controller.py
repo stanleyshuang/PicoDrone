@@ -108,9 +108,9 @@ class flight_controller():
         i = 0
         for rpm in range(start, stop, step):
             try:
-                m0 = self._m0.rpm2duty(rpm)
+                m0 = self._m0.rpm2duty(rpm * 1.01)
                 m1 = self._m1.rpm2duty(rpm)
-                m2 = self._m2.rpm2duty(rpm)
+                m2 = self._m2.rpm2duty(rpm * 0.99)
                 m3 = self._m3.rpm2duty(rpm)
                 self._ESC0.duty = m0
                 self._ESC1.duty = m1
