@@ -90,10 +90,10 @@ motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 26663], cr=1.0)
 motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 37740], cr=0.95) # pwm = 6.42    x rpm -  7200
 motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 38232], cr=1.0)  # pwm = 1.4633  x rpm + 27988.4
 
-esc_0.duty = motor_ctr_0.init_duty
-esc_1.duty = motor_ctr_1.init_duty
-esc_2.duty = motor_ctr_2.init_duty
-esc_3.duty = motor_ctr_3.init_duty
+esc_0.duty = motor_ctr_0.i_init_duty
+esc_1.duty = motor_ctr_1.i_init_duty
+esc_2.duty = motor_ctr_2.i_init_duty
+esc_3.duty = motor_ctr_3.i_init_duty
 
 
 ### before taking off, initialize FlightController

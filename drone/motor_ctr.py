@@ -35,54 +35,54 @@ from moving_average import moving_average
 class motor_ctr():
     def __init__(self, duties, cr):
         self._duties = duties # SimonK ESC pwm duty parameters
-        self._M_UNIT = (self.max_duty - self.min_duty)/3000
-        self._CR = cr # conversion rate
-        self._AX = 0.0
-        self._AY = 0.0
+        self._F_UNIT = (self.i_max_duty - self.i_min_duty)/3000
+        self._F_CR = cr # conversion rate
+        self._I_AX = 0
+        self._I_AY = 0
 
 
     @property
-    def init_duty(self):
+    def i_init_duty(self):
         return self._duties[0]
 
     @property
-    def min_duty(self):
+    def i_min_duty(self):
         return self._duties[1]
 
     @property
-    def balance_duty(self):
+    def i_balance_duty(self):
         return self._duties[2]
 
     @property
-    def max_duty(self):
+    def i_max_duty(self):
         return self._duties[3]
 
     @property
-    def limit_duty(self):
+    def i_limit_duty(self):
         return self._duties[4]
         
     @property
-    def conversion_rate(self):
-        return self._CR
+    def f_conversion_rate(self):
+        return self._F_CR
         
     @property
-    def ax(self):
-        return self._AX
+    def i_ax(self):
+        return self._I_AX
         
     @property
-    def ay(self):
-        return self._AY
+    def i_ay(self):
+        return self._I_AY
 
-    def duty2rpm(self, duty):
-        return int(2000 + (duty-self.min_duty)/self._M_UNIT)
+    def i_duty2rpm(self, duty):
+        return int(2000 + (duty-self.i_min_duty)/self._F_UNIT)
 
-    def rpm2duty(self, rpm):
-        return int(self.min_duty + (rpm-2000)*self._M_UNIT)
+    def i_rpm2duty(self, rpm):
+        return int(self.i_min_duty + (rpm-2000)*self._F_UNIT)
 
-    def balance_pid(self, curr, max_add_rpm=500, boundary=100.0, baseline=0.0):
+    def i_balance_pid(self, curr, max_add_rpm=500, boundary=100, baseline=0):
         p = curr - baseline
         if p < boundary:
-            return max_add_rpm * (p/boundary)
+            return int(max_add_rpm * (p/boundary))
         return max_add_rpm
 
 
@@ -90,29 +90,29 @@ class motor_ctr_fr(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_fr, self).__init__(duties, cr)
-        self._AX = -1.0
-        self._AY = 1.0
+        self._I_AX = -1
+        self._I_AY = 1
 
 
 class motor_ctr_fl(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_fl, self).__init__(duties, cr)
-        self._AX = -1.0
-        self._AY = -1.0
+        self._I_AX = -1
+        self._I_AY = -1
 
 
 class motor_ctr_bl(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_bl, self).__init__(duties, cr)
-        self._AX = 1.0
-        self._AY = -1.0
+        self._I_AX = 1
+        self._I_AY = -1
 
 
 class motor_ctr_br(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_br, self).__init__(duties, cr)
-        self._AX = 1.0
-        self._AY = 1.0
+        self._I_AX = 1
+        self._I_AY = 1
