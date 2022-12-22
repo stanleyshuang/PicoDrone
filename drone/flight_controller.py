@@ -74,7 +74,7 @@ class flight_controller():
         import time
         if self._bb:
             self._bb.write('    figuring out the baseline of acc sum..')
-        ACC_BASE_SAMPLING_COUNT = 30
+        ACC_BASE_SAMPLING_COUNT = 15
         acc_sum = [0, 0, 0]
         for i in range(ACC_BASE_SAMPLING_COUNT):
             acc_sum[0] += int(self._IMU.accel.x * 100)
@@ -136,12 +136,12 @@ class flight_controller():
                 pass
                 
         if self._bb:
-            self._bb.write('    countdown: 0 sec.')
+            self._bb.write('    countdown: '+str(int(i/10))+' sec.', end='\r')
 
 
     def takeoff(self):
-        self.simple_mode('    Take off..', 2000, 5000, 50)
+        self.simple_mode('    Take off..', 2000, 4500, 50)
 
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 5000, 2000, -50)
+        self.simple_mode('    Shutdown..', 4500, 2000, -50)
