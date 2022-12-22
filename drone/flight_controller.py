@@ -92,10 +92,10 @@ class flight_controller():
         i_acc_sum_base = i_acc_base[0]**2 + i_acc_base[1]**2 + i_acc_base[2]**2
 
         # figuring out the baseline of acc sum 
-        self._m0.based_acc_sum = i_acc_sum_base
-        self._m1.based_acc_sum = i_acc_sum_base
-        self._m2.based_acc_sum = i_acc_sum_base
-        self._m3.based_acc_sum = i_acc_sum_base
+        self._m0.i_based_acc_sum = i_acc_sum_base
+        self._m1.i_based_acc_sum = i_acc_sum_base
+        self._m2.i_based_acc_sum = i_acc_sum_base
+        self._m3.i_based_acc_sum = i_acc_sum_base
         if self._bb:
             self._bb.write('    Base G: '+str(i_acc_sum_base))
         return i_acc_sum_base

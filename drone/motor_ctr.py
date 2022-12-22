@@ -39,6 +39,7 @@ class motor_ctr():
         self._F_CR = cr # conversion rate
         self._I_AX = 0
         self._I_AY = 0
+        self._I_BASE_ACC_SUM = 0
 
 
     @property
@@ -84,6 +85,14 @@ class motor_ctr():
         if p < boundary:
             return int(max_add_rpm * (p/boundary))
         return max_add_rpm
+
+    @property
+    def i_based_acc_sum(self):
+        return self._I_BASE_ACC_SUM
+
+    @i_based_acc_sum.setter
+    def i_based_acc_sum(self, based_acc_sum):
+        self._I_BASE_ACC_SUM = based_acc_sum
 
 
 class motor_ctr_fr(motor_ctr):
