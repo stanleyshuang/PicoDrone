@@ -29,6 +29,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
+import utime
 from moving_average import moving_average
 
 
@@ -38,7 +39,11 @@ class flight_controller():
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3, 
                  debug_obj=None):
         self._IMU = imu
-        self._i_acc_vals = [0, 0, 0]
+        i_acc_q_size = 10
+        ax_q = moving_average(i_acc_q_size+1)
+        ay_q = moving_average(i_acc_q_size+1)
+        az_q = moving_average(i_acc_q_size+1)
+        self._i_acc_vals = [ax_q, ay_q, az_q]
         self._i_gyro_vals = [0, 0, 0]
 
         self._ST0 = st0
@@ -80,6 +85,9 @@ class flight_controller():
             i_acc_sum[0] += int(self._IMU.accel.x * 100)
             i_acc_sum[1] += int(self._IMU.accel.y * 100)
             i_acc_sum[2] += int(self._IMU.accel.z * 100)
+            self._i_acc_vals[0].update_val(self._IMU.accel.x)
+            self._i_acc_vals[1].update_val(self._IMU.accel.y)
+            self._i_acc_vals[2].update_val(self._IMU.accel.z)
             if i%10==0 and self._bb:
                 self._bb.write('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             time.sleep(0.1)
@@ -102,30 +110,43 @@ class flight_controller():
 
 
     def simple_mode(self, msg, start, stop, step):
+        begin = utime.ticks_ms()
         import sys, time
         if self._bb:
             self._bb.write(msg)
+        i_acc_vals = [0, 0, 0]
+        prob = 5
+        step = int(step/prob)
         i = 0
         for rpm in range(start, stop, step):
             try:
-                i_m0 = self._m0.i_rpm2duty(int(rpm * self._m0.f_conversion_rate))
-                i_m1 = self._m1.i_rpm2duty(int(rpm * self._m1.f_conversion_rate))
-                i_m2 = self._m2.i_rpm2duty(int(rpm * self._m2.f_conversion_rate))
-                i_m3 = self._m3.i_rpm2duty(int(rpm * self._m3.f_conversion_rate))
-                self._ESC0.duty = i_m0
-                self._ESC1.duty = i_m1
-                self._ESC2.duty = i_m2
-                self._ESC3.duty = i_m3
-                if i%10==0 and self._bb:
-                    self._bb.write('    countdown: '+str(int(i/10))+' sec.', end='\r')
-                if self._bb:
-                    self._i_acc_vals[0] = self._IMU.accel.x
-                    self._i_acc_vals[1] = self._IMU.accel.y
-                    self._i_acc_vals[2] = self._IMU.accel.z
-                    imu_tem = self._IMU.temperature
-                    self._bb.update(self._i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
-                    self._bb.show_status(self._i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
-                time.sleep(0.1)
+                self._i_acc_vals[0].update_val(self._IMU.accel.x)
+                self._i_acc_vals[1].update_val(self._IMU.accel.y)
+                self._i_acc_vals[2].update_val(self._IMU.accel.z)
+                if i%prob==0:
+                    i_m0 = self._m0.i_rpm2duty(int(rpm * self._m0.f_conversion_rate))
+                    i_m1 = self._m1.i_rpm2duty(int(rpm * self._m1.f_conversion_rate))
+                    i_m2 = self._m2.i_rpm2duty(int(rpm * self._m2.f_conversion_rate))
+                    i_m3 = self._m3.i_rpm2duty(int(rpm * self._m3.f_conversion_rate))
+                    self._ESC0.duty = i_m0
+                    self._ESC1.duty = i_m1
+                    self._ESC2.duty = i_m2
+                    self._ESC3.duty = i_m3
+                    if i%(10*prob)==0 and self._bb:
+                        self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
+                    if self._bb:
+                        i_acc_vals[0] = self._i_acc_vals[0].average
+                        i_acc_vals[1] = self._i_acc_vals[1].average
+                        i_acc_vals[2] = self._i_acc_vals[2].average
+                        '''
+                        i_acc_vals[0] = self._IMU.accel.x
+                        i_acc_vals[1] = self._IMU.accel.y
+                        i_acc_vals[2] = self._IMU.accel.z
+                        '''
+                        imu_tem = self._IMU.temperature
+                        self._bb.update(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
+                        self._bb.show_status(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
+                time.sleep(0.01/prob)
                 i += 1
             except Exception as e:
                 print('!!! Exception: ' + str(e))
@@ -134,14 +155,18 @@ class flight_controller():
                 pass
             finally:
                 pass
-                
         if self._bb:
-            self._bb.write('    countdown: '+str(int(i/10))+' sec.', end='\r')
+            self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
+        end = utime.ticks_ms()
+        diff = utime.ticks_diff(end, begin)
+        if self._bb:
+            self._bb.write('    duration: '+str(round(diff/1000, 2))+' sec.')
+
 
 
     def takeoff(self):
-        self.simple_mode('    Take off..', 2000, 4500, 50)
+        self.simple_mode('    Take off..', 2000, 4630, 50)
 
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4500, 2000, -50)
+        self.simple_mode('    Shutdown..', 4630, 2000, -50)

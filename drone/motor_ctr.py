@@ -80,7 +80,7 @@ class motor_ctr():
     def i_rpm2duty(self, rpm):
         return int(self.i_min_duty + (rpm-2000)*self._F_UNIT)
 
-    def i_balance_pid(self, curr, max_add_rpm=500, boundary=100, baseline=0):
+    def i_balance_pid(self, curr, max_add_rpm=50, boundary=100, baseline=0):
         p = curr - baseline
         if p < boundary:
             return int(max_add_rpm * (p/boundary))
