@@ -41,53 +41,46 @@ class flight_data():
                 self._fd.write(msg+'\n')
                 self._fd.flush()
 
-    def update(self, acc_vals, gyro_vals, tem, m0, m1, m2, m3):
-        acc_sum = int(acc_vals[0]*100)**2+int(acc_vals[1]*100)**2+int(acc_vals[2]*100)**2
-        self._acc_sum_prop[0] = acc_sum
-        if self._acc_sum_prop[1] > acc_sum:
-            self._acc_sum_prop[1] = acc_sum
-        if self._acc_sum_prop[2] < acc_sum:
-            self._acc_sum_prop[2] = acc_sum
+    def format(self, s, l):
+        msg = ''
+        for i in range(l-len(str(s))):
+            msg += ' '
+        msg += str(s)
+        return msg
 
-
-    def show_status(self, acc_vals, gyro_vals, tem, m0, m1, m2, m3, indent=4):
+    def show_status(self, i_acc_vals, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
             return
+        pid_x = ''
+        pid_x += self.format(pid_x0, 4)
+        pid_x += ' '
+        pid_x += self.format(pid_x1, 4)
+        pid_x += ' '
+        pid_x += self.format(pid_x2, 4)
+        pid_x += ' '
+        pid_x += self.format(pid_x3, 4)
+
+        pid_y = ''
+        pid_y += self.format(pid_y0, 4)
+        pid_y += ' '
+        pid_y += self.format(pid_y1, 4)
+        pid_y += ' '
+        pid_y += self.format(pid_y2, 4)
+        pid_y += ' '
+        pid_y += self.format(pid_y3, 4)
+
         msg = ''
+        keys = ['ax', 'pid_x', 'ay', 'pid_y', 'az', 'rpm', 't']
+        lens = [3, 19, 3, 19, 3, 4, 2]
+        vals = [str(int(i_acc_vals[0]*100)), pid_x,
+                str(int(i_acc_vals[1]*100)), pid_y,
+                str(int(i_acc_vals[2]*100)), str(rpm), str(round(imu_tem))]
         for i in range(indent):
             msg += ' '
-        acc_keys = ['ax:',' ay:',' az:']
-        for i in range(3):
-            msg += acc_keys[i]
-            val = int(acc_vals[i]*100)
-            if val>=0:
-                msg += ' '
-            msg += str(val)
-        gyro_keys = [' gx:',' gy:',' gz:']
-        for i in range(3):
-            msg += gyro_keys[i]
-            val = int(gyro_vals[i])
-            if val>=0:
-                msg += ' '
-            msg += str(val)
-        msg += ' tem:'
-        msg += str(int(tem))
-        msg += ' m0:'
-        msg += str(m0)
-        msg += ' m1:'
-        msg += str(m1)
-        msg += ' m2:'
-        msg += str(m2)
-        msg += ' m3:'
-        msg += str(m3)
-
-        acc_sum_keys = [' acc sum:',' min:',' max:']
-        for i in range(3):
-            msg += acc_sum_keys[i]
-            val = self._acc_sum_prop[i]
-            if val>=0:
-                msg += ' '
-            msg += str(val)
-
+        for i in range(7):
+            msg += keys[i]
+            msg += '='
+            msg += self.format(vals[i], lens[i])
+            msg += ', '
         msg += '        '
         self.write(msg, end='\r')

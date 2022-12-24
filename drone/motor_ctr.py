@@ -82,14 +82,14 @@ class motor_ctr():
 
     def i_balance_pid(self, curr, max_add_rpm, boundary, baseline):
         p = curr - baseline
-        if p < boundary:
-            return int(max_add_rpm * (p/boundary))
-        return max_add_rpm
+        if abs(curr - baseline) < boundary:
+            return int((max_add_rpm**2/10) * (p/boundary))
+        return (max_add_rpm**2/10)
 
-    def i_pid_x(self, curr, max_add_rpm=100, boundary=75, baseline=0):
+    def i_pid_x(self, curr, max_add_rpm=45, boundary=0.75, baseline=0.0):
         return self._I_AX * self.i_balance_pid(curr, max_add_rpm, boundary, baseline)
 
-    def i_pid_y(self, curr, max_add_rpm=100, boundary=75, baseline=0):
+    def i_pid_y(self, curr, max_add_rpm=45, boundary=0.75, baseline=0.0):
         return self._I_AY * self.i_balance_pid(curr, max_add_rpm, boundary, baseline)
 
     @property

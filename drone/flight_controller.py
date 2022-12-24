@@ -119,46 +119,45 @@ class flight_controller():
         step = int(step/prob)
         i = 0
         for rpm in range(start, stop, step):
-            try:
-                self._i_acc_vals[0].update_val(self._IMU.accel.x)
-                self._i_acc_vals[1].update_val(self._IMU.accel.y)
-                self._i_acc_vals[2].update_val(self._IMU.accel.z)
-                if i%prob==0:
-                    rpm0 = rpm + self._m0.i_pid_x(self._i_acc_vals[0].average) + self._m0.i_pid_y(self._i_acc_vals[1].average)
-                    rpm1 = rpm + self._m1.i_pid_x(self._i_acc_vals[0].average) + self._m1.i_pid_y(self._i_acc_vals[1].average)
-                    rpm2 = rpm + self._m2.i_pid_x(self._i_acc_vals[0].average) + self._m2.i_pid_y(self._i_acc_vals[1].average)
-                    rpm3 = rpm + self._m3.i_pid_x(self._i_acc_vals[0].average) + self._m3.i_pid_y(self._i_acc_vals[1].average)
-                    i_m0 = self._m0.i_rpm2duty(int(rpm * self._m0.f_conversion_rate))
-                    i_m1 = self._m1.i_rpm2duty(int(rpm * self._m1.f_conversion_rate))
-                    i_m2 = self._m2.i_rpm2duty(int(rpm * self._m2.f_conversion_rate))
-                    i_m3 = self._m3.i_rpm2duty(int(rpm * self._m3.f_conversion_rate))
-                    self._ESC0.duty = i_m0
-                    self._ESC1.duty = i_m1
-                    self._ESC2.duty = i_m2
-                    self._ESC3.duty = i_m3
-                    if i%(10*prob)==0 and self._bb:
-                        self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
-                    if self._bb:
-                        i_acc_vals[0] = self._i_acc_vals[0].average
-                        i_acc_vals[1] = self._i_acc_vals[1].average
-                        i_acc_vals[2] = self._i_acc_vals[2].average
-                        '''
-                        i_acc_vals[0] = self._IMU.accel.x
-                        i_acc_vals[1] = self._IMU.accel.y
-                        i_acc_vals[2] = self._IMU.accel.z
-                        '''
-                        imu_tem = self._IMU.temperature
-                        self._bb.update(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
-                        self._bb.show_status(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
-                time.sleep(0.02/prob) # workload = (0.1 - 0.02)
-                i += 1
-            except Exception as e:
-                print('!!! Exception: ' + str(e))
-                sys.exit()
-            else:
-                pass
-            finally:
-                pass
+            self._i_acc_vals[0].update_val(self._IMU.accel.x)
+            self._i_acc_vals[1].update_val(self._IMU.accel.y)
+            self._i_acc_vals[2].update_val(self._IMU.accel.z)
+            if i%prob==0:
+                pid_x0 = self._m0.i_pid_x(self._i_acc_vals[0].average)
+                pid_y0 = self._m0.i_pid_y(self._i_acc_vals[1].average)
+                pid_x1 = self._m1.i_pid_x(self._i_acc_vals[0].average)
+                pid_y1 = self._m1.i_pid_y(self._i_acc_vals[1].average)
+                pid_x2 = self._m2.i_pid_x(self._i_acc_vals[0].average)
+                pid_y2 = self._m2.i_pid_y(self._i_acc_vals[1].average)
+                pid_x3 = self._m3.i_pid_x(self._i_acc_vals[0].average)
+                pid_y3 = self._m3.i_pid_y(self._i_acc_vals[1].average)
+                rpm0 = rpm + pid_x0 + pid_y0
+                rpm1 = rpm + pid_x1 + pid_y1
+                rpm2 = rpm + pid_x2 + pid_y2
+                rpm3 = rpm + pid_x3 + pid_y3
+                i_m0 = self._m0.i_rpm2duty(int(rpm0 * self._m0.f_conversion_rate))
+                i_m1 = self._m1.i_rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
+                i_m2 = self._m2.i_rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
+                i_m3 = self._m3.i_rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
+                self._ESC0.duty = i_m0
+                self._ESC1.duty = i_m1
+                self._ESC2.duty = i_m2
+                self._ESC3.duty = i_m3
+                if i%(10*prob)==0 and self._bb:
+                    self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
+                if self._bb:
+                    i_acc_vals[0] = self._i_acc_vals[0].average
+                    i_acc_vals[1] = self._i_acc_vals[1].average
+                    i_acc_vals[2] = self._i_acc_vals[2].average
+                    '''
+                    i_acc_vals[0] = self._IMU.accel.x
+                    i_acc_vals[1] = self._IMU.accel.y
+                    i_acc_vals[2] = self._IMU.accel.z
+                    '''
+                    imu_tem = self._IMU.temperature
+                    self._bb.show_status(i_acc_vals, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+            time.sleep(0.01/prob) # workload = (0.1 - 0.02)
+            i += 1
         if self._bb:
             self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
         end = utime.ticks_ms()
@@ -169,8 +168,8 @@ class flight_controller():
 
 
     def takeoff(self):
-        self.simple_mode('    Take off..', 2000, 4640, 50)
+        self.simple_mode('    Take off..', 2000, 4640, 30)
 
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4640, 2000, -50)
+        self.simple_mode('    Shutdown..', 4640, 0, -60)
