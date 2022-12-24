@@ -48,7 +48,7 @@ class flight_data():
         msg += str(s)
         return msg
 
-    def show_status(self, i_acc_vals, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
+    def show_status(self, acc_currs, acc_mas, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
             return
         pid_x = ''
@@ -70,14 +70,14 @@ class flight_data():
         pid_y += self.format(pid_y3, 4)
 
         msg = ''
-        keys = ['ax', 'pid_x', 'ay', 'pid_y', 'az', 'rpm', 't']
-        lens = [3, 19, 3, 19, 3, 4, 2]
-        vals = [str(int(i_acc_vals[0]*100)), pid_x,
-                str(int(i_acc_vals[1]*100)), pid_y,
-                str(int(i_acc_vals[2]*100)), str(rpm), str(round(imu_tem))]
+        keys = ['ax', 'axma', 'pid_x', 'ay', 'ayma', 'pid_y', 'az', 'azma', 'rpm', 't']
+        lens = [3, 3, 19, 3, 3, 19, 3, 3, 4, 2]
+        vals = [str(int(acc_currs[0]*100)), str(int(acc_mas[0]*100)), pid_x,
+                str(int(acc_currs[1]*100)), str(int(acc_mas[1]*100)), pid_y,
+                str(int(acc_currs[2]*100)), str(int(acc_mas[2]*100)), str(rpm), str(round(imu_tem))]
         for i in range(indent):
             msg += ' '
-        for i in range(7):
+        for i in range(len(keys)):
             msg += keys[i]
             msg += '='
             msg += self.format(vals[i], lens[i])
