@@ -39,7 +39,7 @@ class flight_controller():
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3, 
                  debug_obj=None):
         self._IMU = imu
-        i_acc_q_size = 10
+        i_acc_q_size = 3
         ax_q = moving_average(i_acc_q_size+1)
         ay_q = moving_average(i_acc_q_size+1)
         az_q = moving_average(i_acc_q_size+1)
@@ -115,7 +115,7 @@ class flight_controller():
         if self._bb:
             self._bb.write(msg)
         i_acc_vals = [0, 0, 0]
-        prob = 5
+        prob = 1
         step = int(step/prob)
         i = 0
         for rpm in range(start, stop, step):
@@ -124,6 +124,10 @@ class flight_controller():
                 self._i_acc_vals[1].update_val(self._IMU.accel.y)
                 self._i_acc_vals[2].update_val(self._IMU.accel.z)
                 if i%prob==0:
+                    rpm0 = rpm + self._m0.i_pid_x(self._i_acc_vals[0].average) + self._m0.i_pid_y(self._i_acc_vals[1].average)
+                    rpm1 = rpm + self._m1.i_pid_x(self._i_acc_vals[0].average) + self._m1.i_pid_y(self._i_acc_vals[1].average)
+                    rpm2 = rpm + self._m2.i_pid_x(self._i_acc_vals[0].average) + self._m2.i_pid_y(self._i_acc_vals[1].average)
+                    rpm3 = rpm + self._m3.i_pid_x(self._i_acc_vals[0].average) + self._m3.i_pid_y(self._i_acc_vals[1].average)
                     i_m0 = self._m0.i_rpm2duty(int(rpm * self._m0.f_conversion_rate))
                     i_m1 = self._m1.i_rpm2duty(int(rpm * self._m1.f_conversion_rate))
                     i_m2 = self._m2.i_rpm2duty(int(rpm * self._m2.f_conversion_rate))
@@ -146,7 +150,7 @@ class flight_controller():
                         imu_tem = self._IMU.temperature
                         self._bb.update(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
                         self._bb.show_status(i_acc_vals, self._i_gyro_vals, imu_tem, i_m0, i_m1, i_m2, i_m3)
-                time.sleep(0.01/prob)
+                time.sleep(0.02/prob) # workload = (0.1 - 0.02)
                 i += 1
             except Exception as e:
                 print('!!! Exception: ' + str(e))
@@ -165,8 +169,8 @@ class flight_controller():
 
 
     def takeoff(self):
-        self.simple_mode('    Take off..', 2000, 4630, 50)
+        self.simple_mode('    Take off..', 2000, 4640, 50)
 
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4630, 2000, -50)
+        self.simple_mode('    Shutdown..', 4640, 2000, -50)

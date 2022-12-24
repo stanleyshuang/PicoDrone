@@ -85,10 +85,10 @@ time.sleep(1.0)
 ### initializing Motor Controllers
 bb.write('initializing Motor Controllers')
 #                          duties=[ init,   min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 35617], cr=1.019) # pwm = 6.70833 x rpm - 11341.66
-motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 26663], cr=1.026)  # pwm = 4.7866  x rpm -  6843.33
-motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 37740], cr=0.9585) # pwm = 6.42    x rpm -  7200
-motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 38232], cr=1.001)  # pwm = 1.4633  x rpm + 27988.4
+motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 35617], cr=1.012) # pwm = 6.70833 x rpm - 11341.66
+motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 26663], cr=1.034)  # pwm = 4.7866  x rpm -  6843.33
+motor_ctr_2 = motor_ctr_bl(duties=[ 2000,  5640,   21295, 24900, 37740], cr=0.966) # pwm = 6.42    x rpm -  7200
+motor_ctr_3 = motor_ctr_br(duties=[20000, 30915,   34500, 35305, 38232], cr=1.0)  # pwm = 1.4633  x rpm + 27988.4
 
 esc_0.duty = motor_ctr_0.i_init_duty
 esc_1.duty = motor_ctr_1.i_init_duty
@@ -113,5 +113,5 @@ flight_ctr = flight_controller(imu, st0, st1, st2, st_matrics,
 
 flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
 flight_ctr.takeoff()
-time.sleep(1.0)
+# time.sleep(1.0)
 flight_ctr.shutdown()

@@ -80,11 +80,17 @@ class motor_ctr():
     def i_rpm2duty(self, rpm):
         return int(self.i_min_duty + (rpm-2000)*self._F_UNIT)
 
-    def i_balance_pid(self, curr, max_add_rpm=50, boundary=100, baseline=0):
+    def i_balance_pid(self, curr, max_add_rpm, boundary, baseline):
         p = curr - baseline
         if p < boundary:
             return int(max_add_rpm * (p/boundary))
         return max_add_rpm
+
+    def i_pid_x(self, curr, max_add_rpm=100, boundary=75, baseline=0):
+        return self._I_AX * self.i_balance_pid(curr, max_add_rpm, boundary, baseline)
+
+    def i_pid_y(self, curr, max_add_rpm=100, boundary=75, baseline=0):
+        return self._I_AY * self.i_balance_pid(curr, max_add_rpm, boundary, baseline)
 
     @property
     def i_based_acc_sum(self):
