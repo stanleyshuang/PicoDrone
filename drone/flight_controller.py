@@ -146,6 +146,14 @@ class flight_controller():
                 i_m1 = self._m1.i_rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
                 i_m2 = self._m2.i_rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
                 i_m3 = self._m3.i_rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
+                diff_rmp0 = rpm0 - self._m0.rpm
+                diff_rmp1 = rpm1 - self._m1.rpm
+                diff_rmp2 = rpm2 - self._m2.rpm
+                diff_rmp3 = rpm3 - self._m3.rpm
+                self._m0.rpm = rpm0
+                self._m1.rpm = rpm1
+                self._m2.rpm = rpm2
+                self._m3.rpm = rpm3
                 self._ESC0.duty = i_m0
                 self._ESC1.duty = i_m1
                 self._ESC2.duty = i_m2
@@ -157,7 +165,10 @@ class flight_controller():
                     acc_mas[1] = self._acc_mas[1].average
                     acc_mas[2] = self._acc_mas[2].average
                     imu_tem = self._IMU.temperature
-                    self._bb.show_status(self._acc_currs, acc_mas, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+                    self._bb.show_status(self._acc_currs, acc_mas, imu_tem, 
+                                         rpm, rpm0, rpm1, rpm2, rpm3, 
+                                         diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
+                                         pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
             time.sleep(0.01/prob) # workload = (0.1 - 0.02)
             i += 1
         if self._bb:

@@ -48,33 +48,67 @@ class flight_data():
         msg += str(s)
         return msg
 
-    def show_status(self, acc_currs, acc_mas, imu_tem, rpm, pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
+    def show_status(self, acc_currs, acc_mas, imu_tem, 
+                    rpm, rpm0, rpm1, rpm2, rpm3, 
+                    diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
+                    pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
             return
+        ax = ''
+        ax += self.format(int(acc_currs[0]*100), 3)
+        ax += ' '
+        ax += self.format(int(acc_mas[0]*100), 3)
+
+        ay = ''
+        ay += self.format(int(acc_currs[1]*100), 3)
+        ay += ' '
+        ay += self.format(int(acc_mas[1]*100), 3)
+
+        az = ''
+        az += self.format(int(acc_currs[2]*100), 3)
+        az += ' '
+        az += self.format(int(acc_mas[2]*100), 3)
+
         pid_x = ''
-        pid_x += self.format(pid_x0, 4)
+        pid_x += self.format(int(pid_x0), 4)
         pid_x += ' '
-        pid_x += self.format(pid_x1, 4)
+        pid_x += self.format(int(pid_x1), 4)
         pid_x += ' '
-        pid_x += self.format(pid_x2, 4)
+        pid_x += self.format(int(pid_x2), 4)
         pid_x += ' '
-        pid_x += self.format(pid_x3, 4)
+        pid_x += self.format(int(pid_x3), 4)
 
         pid_y = ''
-        pid_y += self.format(pid_y0, 4)
+        pid_y += self.format(int(pid_y0), 4)
         pid_y += ' '
-        pid_y += self.format(pid_y1, 4)
+        pid_y += self.format(int(pid_y1), 4)
         pid_y += ' '
-        pid_y += self.format(pid_y2, 4)
+        pid_y += self.format(int(pid_y2), 4)
         pid_y += ' '
-        pid_y += self.format(pid_y3, 4)
+        pid_y += self.format(int(pid_y3), 4)
+
+        rpms = ''
+        rpms += self.format(int(rpm0), 4)
+        rpms += ' '
+        rpms += self.format(int(rpm1), 4)
+        rpms += ' '
+        rpms += self.format(int(rpm2), 4)
+        rpms += ' '
+        rpms += self.format(int(rpm3), 4)
+
+        diff_rpm = ''
+        diff_rpm += self.format(int(diff_rmp0), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp1), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp2), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp3), 4)
 
         msg = ''
-        keys = ['ax', 'axma', 'pid_x', 'ay', 'ayma', 'pid_y', 'az', 'azma', 'rpm', 't']
-        lens = [3, 3, 19, 3, 3, 19, 3, 3, 4, 2]
-        vals = [str(int(acc_currs[0]*100)), str(int(acc_mas[0]*100)), pid_x,
-                str(int(acc_currs[1]*100)), str(int(acc_mas[1]*100)), pid_y,
-                str(int(acc_currs[2]*100)), str(int(acc_mas[2]*100)), str(rpm), str(round(imu_tem))]
+        keys = ['ax', 'pid', 'ay', 'pid', 'az', 'rpm', 'rpms', 'diff']
+        lens = [7, 19, 7, 19, 7, 4, 19, 19]
+        vals = [ax, pid_x, ay, pid_y, az, str(rpm), rpms, diff_rpm]
         for i in range(indent):
             msg += ' '
         for i in range(len(keys)):

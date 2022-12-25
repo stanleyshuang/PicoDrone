@@ -40,6 +40,7 @@ class motor_ctr():
         self._I_AX = 0
         self._I_AY = 0
         self._I_BASE_ACC_SUM = 0
+        self._rpm = 0
 
 
     @property
@@ -84,9 +85,10 @@ class motor_ctr():
         p = curr - baseline
         if p == 0:
             return 0.0
+
         if (curr > ma and ma > baseline) or (baseline > ma and ma > curr):
             if abs(curr - baseline) < boundary/10:
-                return int(max_add_rpm * ((p*10)/boundary))
+                return int(max_add_rpm * (p/boundary))
         else:
             if abs(curr - baseline) < boundary:
                 return int(max_add_rpm * (p/boundary))
@@ -108,6 +110,14 @@ class motor_ctr():
     @i_based_acc_sum.setter
     def i_based_acc_sum(self, based_acc_sum):
         self._I_BASE_ACC_SUM = based_acc_sum
+
+    @property
+    def rpm(self):
+        return self._rpm
+
+    @rpm.setter
+    def rpm(self, rpm):
+        self._rpm = rpm
 
 
 class motor_ctr_fr(motor_ctr):
