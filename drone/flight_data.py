@@ -48,26 +48,32 @@ class flight_data():
         msg += str(s)
         return msg
 
-    def show_status(self, acc_currs, acc_mas, imu_tem, 
+    def show_status(self, acc_currs, gyro_currs, acc_sums, imu_tem, 
                     rpm, rpm0, rpm1, rpm2, rpm3, 
                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
             return
-        ax = ''
-        ax += self.format(int(acc_currs[0]*100), 3)
-        ax += ' '
-        ax += self.format(int(acc_mas[0]*100), 3)
+        x_axis = ''
+        x_axis += self.format(int(acc_currs[0]*100), 3)
+        x_axis += ' '
+        x_axis += self.format(int(gyro_currs[1]), 4)
+        x_axis += ' '
+        x_axis += self.format(int(acc_sums[0]*100), 3)
 
-        ay = ''
-        ay += self.format(int(acc_currs[1]*100), 3)
-        ay += ' '
-        ay += self.format(int(acc_mas[1]*100), 3)
+        y_axis = ''
+        y_axis += self.format(int(acc_currs[1]*100), 3)
+        y_axis += ' '
+        y_axis += self.format(int(gyro_currs[0]), 4)
+        y_axis += ' '
+        y_axis += self.format(int(acc_sums[1]*100), 3)
 
-        az = ''
-        az += self.format(int(acc_currs[2]*100), 3)
-        az += ' '
-        az += self.format(int(acc_mas[2]*100), 3)
+        z_axis = ''
+        z_axis += self.format(int(acc_currs[2]*100), 3)
+        z_axis += ' '
+        z_axis += self.format(int(gyro_currs[2]), 4)
+        z_axis += ' '
+        z_axis += self.format(int(acc_sums[2]*100), 3)
 
         pid_x = ''
         pid_x += self.format(int(pid_x0), 4)
@@ -106,9 +112,9 @@ class flight_data():
         diff_rpm += self.format(int(diff_rmp3), 4)
 
         msg = ''
-        keys = ['ax', 'pid', 'ay', 'pid', 'az', 'rpm', 'rpms', 'diff']
+        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpm', 'rpms', 'diff']
         lens = [7, 19, 7, 19, 7, 4, 19, 19]
-        vals = [ax, pid_x, ay, pid_y, az, str(rpm), rpms, diff_rpm]
+        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, str(rpm), rpms, diff_rpm]
         for i in range(indent):
             msg += ' '
         for i in range(len(keys)):

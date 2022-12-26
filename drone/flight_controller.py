@@ -44,8 +44,8 @@ class flight_controller():
         ax_q = moving_average(i_acc_q_size+1)
         ay_q = moving_average(i_acc_q_size+1)
         az_q = moving_average(i_acc_q_size+1)
-        self._acc_mas = [ax_q, ay_q, az_q]
-        self._gyro_currs = [0.0, 0.0, 0.0]
+        self._acc_qs = [ax_q, ay_q, az_q]
+        self._gyro_currs = [self._IMU.gyro.x, self._IMU.gyro.y, self._IMU.gyro.z]
 
         self._ST0 = st0
         self._ST1 = st1
@@ -89,9 +89,9 @@ class flight_controller():
             i_acc_sum[0] += int(ax * 100)
             i_acc_sum[1] += int(ay * 100)
             i_acc_sum[2] += int(az * 100)
-            self._acc_mas[0].update_val(ax)
-            self._acc_mas[1].update_val(ay)
-            self._acc_mas[2].update_val(az)
+            self._acc_qs[0].update_val(ax)
+            self._acc_qs[1].update_val(ay)
+            self._acc_qs[2].update_val(az)
             if i%10==0 and self._bb:
                 self._bb.write('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             time.sleep(0.1)
@@ -118,7 +118,8 @@ class flight_controller():
         import sys, time
         if self._bb:
             self._bb.write(msg)
-        acc_mas = [0, 0, 0]
+        acc_sums = [0, 0, 0]
+        gyro_currs = [0, 0, 0]
         prob = 1
         step = int(step/prob)
         i = 0
@@ -126,18 +127,29 @@ class flight_controller():
             self._acc_currs[0] = self._IMU.accel.x
             self._acc_currs[1] = self._IMU.accel.y
             self._acc_currs[2] = self._IMU.accel.z
-            self._acc_mas[0].update_val(self._acc_currs[0])
-            self._acc_mas[1].update_val(self._acc_currs[1])
-            self._acc_mas[2].update_val(self._acc_currs[2])
+            self._gyro_currs[0] = self._IMU.gyro.x
+            self._gyro_currs[1] = self._IMU.gyro.y
+            self._gyro_currs[2] = self._IMU.gyro.z
+            self._acc_qs[0].update_val(self._acc_currs[0])
+            self._acc_qs[1].update_val(self._acc_currs[1])
+            self._acc_qs[2].update_val(self._acc_currs[2])
             if i%prob==0:
-                pid_x0 = self._m0.i_pid_x(self._acc_currs[0], self._acc_mas[0].average)
-                pid_y0 = self._m0.i_pid_y(self._acc_currs[1], self._acc_mas[1].average)
-                pid_x1 = self._m1.i_pid_x(self._acc_currs[0], self._acc_mas[0].average)
-                pid_y1 = self._m1.i_pid_y(self._acc_currs[1], self._acc_mas[1].average)
-                pid_x2 = self._m2.i_pid_x(self._acc_currs[0], self._acc_mas[0].average)
-                pid_y2 = self._m2.i_pid_y(self._acc_currs[1], self._acc_mas[1].average)
-                pid_x3 = self._m3.i_pid_x(self._acc_currs[0], self._acc_mas[0].average)
-                pid_y3 = self._m3.i_pid_y(self._acc_currs[1], self._acc_mas[1].average)
+
+                acc_sums[0] = self._acc_qs[0].sum
+                acc_sums[1] = self._acc_qs[1].sum
+                acc_sums[2] = self._acc_qs[2].sum
+                gyro_currs[0] = self._gyro_currs[0]
+                gyro_currs[1] = -1 * self._gyro_currs[1]
+                gyro_currs[2] = self._gyro_currs[2]
+
+                pid_x0 = self._m0.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+                pid_y0 = self._m0.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+                pid_x1 = self._m1.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+                pid_y1 = self._m1.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+                pid_x2 = self._m2.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+                pid_y2 = self._m2.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+                pid_x3 = self._m3.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+                pid_y3 = self._m3.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
                 rpm0 = rpm + pid_x0 + pid_y0
                 rpm1 = rpm + pid_x1 + pid_y1
                 rpm2 = rpm + pid_x2 + pid_y2
@@ -161,11 +173,8 @@ class flight_controller():
                 if i%(10*prob)==0 and self._bb:
                     self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
                 if self._bb:
-                    acc_mas[0] = self._acc_mas[0].average
-                    acc_mas[1] = self._acc_mas[1].average
-                    acc_mas[2] = self._acc_mas[2].average
                     imu_tem = self._IMU.temperature
-                    self._bb.show_status(self._acc_currs, acc_mas, imu_tem, 
+                    self._bb.show_status(self._acc_currs, gyro_currs, acc_sums, imu_tem, 
                                          rpm, rpm0, rpm1, rpm2, rpm3, 
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                          pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
