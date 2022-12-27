@@ -104,10 +104,10 @@ class flight_controller():
         acc_sum_base = acc_base[0]**2 + acc_base[1]**2 + acc_base[2]**2
 
         # figuring out the baseline of acc sum 
-        self._m0.based_acc_sum = acc_sum_base
-        self._m1.based_acc_sum = acc_sum_base
-        self._m2.based_acc_sum = acc_sum_base
-        self._m3.based_acc_sum = acc_sum_base
+        self._m0.f_based_acc_sum = acc_sum_base
+        self._m1.f_based_acc_sum = acc_sum_base
+        self._m2.f_based_acc_sum = acc_sum_base
+        self._m3.f_based_acc_sum = acc_sum_base
         if self._bb:
             self._bb.write('    Base G: '+str(acc_sum_base))
         end = utime.ticks_ms()
@@ -155,10 +155,10 @@ class flight_controller():
             rpm1 = rpm + pid_x1 + pid_y1
             rpm2 = rpm + pid_x2 + pid_y2
             rpm3 = rpm + pid_x3 + pid_y3
-            i_m0 = self._m0.i_rpm2duty(int(rpm0 * self._m0.f_conversion_rate))
-            i_m1 = self._m1.i_rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
-            i_m2 = self._m2.i_rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
-            i_m3 = self._m3.i_rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
+            i_m0 = self._m0.rpm2duty(int(rpm0 * self._m0.f_conversion_rate))
+            i_m1 = self._m1.rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
+            i_m2 = self._m2.rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
+            i_m3 = self._m3.rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
             diff_rmp0 = rpm0 - self._m0.rpm
             diff_rmp1 = rpm1 - self._m1.rpm
             diff_rmp2 = rpm2 - self._m2.rpm
