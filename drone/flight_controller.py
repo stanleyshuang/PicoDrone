@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
-import utime
+import sys, time, utime
 from moving_average import moving_average
 
 
@@ -77,51 +77,53 @@ class flight_controller():
 
     def acc_sum_base(self):
         ### figuring out the baseline of acc sum
-        import time
+        begin = utime.ticks_ms()
         if self._bb:
             self._bb.write('    figuring out the baseline of acc sum..')
-        ACC_BASE_SAMPLING_COUNT = 15
-        i_acc_sum = [0, 0, 0]
+        ACC_BASE_SAMPLING_COUNT = 20
+        acc_sum = [0.0, 0.0, 0.0]
         for i in range(ACC_BASE_SAMPLING_COUNT):
             ax = self._IMU.accel.x
             ay = self._IMU.accel.y
             az = self._IMU.accel.z
-            i_acc_sum[0] += int(ax * 100)
-            i_acc_sum[1] += int(ay * 100)
-            i_acc_sum[2] += int(az * 100)
+            acc_sum[0] += ax * 100.0
+            acc_sum[1] += ay * 100.0
+            acc_sum[2] += az * 100.0
             self._acc_qs[0].update_val(ax)
             self._acc_qs[1].update_val(ay)
             self._acc_qs[2].update_val(az)
             if i%10==0 and self._bb:
                 self._bb.write('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
-            time.sleep(0.1)
+            time.sleep(0.09)
         if self._bb:
             self._bb.write('    countdown: 0 sec.')
-        i_acc_base = [0, 0, 0]
-        i_acc_base[0] = int(i_acc_sum[0]/ACC_BASE_SAMPLING_COUNT)
-        i_acc_base[1] = int(i_acc_sum[1]/ACC_BASE_SAMPLING_COUNT)
-        i_acc_base[2] = int(i_acc_sum[2]/ACC_BASE_SAMPLING_COUNT)
-        i_acc_sum_base = i_acc_base[0]**2 + i_acc_base[1]**2 + i_acc_base[2]**2
+        acc_base = [0.0, 0.0, 0.0]
+        acc_base[0] = acc_sum[0]/ACC_BASE_SAMPLING_COUNT
+        acc_base[1] = acc_sum[1]/ACC_BASE_SAMPLING_COUNT
+        acc_base[2] = acc_sum[2]/ACC_BASE_SAMPLING_COUNT
+        acc_sum_base = acc_base[0]**2 + acc_base[1]**2 + acc_base[2]**2
 
         # figuring out the baseline of acc sum 
-        self._m0.i_based_acc_sum = i_acc_sum_base
-        self._m1.i_based_acc_sum = i_acc_sum_base
-        self._m2.i_based_acc_sum = i_acc_sum_base
-        self._m3.i_based_acc_sum = i_acc_sum_base
+        self._m0.based_acc_sum = acc_sum_base
+        self._m1.based_acc_sum = acc_sum_base
+        self._m2.based_acc_sum = acc_sum_base
+        self._m3.based_acc_sum = acc_sum_base
         if self._bb:
-            self._bb.write('    Base G: '+str(i_acc_sum_base))
-        return i_acc_sum_base
+            self._bb.write('    Base G: '+str(acc_sum_base))
+        end = utime.ticks_ms()
+        diff = utime.ticks_diff(end, begin)
+        if self._bb:
+            self._bb.write('    duration: '+str(round(diff/1000, 2))+' sec.')
+        return acc_sum_base
 
 
     def simple_mode(self, msg, start, stop, step):
         begin = utime.ticks_ms()
-        import sys, time
         if self._bb:
             self._bb.write(msg)
-        acc_sums = [0, 0, 0]
-        gyro_currs = [0, 0, 0]
-        prob = 1
-        step = int(step/prob)
+        acc_sums = [0.0, 0.0, 0.0]
+        gyro_currs = [0.0, 0.0, 0.0]
+        step = int(step)
         i = 0
         for rpm in range(start, stop, step):
             self._acc_currs[0] = self._IMU.accel.x
@@ -133,55 +135,54 @@ class flight_controller():
             self._acc_qs[0].update_val(self._acc_currs[0])
             self._acc_qs[1].update_val(self._acc_currs[1])
             self._acc_qs[2].update_val(self._acc_currs[2])
-            if i%prob==0:
 
-                acc_sums[0] = self._acc_qs[0].sum
-                acc_sums[1] = self._acc_qs[1].sum
-                acc_sums[2] = self._acc_qs[2].sum
-                gyro_currs[0] = self._gyro_currs[0]
-                gyro_currs[1] = -1 * self._gyro_currs[1]
-                gyro_currs[2] = self._gyro_currs[2]
+            acc_sums[0] = self._acc_qs[0].sum
+            acc_sums[1] = self._acc_qs[1].sum
+            acc_sums[2] = self._acc_qs[2].sum
+            gyro_currs[0] = self._gyro_currs[0]
+            gyro_currs[1] = -1 * self._gyro_currs[1]
+            gyro_currs[2] = self._gyro_currs[2]
 
-                pid_x0 = self._m0.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-                pid_y0 = self._m0.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-                pid_x1 = self._m1.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-                pid_y1 = self._m1.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-                pid_x2 = self._m2.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-                pid_y2 = self._m2.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-                pid_x3 = self._m3.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-                pid_y3 = self._m3.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-                rpm0 = rpm + pid_x0 + pid_y0
-                rpm1 = rpm + pid_x1 + pid_y1
-                rpm2 = rpm + pid_x2 + pid_y2
-                rpm3 = rpm + pid_x3 + pid_y3
-                i_m0 = self._m0.i_rpm2duty(int(rpm0 * self._m0.f_conversion_rate))
-                i_m1 = self._m1.i_rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
-                i_m2 = self._m2.i_rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
-                i_m3 = self._m3.i_rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
-                diff_rmp0 = rpm0 - self._m0.rpm
-                diff_rmp1 = rpm1 - self._m1.rpm
-                diff_rmp2 = rpm2 - self._m2.rpm
-                diff_rmp3 = rpm3 - self._m3.rpm
-                self._m0.rpm = rpm0
-                self._m1.rpm = rpm1
-                self._m2.rpm = rpm2
-                self._m3.rpm = rpm3
-                self._ESC0.duty = i_m0
-                self._ESC1.duty = i_m1
-                self._ESC2.duty = i_m2
-                self._ESC3.duty = i_m3
-                if i%(10*prob)==0 and self._bb:
-                    self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
-                if self._bb:
-                    imu_tem = self._IMU.temperature
-                    self._bb.show_status(self._acc_currs, gyro_currs, acc_sums, imu_tem, 
-                                         rpm, rpm0, rpm1, rpm2, rpm3, 
-                                         diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
-                                         pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
-            time.sleep(0.01/prob) # workload = (0.1 - 0.02)
+            pid_x0 = self._m0.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+            pid_y0 = self._m0.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+            pid_x1 = self._m1.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+            pid_y1 = self._m1.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+            pid_x2 = self._m2.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+            pid_y2 = self._m2.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+            pid_x3 = self._m3.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
+            pid_y3 = self._m3.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+            rpm0 = rpm + pid_x0 + pid_y0
+            rpm1 = rpm + pid_x1 + pid_y1
+            rpm2 = rpm + pid_x2 + pid_y2
+            rpm3 = rpm + pid_x3 + pid_y3
+            i_m0 = self._m0.i_rpm2duty(int(rpm0 * self._m0.f_conversion_rate))
+            i_m1 = self._m1.i_rpm2duty(int(rpm1 * self._m1.f_conversion_rate))
+            i_m2 = self._m2.i_rpm2duty(int(rpm2 * self._m2.f_conversion_rate))
+            i_m3 = self._m3.i_rpm2duty(int(rpm3 * self._m3.f_conversion_rate))
+            diff_rmp0 = rpm0 - self._m0.rpm
+            diff_rmp1 = rpm1 - self._m1.rpm
+            diff_rmp2 = rpm2 - self._m2.rpm
+            diff_rmp3 = rpm3 - self._m3.rpm
+            self._m0.rpm = rpm0
+            self._m1.rpm = rpm1
+            self._m2.rpm = rpm2
+            self._m3.rpm = rpm3
+            self._ESC0.duty = i_m0
+            self._ESC1.duty = i_m1
+            self._ESC2.duty = i_m2
+            self._ESC3.duty = i_m3
+            if i%10==0 and self._bb:
+                self._bb.write('    countdown: '+str(int(i/10))+' sec.', end='\r')
+            if self._bb:
+                imu_tem = self._IMU.temperature
+                self._bb.show_status(self._acc_currs, gyro_currs, acc_sums, imu_tem, 
+                                     rpm, rpm0, rpm1, rpm2, rpm3, 
+                                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
+                                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+            time.sleep(0.01) # workload = (0.1 - 0.02)
             i += 1
         if self._bb:
-            self._bb.write('    countdown: '+str(int(i/(10*prob)))+' sec.', end='\r')
+            self._bb.write('    countdown: '+str(int(i/(10)))+' sec.', end='\r')
         end = utime.ticks_ms()
         diff = utime.ticks_diff(end, begin)
         if self._bb:
@@ -192,6 +193,8 @@ class flight_controller():
     def takeoff(self):
         self.simple_mode('    Take off..', 2000, 4650, 50)
 
+    def ufo_float(self):
+        self.simple_mode('    UFO floating..', 4650, 4700, 1)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4640, 0, -60)
+        self.simple_mode('    Shutdown..', 4700, 0, -100)

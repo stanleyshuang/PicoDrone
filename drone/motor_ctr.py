@@ -39,7 +39,7 @@ class motor_ctr():
         self._F_CR = cr # conversion rate
         self._I_AX = 0
         self._I_AY = 0
-        self._I_BASE_ACC_SUM = 0
+        self._BASE_ACC_SUM = 0.0
         self._rpm = 0
 
 
@@ -92,12 +92,12 @@ class motor_ctr():
         return self._I_AY * self.i_balancer(p, i, d, baseline)
 
     @property
-    def i_based_acc_sum(self):
-        return self._I_BASE_ACC_SUM
+    def based_acc_sum(self):
+        return self._BASE_ACC_SUM
 
-    @i_based_acc_sum.setter
-    def i_based_acc_sum(self, based_acc_sum):
-        self._I_BASE_ACC_SUM = based_acc_sum
+    @based_acc_sum.setter
+    def based_acc_sum(self, based_acc_sum):
+        self._BASE_ACC_SUM = based_acc_sum
 
     @property
     def rpm(self):

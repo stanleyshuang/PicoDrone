@@ -29,7 +29,6 @@ SOFTWARE.
 '''
 class flight_data():
     def __init__(self, b_debug=False):
-        self._acc_sum_prop = [0, 15000, 0] # now, min, max
         self._b_debug = b_debug
         if b_debug:
             self._fd = open('data.txt', 'a+')
@@ -55,43 +54,45 @@ class flight_data():
         if not self._b_debug:
             return
         x_axis = ''
-        x_axis += self.format(int(acc_currs[0]*100), 3)
+        x_axis += self.format(int(acc_currs[0]*100), 4)
         x_axis += ' '
         x_axis += self.format(int(gyro_currs[1]), 4)
         x_axis += ' '
-        x_axis += self.format(int(acc_sums[0]*100), 3)
+        x_axis += self.format(int(acc_sums[0]*100), 4)
 
         y_axis = ''
-        y_axis += self.format(int(acc_currs[1]*100), 3)
+        y_axis += self.format(int(acc_currs[1]*100), 4)
         y_axis += ' '
         y_axis += self.format(int(gyro_currs[0]), 4)
         y_axis += ' '
-        y_axis += self.format(int(acc_sums[1]*100), 3)
+        y_axis += self.format(int(acc_sums[1]*100), 4)
 
         z_axis = ''
-        z_axis += self.format(int(acc_currs[2]*100), 3)
+        z_axis += self.format(int(acc_currs[2]*100), 4)
         z_axis += ' '
         z_axis += self.format(int(gyro_currs[2]), 4)
         z_axis += ' '
-        z_axis += self.format(int(acc_sums[2]*100), 3)
+        z_axis += self.format(int(acc_sums[2]*100), 4)
 
-        pid_x = ''
-        pid_x += self.format(int(pid_x0), 4)
-        pid_x += ' '
-        pid_x += self.format(int(pid_x1), 4)
-        pid_x += ' '
-        pid_x += self.format(int(pid_x2), 4)
-        pid_x += ' '
-        pid_x += self.format(int(pid_x3), 4)
+        pid_x = self.format(abs(int(pid_x0)), 3)
+        pid_xs = [pid_x0, pid_x1, pid_x2, pid_x3]
+        for i in range(len(pid_xs)):
+            if pid_xs[i]>0:
+                pid_x += '+'
+            elif pid_xs[i]==0:
+                pid_x += '0'
+            else:
+                pid_x += '-'
 
-        pid_y = ''
-        pid_y += self.format(int(pid_y0), 4)
-        pid_y += ' '
-        pid_y += self.format(int(pid_y1), 4)
-        pid_y += ' '
-        pid_y += self.format(int(pid_y2), 4)
-        pid_y += ' '
-        pid_y += self.format(int(pid_y3), 4)
+        pid_y = self.format(abs(int(pid_y0)), 3)
+        pid_ys = [pid_y0, pid_y1, pid_y2, pid_y3]
+        for i in range(len(pid_ys)):
+            if pid_ys[i]>0:
+                pid_y += '+'
+            elif pid_ys[i]==0:
+                pid_y += '0'
+            else:
+                pid_y += '-'
 
         rpms = ''
         rpms += self.format(int(rpm0), 4)
@@ -113,7 +114,7 @@ class flight_data():
 
         msg = ''
         keys = ['x', 'pid', 'y', 'pid', 'z', 'rpm', 'rpms', 'diff']
-        lens = [7, 19, 7, 19, 7, 4, 19, 19]
+        lens = [14, 8, 14, 8, 14, 4, 19, 19]
         vals = [x_axis, pid_x, y_axis, pid_y, z_axis, str(rpm), rpms, diff_rpm]
         for i in range(indent):
             msg += ' '

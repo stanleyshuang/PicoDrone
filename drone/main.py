@@ -113,5 +113,5 @@ flight_ctr = flight_controller(imu, st0, st1, st2, st_matrics,
 
 flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
 flight_ctr.takeoff()
-# time.sleep(1.0)
+flight_ctr.ufo_float()
 flight_ctr.shutdown()
