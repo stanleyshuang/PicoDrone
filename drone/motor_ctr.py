@@ -81,15 +81,14 @@ class motor_ctr():
     def rpm2duty(self, rpm):
         return int(self.min_duty + (rpm-2000)*self._F_UNIT)
 
-    def i_balancer(self, p, i, d, f_baseline):
-        return int((p - f_baseline) * 50.0 + d + i / 100.0)
+    def i_balancer(self, d, p, i, f_baseline):
+        return int((p - f_baseline)*100.0 + d*1.0 + i/100.0)
 
+    def i_pid_x(self, d, p, i, f_baseline=0.0):
+        return self._I_X * self.i_balancer(d, p, i, f_baseline)
 
-    def i_pid_x(self, p, i, d, f_baseline=0.0):
-        return self._I_X * self.i_balancer(p, i, d, f_baseline)
-
-    def i_pid_y(self, p, i, d, f_baseline=0.0):
-        return self._I_Y * self.i_balancer(p, i, d, f_baseline)
+    def i_pid_y(self, d, p, i, f_baseline=0.0):
+        return self._I_Y * self.i_balancer(d, p, i, f_baseline)
 
     @property
     def f_based_acc_sum(self):
@@ -112,8 +111,8 @@ class motor_ctr_fr(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_fr, self).__init__(duties, cr)
-        self._I_X = -1
-        self._I_Y = 1
+        self._I_X = 1
+        self._I_Y = -1
 
 
 class motor_ctr_fl(motor_ctr):
@@ -128,8 +127,8 @@ class motor_ctr_bl(motor_ctr):
     def __init__(self, duties=[26214, 26214,   39321, 52428, 52428], cr=1.0):
         #              duties=[ init,   min, balance,   max, limit]
         super(motor_ctr_bl, self).__init__(duties, cr)
-        self._I_X = 1
-        self._I_Y = -1
+        self._I_X = -1
+        self._I_Y = 1
 
 
 class motor_ctr_br(motor_ctr):

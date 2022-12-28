@@ -53,19 +53,20 @@ class flight_data():
                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
             return
+
         x_axis = ''
-        x_axis += self.format(int(acc_currs[0]*100), 4)
+        x_axis += self.format(int(acc_currs[1]*100), 4)
         x_axis += ' '
-        x_axis += self.format(int(gyro_currs[1]), 4)
+        x_axis += self.format(int(gyro_currs[0]), 4)
         x_axis += ' '
-        x_axis += self.format(int(acc_sums[0]*100), 4)
+        x_axis += self.format(int(acc_sums[1]*100), 4)
 
         y_axis = ''
-        y_axis += self.format(int(acc_currs[1]*100), 4)
+        y_axis += self.format(int(acc_currs[0]*100), 4)
         y_axis += ' '
-        y_axis += self.format(int(gyro_currs[0]), 4)
+        y_axis += self.format(int(gyro_currs[1]), 4)
         y_axis += ' '
-        y_axis += self.format(int(acc_sums[1]*100), 4)
+        y_axis += self.format(int(acc_sums[0]*100), 4)
 
         z_axis = ''
         z_axis += self.format(int(acc_currs[2]*100), 4)

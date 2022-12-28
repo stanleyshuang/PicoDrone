@@ -130,7 +130,7 @@ class flight_controller():
             self._acc_currs[1] = self._IMU.accel.y
             self._acc_currs[2] = self._IMU.accel.z
             self._gyro_currs[0] = self._IMU.gyro.x
-            self._gyro_currs[1] = self._IMU.gyro.y
+            self._gyro_currs[1] = self._IMU.gyro.y * -1.0
             self._gyro_currs[2] = self._IMU.gyro.z
             self._acc_qs[0].update_val(self._acc_currs[0])
             self._acc_qs[1].update_val(self._acc_currs[1])
@@ -140,17 +140,17 @@ class flight_controller():
             acc_sums[1] = self._acc_qs[1].sum
             acc_sums[2] = self._acc_qs[2].sum
             gyro_currs[0] = self._gyro_currs[0]
-            gyro_currs[1] = -1 * self._gyro_currs[1]
+            gyro_currs[1] = self._gyro_currs[1]
             gyro_currs[2] = self._gyro_currs[2]
 
-            pid_x0 = self._m0.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-            pid_y0 = self._m0.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-            pid_x1 = self._m1.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-            pid_y1 = self._m1.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-            pid_x2 = self._m2.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-            pid_y2 = self._m2.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
-            pid_x3 = self._m3.i_pid_x(self._acc_currs[0], acc_sums[0], gyro_currs[1])
-            pid_y3 = self._m3.i_pid_y(self._acc_currs[1], acc_sums[1], gyro_currs[0])
+            pid_x0 = self._m0.i_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
+            pid_y0 = self._m0.i_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
+            pid_x1 = self._m1.i_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
+            pid_y1 = self._m1.i_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
+            pid_x2 = self._m2.i_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
+            pid_y2 = self._m2.i_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
+            pid_x3 = self._m3.i_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
+            pid_y3 = self._m3.i_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
             rpm0 = rpm + pid_x0 + pid_y0
             rpm1 = rpm + pid_x1 + pid_y1
             rpm2 = rpm + pid_x2 + pid_y2
