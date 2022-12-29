@@ -70,7 +70,7 @@ class flight_controller():
         self._m2 = motor_ctr_2
         self._m3 = motor_ctr_3
 
-        self._bb = False
+        self._bb = None
         self._b_pid = True
 
     @property
