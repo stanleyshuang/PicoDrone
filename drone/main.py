@@ -108,8 +108,9 @@ st_matrics = [ # min,  mid,  max
 
 flight_ctr = flight_controller(imu, st0, st1, st2, st_matrics, 
                                esc_0, esc_1, esc_2, esc_3,
-                               motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3, 
-                               debug_obj=bb)
+                               motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3)
+flight_ctr.debug = bb
+flight_ctr.b_pid = True
 
 flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
 flight_ctr.takeoff()

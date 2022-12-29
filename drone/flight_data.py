@@ -55,21 +55,21 @@ class flight_data():
             return
 
         x_axis = ''
-        x_axis += self.format(int(acc_currs[1]*100), 4)
+        x_axis += self.format(int(acc_currs[1]*1000), 5)
         x_axis += ' '
         x_axis += self.format(int(gyro_currs[0]), 4)
         x_axis += ' '
         x_axis += self.format(int(acc_sums[1]*100), 4)
 
         y_axis = ''
-        y_axis += self.format(int(acc_currs[0]*100), 4)
+        y_axis += self.format(int(acc_currs[0]*1000), 5)
         y_axis += ' '
         y_axis += self.format(int(gyro_currs[1]), 4)
         y_axis += ' '
         y_axis += self.format(int(acc_sums[0]*100), 4)
 
         z_axis = ''
-        z_axis += self.format(int(acc_currs[2]*100), 4)
+        z_axis += self.format(int(acc_currs[2]*1000), 5)
         z_axis += ' '
         z_axis += self.format(int(gyro_currs[2]), 4)
         z_axis += ' '
@@ -115,7 +115,7 @@ class flight_data():
 
         msg = ''
         keys = ['x', 'pid', 'y', 'pid', 'z', 'rpm', 'rpms', 'diff']
-        lens = [14, 8, 14, 8, 14, 4, 19, 19]
+        lens = [15, 8, 15, 8, 15, 4, 19, 19]
         vals = [x_axis, pid_x, y_axis, pid_y, z_axis, str(rpm), rpms, diff_rpm]
         for i in range(indent):
             msg += ' '
