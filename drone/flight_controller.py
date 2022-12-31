@@ -160,7 +160,7 @@ class flight_controller():
             return self._m0.rpm<=stop and self._m1.rpm<=stop and self._m2.rpm<=stop and self._m3.rpm<=stop
 
 
-    def simple_mode(self, msg, start, stop, step):
+    def simple_mode(self, msg, stop, step):
         begin = utime.ticks_ms()
         if self._bb:
             self._bb.write(msg)
@@ -171,7 +171,6 @@ class flight_controller():
         pid_x1, pid_y1 = 0, 0
         pid_x2, pid_y2 = 0, 0
         pid_x3, pid_y3 = 0, 0
-        rpm = start
         while not self.b_stop_condition(stop, step):
             self._acc_currs[0] = self._IMU.accel.x
             self._acc_currs[1] = self._IMU.accel.y
@@ -201,18 +200,10 @@ class flight_controller():
                 pid_x3 = self._m3.i_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
                 pid_y3 = self._m3.i_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
 
-            rpm0 = self._m0.rpm + step + pid_x0 + pid_y0
-            rpm1 = self._m1.rpm + step + pid_x1 + pid_y1
-            rpm2 = self._m2.rpm + step + pid_x2 + pid_y2
-            rpm3 = self._m3.rpm + step + pid_x3 + pid_y3
-            if rpm0 < 2000:
-                rpm0 = 2000
-            if rpm1 < 2000:
-                rpm1 = 2000
-            if rpm2 < 2000:
-                rpm2 = 2000
-            if rpm3 < 2000:
-                rpm3 = 2000
+            rpm0 = self._m0.rpm_bound_check(self._m0.rpm + step + pid_x0 + pid_y0)
+            rpm1 = self._m1.rpm_bound_check(self._m1.rpm + step + pid_x1 + pid_y1)
+            rpm2 = self._m2.rpm_bound_check(self._m2.rpm + step + pid_x2 + pid_y2)
+            rpm3 = self._m3.rpm_bound_check(self._m3.rpm + step + pid_x3 + pid_y3)
             i_m0 = self._m0.rpm2duty(rpm0, self._m0.f_conversion_rate)
             i_m1 = self._m1.rpm2duty(rpm1, self._m1.f_conversion_rate)
             i_m2 = self._m2.rpm2duty(rpm2, self._m2.f_conversion_rate)
@@ -234,12 +225,11 @@ class flight_controller():
             if self._bb:
                 imu_tem = self._IMU.temperature
                 self._bb.show_status(self._acc_currs, gyro_currs, acc_sums, imu_tem, 
-                                     rpm, rpm0, rpm1, rpm2, rpm3, 
+                                     rpm0, rpm1, rpm2, rpm3, 
                                      diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                      pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
             time.sleep(0.01) # workload = (0.1 - 0.02)
             i += 1
-            rpm += step
         if self._bb:
             self._bb.write('    countdown: '+str(int(i/(10)))+' sec.', end='\r')
         end = utime.ticks_ms()
@@ -254,10 +244,10 @@ class flight_controller():
 
     def takeoff(self):
         self.set_rpm(2000)
-        self.simple_mode('    Take off..', 2000, 4750, 100)
+        self.simple_mode('    Take off..', 4750, 100)
 
     def ufo_float(self):
-        self.simple_mode('    UFO floating..', 4750, 4800, 1)
+        self.simple_mode('    UFO floating..', 4800, 1)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 4800, 2100, -100)
+        self.simple_mode('    Shutdown..', 2100, -100)

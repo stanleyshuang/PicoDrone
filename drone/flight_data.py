@@ -48,7 +48,7 @@ class flight_data():
         return msg
 
     def show_status(self, acc_currs, gyro_currs, acc_sums, imu_tem, 
-                    rpm, rpm0, rpm1, rpm2, rpm3, 
+                    rpm0, rpm1, rpm2, rpm3, 
                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if not self._b_debug:
@@ -114,9 +114,9 @@ class flight_data():
         diff_rpm += self.format(int(diff_rmp3), 4)
 
         msg = ''
-        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpm', 'rpms', 'diff']
+        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpms', 'diff']
         lens = [15, 8, 15, 8, 15, 4, 19, 19]
-        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, str(rpm), rpms, diff_rpm]
+        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, rpms, diff_rpm]
         for i in range(indent):
             msg += ' '
         for i in range(len(keys)):

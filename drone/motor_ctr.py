@@ -90,6 +90,13 @@ class motor_ctr():
     def i_pid_y(self, d, p, i, f_baseline=0.0):
         return self._I_Y * self.i_balancer(d, p, i, f_baseline)
 
+    def rpm_bound_check(self, rpm):
+        if rpm<2000:
+            rpm = 2000
+        elif rpm > 7000:
+            rpm = 7000
+        return rpm
+
     @property
     def f_based_acc_sum(self):
         return self._F_BASE_ACC_SUM
