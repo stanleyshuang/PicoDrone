@@ -50,16 +50,17 @@ from flight_controller import flight_controller
 
 # debug module ----------------------------------------------------------------
 from flight_data import flight_data
-bb = flight_data(b_debug=True)
+bb = flight_data()
+bb.debug_level = 4
 
 
 ### initializing MPU-6050
-bb.write('initializing MPU-6050')
+bb.write(4, 'initializing MPU-6050')
 i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=400000)
 imu = MPU6050(i2c)
 
 ### initializing R8EF_channel
-bb.write('initializing R8EF channels')
+bb.write(4, 'initializing R8EF channels')
 pin16 = Pin(16, Pin.IN, Pin.PULL_UP)
 st0 = R8EF_channel(0, state_machine.mark, in_base=pin16, jmp_pin=pin16)
 st0.active(1)
@@ -73,7 +74,7 @@ st2 = R8EF_channel(2, state_machine.mark, in_base=pin18, jmp_pin=pin18)
 st2.active(1)
 
 ### initializing SimonK PWM
-bb.write('initializing SimonK ESC')
+bb.write(4, 'initializing SimonK ESC')
 # dutys =                 [ init,   min, balance,   max, limit]
 esc_0 = ESC(Pin(6))
 esc_1 = ESC(Pin(7))
@@ -83,7 +84,7 @@ time.sleep(1.0)
 
 
 ### initializing Motor Controllers
-bb.write('initializing Motor Controllers')
+bb.write(4, 'initializing Motor Controllers')
 #                          duties=[ init,   min, balance,   max, limit]
 motor_ctr_0 = motor_ctr_fr(duties=[  200,  2075,   18583, 22200, 35617]) #, cr=1.012) # pwm = 6.70833 x rpm - 11341.66
 motor_ctr_1 = motor_ctr_fl(duties=[  400,  2730,   14457, 17090, 26663]) #, cr=1.034) # pwm = 4.7866  x rpm -  6843.33
@@ -97,7 +98,7 @@ esc_3.duty = motor_ctr_3.init_duty
 
 
 ### before taking off, initialize FlightController
-bb.write('before taking off, initialize FlightController')
+bb.write(4, 'before taking off, initialize FlightController')
 
 # the value range of the joysticks
 st_matrics = [ # min,  mid,  max

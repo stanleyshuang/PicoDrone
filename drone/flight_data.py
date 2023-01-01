@@ -28,13 +28,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 class flight_data():
-    def __init__(self, b_debug=False):
-        self._b_debug = b_debug
-        if b_debug:
-            self._fd = open('data.txt', 'a+')
+    def __init__(self):
+        self._debug_level = 0 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
+        self._fd = open('data.txt', 'a+')
 
-    def write(self, msg, end='\n'):
-        if self._b_debug:
+    @property
+    def debug_level(self):
+        return self._debug_level
+
+    @debug_level.setter
+    def debug_level(self, debug_level):
+        self._debug_level = debug_level
+
+    def write(self, debug_level, msg, end='\n'):
+        if debug_level <= self._debug_level:
             print(msg, end=end)
             if self._fd:
                 self._fd.write(msg+'\n')
@@ -47,33 +54,33 @@ class flight_data():
         msg += str(s)
         return msg
 
-    def show_status(self, acc_currs, gyro_currs, acc_sums, imu_tem, 
+    def show_status(self, debug_level, acc_currs, gyro_currs, acc_sums, imu_tem, 
                     rpm0, rpm1, rpm2, rpm3, 
                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
-        if not self._b_debug:
+        if debug_level > self._debug_level:
             return
 
         x_axis = ''
-        x_axis += self.format(int(acc_currs[1]*1000), 5)
+        x_axis += self.format(int(acc_currs[1]*250), 5)
         x_axis += ' '
         x_axis += self.format(int(gyro_currs[0]), 4)
         x_axis += ' '
-        x_axis += self.format(int(acc_sums[1]*100), 4)
+        x_axis += self.format(int(acc_sums[1]*25), 4)
 
         y_axis = ''
-        y_axis += self.format(int(acc_currs[0]*1000), 5)
+        y_axis += self.format(int(acc_currs[0]*250), 5)
         y_axis += ' '
         y_axis += self.format(int(gyro_currs[1]), 4)
         y_axis += ' '
-        y_axis += self.format(int(acc_sums[0]*100), 4)
+        y_axis += self.format(int(acc_sums[0]*25), 4)
 
         z_axis = ''
-        z_axis += self.format(int(acc_currs[2]*1000), 5)
+        z_axis += self.format(int(acc_currs[2]*250), 5)
         z_axis += ' '
         z_axis += self.format(int(gyro_currs[2]), 4)
         z_axis += ' '
-        z_axis += self.format(int(acc_sums[2]*100), 4)
+        z_axis += self.format(int(acc_sums[2]*25), 4)
 
         pid_x = self.format(abs(int(pid_x0)), 3)
         pid_xs = [pid_x0, pid_x1, pid_x2, pid_x3]
@@ -125,4 +132,4 @@ class flight_data():
             msg += self.format(vals[i], lens[i])
             msg += ', '
         msg += '        '
-        self.write(msg, end='\r')
+        self.write(debug_level, msg, end='\r')
