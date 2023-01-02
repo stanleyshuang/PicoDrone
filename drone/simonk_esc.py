@@ -52,9 +52,9 @@ def test_escs():
     from machine import Pin
     import time
     esc0 = ESC(Pin(6))
-    esc1 = ESC(Pin(7))
+    esc1 = ESC(Pin(7), freq=50)
     esc2 = ESC(Pin(8))
-    esc3 = ESC(Pin(9))
+    esc3 = ESC(Pin(9), freq=50)
     m0 = m1 = m2 = m3 = 0
     while True:
         the_input = input("輸入馬達 PWM Duty Cycle: (例如: a30) ")

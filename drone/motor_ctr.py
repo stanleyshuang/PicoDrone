@@ -82,7 +82,7 @@ class motor_ctr():
         return int((self.min_duty + (rpm-2000)*self._F_UNIT) * f_conversion_rate)
 
     def i_balancer(self, d, p, i, f_baseline):
-        return int((p - f_baseline)*250.0 + d*0.0 + i*0.0)
+        return int((p - f_baseline)*0.0 + d*0.0 + i*0.0)
 
     def i_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.i_balancer(d, p, i, f_baseline)

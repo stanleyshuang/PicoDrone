@@ -190,6 +190,8 @@ class flight_controller():
                 imu_tem = self._IMU.temperature
             except Exception as e:
                 self._bb.write(1, '!!! Exception: ' + str(e))
+                time.sleep(0.01)
+                continue
             else:
                 pass
             finally:
@@ -259,12 +261,14 @@ class flight_controller():
 
     def takeoff(self):
         self.set_rpm(2000)
-        self.simple_mode('    Take off..', 4000, 200)
-        self.simple_mode('    Take off..', 4700, 100)
-        self.simple_mode('    Take off..', 4750, 10)
+        self.simple_mode('    Take off..', 2100, 10)
+        self.simple_mode('    Take off..', 2300, 50)
+        self.simple_mode('    Take off..', 4300, 100)
+        self.simple_mode('    Take off..', 4500, 50)
+        self.simple_mode('    Take off..', 4600, 10)
 
     def ufo_float(self):
-        self.simple_mode('    UFO floating..', 4850, 1)
+        self.simple_mode('    UFO floating..', 4500, -1)
 
     def shutdown(self):
         self.simple_mode('    Shutdown..', 2100, -100)
