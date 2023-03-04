@@ -34,6 +34,11 @@ from moving_average import moving_average
 
 
 class flight_controller():
+    INIT_SPEED = 6553
+    FINAL_SPEED = 16383
+    THIRD_SPEED = 16373
+    CHAGING_STEP = 50
+    FIXED_STEP = 1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3):
@@ -94,8 +99,13 @@ class flight_controller():
         begin = utime.ticks_ms()
         if self._bb:
             self._bb.write(4, '    figuring out the baseline of acc sum..')
+
+        self._ESC0.duty = int(self._m0.min_duty/2)
+        self._ESC1.duty = int(self._m0.min_duty/2)
+        self._ESC2.duty = int(self._m0.min_duty/2)
+        self._ESC3.duty = int(self._m0.min_duty/2)
+
         ACC_BASE_SAMPLING_COUNT = 20
-        steps = int(self._m0.min_duty/ACC_BASE_SAMPLING_COUNT)
         acc_sum = [0.0, 0.0, 0.0]
         for i in range(ACC_BASE_SAMPLING_COUNT):
             try:
@@ -116,15 +126,17 @@ class flight_controller():
             acc_sum[1] += ay * 100.0
             acc_sum[2] += az * 100.0
 
-            self._ESC0.duty += steps
-            self._ESC1.duty += steps
-            self._ESC2.duty += steps
-            self._ESC3.duty += steps
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             time.sleep(0.09)
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
+
+        self._ESC0.duty = self._m0.min_duty
+        self._ESC1.duty = self._m0.min_duty
+        self._ESC2.duty = self._m0.min_duty
+        self._ESC3.duty = self._m0.min_duty
+
         acc_base = [0.0, 0.0, 0.0]
         acc_base[0] = acc_sum[0]/ACC_BASE_SAMPLING_COUNT
         acc_base[1] = acc_sum[1]/ACC_BASE_SAMPLING_COUNT
@@ -264,19 +276,12 @@ class flight_controller():
             print(msg_duration)
 
 
-
     def takeoff(self):
-        self.set_rpm(self._m0.min_duty)
-        self.simple_mode('    Take off..', self._m0.balance_duty, 100)
-        '''
-        self.simple_mode('    Take off..', 2500, 20)
-        self.simple_mode('    Take off..', 4300, 100)
-        self.simple_mode('    Take off..', 4500, 50)
-        self.simple_mode('    Take off..', 4600, 10)
-        '''
+        self.set_rpm(flight_controller.INIT_SPEED)
+        self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.CHAGING_STEP)
 
     def ufo_float(self):
-        self.simple_mode('    UFO floating..', self._m0.balance_duty-200, -1)
+        self.simple_mode('    UFO floating..', flight_controller.THIRD_SPEED, -1*flight_controller.FIXED_STEP)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', self._m0.min_duty, -100)
+        self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.CHAGING_STEP)
