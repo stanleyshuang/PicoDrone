@@ -181,11 +181,11 @@ class flight_controller():
         imu_tem = 0.0
         while not self.b_stop_condition(stop, step):
             try:
-                self._acc_currs[0] = self._IMU.accel.x
+                self._acc_currs[0] = self._IMU.accel.x * -1.0
                 self._acc_currs[1] = self._IMU.accel.y
                 self._acc_currs[2] = self._IMU.accel.z
                 self._gyro_currs[0] = self._IMU.gyro.x
-                self._gyro_currs[1] = self._IMU.gyro.y * -1.0
+                self._gyro_currs[1] = self._IMU.gyro.y
                 self._gyro_currs[2] = self._IMU.gyro.z
                 imu_tem = self._IMU.temperature
             except Exception as e:
