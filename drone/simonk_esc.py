@@ -29,14 +29,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
+
+import time
 from machine import PWM
 
 class ESC():
-    def __init__(self, pin, freq=400, duty=0):
+    def __init__(self, pin, freq=50, duty=0):
         self._pwm = PWM(pin)
         self._pwm.freq(freq)
-        self._pwm.duty_u16(duty)
-        self._duty = duty # [26214, 52428]
+        self._duty = duty
+        self._pwm.duty_u16(self._duty)
 
     @property
     def duty(self):
@@ -44,20 +46,19 @@ class ESC():
     
     @duty.setter
     def duty(self, duty):
-        self._pwm.duty_u16(duty)
         self._duty = duty
+        self._pwm.duty_u16(self._duty)
 
 
 def test_escs():
     from machine import Pin
-    import time
     esc0 = ESC(Pin(6))
     esc1 = ESC(Pin(7), freq=50)
     esc2 = ESC(Pin(8))
     esc3 = ESC(Pin(9), freq=50)
     m0 = m1 = m2 = m3 = 0
     while True:
-        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a30) ")
+        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a10) 值域： 0 - 65535")
         if len(the_input)>1:
             duty = int(the_input[1:])
             if the_input[0] == 'a':
