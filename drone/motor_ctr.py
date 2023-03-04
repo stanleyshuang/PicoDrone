@@ -33,9 +33,9 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    MIN_RPM = 2000
-    MAX_RPM = 7000
-    STEPS = 5000
+    MIN_RPM = 6553
+    MAX_RPM = 58982
+    STEPS = 52429
     def __init__(self, duties, f_cr):
         self._duties = duties # SimonK ESC pwm duty parameters
         self._F_UNIT = (self.max_duty - self.min_duty)/motor_ctr.STEPS

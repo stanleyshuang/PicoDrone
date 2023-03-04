@@ -95,6 +95,7 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    figuring out the baseline of acc sum..')
         ACC_BASE_SAMPLING_COUNT = 20
+        steps = int(self._m0.min_duty/ACC_BASE_SAMPLING_COUNT)
         acc_sum = [0.0, 0.0, 0.0]
         for i in range(ACC_BASE_SAMPLING_COUNT):
             try:
@@ -114,6 +115,11 @@ class flight_controller():
             acc_sum[0] += ax * 100.0
             acc_sum[1] += ay * 100.0
             acc_sum[2] += az * 100.0
+
+            self._ESC0.duty += steps
+            self._ESC1.duty += steps
+            self._ESC2.duty += steps
+            self._ESC3.duty += steps
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             time.sleep(0.09)
@@ -181,11 +187,11 @@ class flight_controller():
         imu_tem = 0.0
         while not self.b_stop_condition(stop, step):
             try:
-                self._acc_currs[0] = self._IMU.accel.x * -1.0
-                self._acc_currs[1] = self._IMU.accel.y
+                self._acc_currs[0] = self._IMU.accel.x
+                self._acc_currs[1] = self._IMU.accel.y * -1.0
                 self._acc_currs[2] = self._IMU.accel.z
-                self._gyro_currs[0] = self._IMU.gyro.x
-                self._gyro_currs[1] = self._IMU.gyro.y
+                self._gyro_currs[0] = self._IMU.gyro.x * -1.0
+                self._gyro_currs[1] = self._IMU.gyro.y * -1.0
                 self._gyro_currs[2] = self._IMU.gyro.z
                 imu_tem = self._IMU.temperature
             except Exception as e:
@@ -260,15 +266,17 @@ class flight_controller():
 
 
     def takeoff(self):
-        self.set_rpm(2000)
-        self.simple_mode('    Take off..', 2100, 10)
-        self.simple_mode('    Take off..', 2300, 50)
+        self.set_rpm(self._m0.min_duty)
+        self.simple_mode('    Take off..', self._m0.balance_duty, 100)
+        '''
+        self.simple_mode('    Take off..', 2500, 20)
         self.simple_mode('    Take off..', 4300, 100)
         self.simple_mode('    Take off..', 4500, 50)
         self.simple_mode('    Take off..', 4600, 10)
+        '''
 
     def ufo_float(self):
-        self.simple_mode('    UFO floating..', 4500, -1)
+        self.simple_mode('    UFO floating..', self._m0.balance_duty-200, -1)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', 2100, -100)
+        self.simple_mode('    Shutdown..', self._m0.min_duty, -100)
