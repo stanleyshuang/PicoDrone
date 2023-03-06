@@ -86,10 +86,10 @@ time.sleep(1.0)
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
 #                          duties=[init, min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(duties=[   0, 6553,   32767, 58982, 65535], cr=1.0)
-motor_ctr_1 = motor_ctr_fr(duties=[   0, 6553,   32767, 58982, 65535], cr=1.0)
-motor_ctr_2 = motor_ctr_fl(duties=[   0, 6553,   32767, 58982, 65535], cr=1.0)
-motor_ctr_3 = motor_ctr_bl(duties=[   0, 6553,   32767, 58982, 65535], cr=1.0)
+motor_ctr_0 = motor_ctr_br(duties=[3000, 3780,   32767, 58982, 65535], cr=1.0)
+motor_ctr_1 = motor_ctr_fr(duties=[3000, 3780,   32767, 58982, 65535], cr=1.0)
+motor_ctr_2 = motor_ctr_fl(duties=[3000, 3780,   32767, 58982, 65535], cr=1.0)
+motor_ctr_3 = motor_ctr_bl(duties=[3000, 3780,   32767, 58982, 65535], cr=1.0)
 
 esc_0.duty = motor_ctr_0.init_duty
 esc_1.duty = motor_ctr_1.init_duty
@@ -117,3 +117,4 @@ flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
 flight_ctr.takeoff()
 flight_ctr.ufo_float()
 flight_ctr.shutdown()
+time.sleep(60.0)

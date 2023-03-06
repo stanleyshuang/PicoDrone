@@ -34,9 +34,9 @@ from moving_average import moving_average
 
 
 class flight_controller():
-    INIT_SPEED = 6553
-    FINAL_SPEED = 16383
-    THIRD_SPEED = 16373
+    INIT_SPEED = 3780
+    FINAL_SPEED = 4100
+    THIRD_SPEED = 4000
     CHAGING_STEP = 50
     FIXED_STEP = 1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
@@ -100,10 +100,12 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    figuring out the baseline of acc sum..')
 
-        self._ESC0.duty = int(self._m0.min_duty/2)
-        self._ESC1.duty = int(self._m0.min_duty/2)
-        self._ESC2.duty = int(self._m0.min_duty/2)
-        self._ESC3.duty = int(self._m0.min_duty/2)
+        self._ESC0.duty = self._m0.init_duty
+        self._ESC1.duty = self._m1.init_duty
+        self._ESC2.duty = self._m2.init_duty
+        self._ESC3.duty = self._m3.init_duty
+
+        increased_duty = 0
 
         ACC_BASE_SAMPLING_COUNT = 20
         acc_sum = [0.0, 0.0, 0.0]
@@ -126,6 +128,13 @@ class flight_controller():
             acc_sum[1] += ay * 100.0
             acc_sum[2] += az * 100.0
 
+            if i%7==6:
+                increased_duty += 300
+                self._ESC0.duty = self._m0.init_duty + increased_duty
+                self._ESC1.duty = self._m1.init_duty + increased_duty
+                self._ESC2.duty = self._m2.init_duty + increased_duty
+                self._ESC3.duty = self._m3.init_duty + increased_duty
+
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             time.sleep(0.09)
@@ -133,9 +142,9 @@ class flight_controller():
             self._bb.write(4, '    countdown: 0 sec.')
 
         self._ESC0.duty = self._m0.min_duty
-        self._ESC1.duty = self._m0.min_duty
-        self._ESC2.duty = self._m0.min_duty
-        self._ESC3.duty = self._m0.min_duty
+        self._ESC1.duty = self._m1.min_duty
+        self._ESC2.duty = self._m2.min_duty
+        self._ESC3.duty = self._m3.min_duty
 
         acc_base = [0.0, 0.0, 0.0]
         acc_base[0] = acc_sum[0]/ACC_BASE_SAMPLING_COUNT
@@ -285,3 +294,4 @@ class flight_controller():
 
     def shutdown(self):
         self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.CHAGING_STEP)
+        self.set_rpm(0)
