@@ -56,9 +56,19 @@ def test_escs():
     esc1 = ESC(Pin(7), freq=50)
     esc2 = ESC(Pin(8))
     esc3 = ESC(Pin(9), freq=50)
-    m0 = m1 = m2 = m3 = 0
+
+    duties = [3000, 3300, 3600, 3780]
+    for duty in duties:
+        m0 = m1 = m2 = m3 = duty
+        print(m0, m1, m2, m3)
+        esc0.duty = m0
+        esc1.duty = m1
+        esc2.duty = m2
+        esc3.duty = m3
+        time.sleep(0.2)
+
     while True:
-        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a10) 值域： 0 - 65535")
+        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a3780, 值域：0 - 65535)")
         if len(the_input)>1:
             duty = int(the_input[1:])
             if the_input[0] == 'a':

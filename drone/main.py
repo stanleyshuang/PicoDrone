@@ -39,7 +39,7 @@ import state_machine
 from state_machine import R8EF_channel
 
 # ZMR SimonK ESC --------------------------------------------------------------
-from simonk_esc import ESC
+from esc import ESC
 
 # Motor Controller -----------------------------------------------------------
 from motor_ctr import motor_ctr_fr, motor_ctr_fl
