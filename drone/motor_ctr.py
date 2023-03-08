@@ -33,9 +33,9 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    MIN_RPM =  3780
-    MAX_RPM = 58982
-    STEPS =   55202
+    MIN_RPM = 3780
+    MAX_RPM = 4420
+    STEPS =    640
     def __init__(self, duties, f_cr):
         self._duties = duties # SimonK ESC pwm duty parameters
         self._F_UNIT = (self.max_duty - self.min_duty)/motor_ctr.STEPS
@@ -85,7 +85,7 @@ class motor_ctr():
         return int((self.min_duty + (rpm-motor_ctr.MIN_RPM)*self._F_UNIT) * self._F_CR)
 
     def i_balancer(self, d, p, i, f_baseline):
-        return int((p - f_baseline)*1.0 + d*1.0 + i*1.0)
+        return int((p - f_baseline)*3.0 + d*1.0 + i*1.0)
 
     def i_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.i_balancer(d, p, i, f_baseline)
@@ -118,28 +118,28 @@ class motor_ctr():
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 32767, 58982, 65535], cr=1.0):
+    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
         super(motor_ctr_fr, self).__init__(duties, cr)
         self._I_X =  1
         self._I_Y = -1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 32767, 58982, 65535], cr=1.0):
+    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
         super(motor_ctr_fl, self).__init__(duties, cr)
         self._I_X = -1
         self._I_Y = -1
 
 
 class motor_ctr_bl(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 32767, 58982, 65535], cr=1.0):
+    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
         super(motor_ctr_bl, self).__init__(duties, cr)
         self._I_X = -1
         self._I_Y =  1
 
 
 class motor_ctr_br(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 32767, 58982, 65535], cr=1.0):
+    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
         super(motor_ctr_br, self).__init__(duties, cr)
         self._I_X =  1
         self._I_Y =  1
