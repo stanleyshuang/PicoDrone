@@ -36,9 +36,9 @@ class motor_ctr():
     MIN_RPM = 3780
     MAX_RPM = 4420
     STEPS =    640
-    def __init__(self, duties, f_cr):
-        self._duties = duties # SimonK ESC pwm duty parameters
-        self._F_UNIT = (self.max_duty - self.min_duty)/motor_ctr.STEPS
+    def __init__(self, values, f_cr):
+        self._values = values # SimonK ESC pwm duty parameters
+        self._F_UNIT = (self.max_value - self.min_value)/motor_ctr.STEPS
         self._F_CR = f_cr # conversion rate
         self._I_X = 0
         self._I_Y = 0
@@ -47,24 +47,24 @@ class motor_ctr():
 
 
     @property
-    def init_duty(self):
-        return self._duties[0]
+    def init_value(self):
+        return self._values[0]
 
     @property
-    def min_duty(self):
-        return self._duties[1]
+    def min_value(self):
+        return self._values[1]
 
     @property
-    def balance_duty(self):
-        return self._duties[2]
+    def balance_value(self):
+        return self._values[2]
 
     @property
-    def max_duty(self):
-        return self._duties[3]
+    def max_value(self):
+        return self._values[3]
 
     @property
-    def limit_duty(self):
-        return self._duties[4]
+    def limit_value(self):
+        return self._values[4]
         
     @property
     def f_conversion_rate(self):
@@ -78,11 +78,11 @@ class motor_ctr():
     def i_y(self):
         return self._I_Y
 
-    def duty2rpm(self, duty):
-        return int((motor_ctr.MIN_RPM + (duty-self.min_duty)/self._F_UNIT) / self._F_CR)
+    def value2rpm(self, value):
+        return int((motor_ctr.MIN_RPM + (value-self.min_value)/self._F_UNIT) / self._F_CR)
 
-    def rpm2duty(self, rpm):
-        return int((self.min_duty + (rpm-motor_ctr.MIN_RPM)*self._F_UNIT) * self._F_CR)
+    def rpm2value(self, rpm):
+        return int((self.min_value + (rpm-motor_ctr.MIN_RPM)*self._F_UNIT) * self._F_CR)
 
     def i_balancer(self, d, p, i, f_baseline):
         return int((p - f_baseline)*3.0 + d*1.0 + i*1.0)
@@ -118,28 +118,28 @@ class motor_ctr():
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
-        super(motor_ctr_fr, self).__init__(duties, cr)
+    def __init__(self, values=[3000, 3780, 4100, 4420, 65535], cr=1.0):
+        super(motor_ctr_fr, self).__init__(values, cr)
         self._I_X =  1
         self._I_Y = -1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
-        super(motor_ctr_fl, self).__init__(duties, cr)
+    def __init__(self, values=[3000, 3780, 4100, 4420, 65535], cr=1.0):
+        super(motor_ctr_fl, self).__init__(values, cr)
         self._I_X = -1
         self._I_Y = -1
 
 
 class motor_ctr_bl(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
-        super(motor_ctr_bl, self).__init__(duties, cr)
+    def __init__(self, values=[3000, 3780, 4100, 4420, 65535], cr=1.0):
+        super(motor_ctr_bl, self).__init__(values, cr)
         self._I_X = -1
         self._I_Y =  1
 
 
 class motor_ctr_br(motor_ctr):
-    def __init__(self, duties=[3000, 3780, 4100, 4420, 65535], cr=1.0):
-        super(motor_ctr_br, self).__init__(duties, cr)
+    def __init__(self, values=[3000, 3780, 4100, 4420, 65535], cr=1.0):
+        super(motor_ctr_br, self).__init__(values, cr)
         self._I_X =  1
         self._I_Y =  1

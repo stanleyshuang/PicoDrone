@@ -100,12 +100,12 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    figuring out the baseline of acc sum..')
 
-        self._ESC0.duty = self._m0.init_duty
-        self._ESC1.duty = self._m1.init_duty
-        self._ESC2.duty = self._m2.init_duty
-        self._ESC3.duty = self._m3.init_duty
+        self._ESC0.value = self._m0.init_value
+        self._ESC1.value = self._m1.init_value
+        self._ESC2.value = self._m2.init_value
+        self._ESC3.value = self._m3.init_value
 
-        increased_duty = 0
+        increased_value = 0
 
         ACC_BASE_SAMPLING_COUNT = 20
         acc_sum = [0.0, 0.0, 0.0]
@@ -129,11 +129,11 @@ class flight_controller():
             acc_sum[2] += az * 100.0
 
             if i%7==6:
-                increased_duty += 300
-                self._ESC0.duty = self._m0.init_duty + increased_duty
-                self._ESC1.duty = self._m1.init_duty + increased_duty
-                self._ESC2.duty = self._m2.init_duty + increased_duty
-                self._ESC3.duty = self._m3.init_duty + increased_duty
+                increased_value += 300
+                self._ESC0.value = self._m0.init_value + increased_value
+                self._ESC1.value = self._m1.init_value + increased_value
+                self._ESC2.value = self._m2.init_value + increased_value
+                self._ESC3.value = self._m3.init_value + increased_value
 
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
@@ -141,10 +141,10 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
 
-        self._ESC0.duty = self._m0.min_duty
-        self._ESC1.duty = self._m1.min_duty
-        self._ESC2.duty = self._m2.min_duty
-        self._ESC3.duty = self._m3.min_duty
+        self._ESC0.value = self._m0.min_value
+        self._ESC1.value = self._m1.min_value
+        self._ESC2.value = self._m2.min_value
+        self._ESC3.value = self._m3.min_value
 
         acc_base = [0.0, 0.0, 0.0]
         acc_base[0] = acc_sum[0]/ACC_BASE_SAMPLING_COUNT
@@ -177,14 +177,14 @@ class flight_controller():
         self._m1.rpm = rpm
         self._m2.rpm = rpm
         self._m3.rpm = rpm
-        i_m0 = self._m0.rpm2duty(rpm)
-        i_m1 = self._m1.rpm2duty(rpm)
-        i_m2 = self._m2.rpm2duty(rpm)
-        i_m3 = self._m3.rpm2duty(rpm)
-        self._ESC0.duty = i_m0
-        self._ESC1.duty = i_m1
-        self._ESC2.duty = i_m2
-        self._ESC3.duty = i_m3
+        i_m0 = self._m0.rpm2value(rpm)
+        i_m1 = self._m1.rpm2value(rpm)
+        i_m2 = self._m2.rpm2value(rpm)
+        i_m3 = self._m3.rpm2value(rpm)
+        self._ESC0.value = i_m0
+        self._ESC1.value = i_m1
+        self._ESC2.value = i_m2
+        self._ESC3.value = i_m3
 
 
     def b_stop_condition(self, stop, step):
@@ -249,10 +249,10 @@ class flight_controller():
             rpm1 = self._m1.rpm_bound_check(self._m1.rpm + step + pid_x1 + pid_y1)
             rpm2 = self._m2.rpm_bound_check(self._m2.rpm + step + pid_x2 + pid_y2)
             rpm3 = self._m3.rpm_bound_check(self._m3.rpm + step + pid_x3 + pid_y3)
-            i_m0 = self._m0.rpm2duty(rpm0)
-            i_m1 = self._m1.rpm2duty(rpm1)
-            i_m2 = self._m2.rpm2duty(rpm2)
-            i_m3 = self._m3.rpm2duty(rpm3)
+            i_m0 = self._m0.rpm2value(rpm0)
+            i_m1 = self._m1.rpm2value(rpm1)
+            i_m2 = self._m2.rpm2value(rpm2)
+            i_m3 = self._m3.rpm2value(rpm3)
             diff_rmp0 = rpm0 - self._m0.rpm
             diff_rmp1 = rpm1 - self._m1.rpm
             diff_rmp2 = rpm2 - self._m2.rpm
@@ -261,10 +261,10 @@ class flight_controller():
             self._m1.rpm = rpm1
             self._m2.rpm = rpm2
             self._m3.rpm = rpm3
-            self._ESC0.duty = i_m0
-            self._ESC1.duty = i_m1
-            self._ESC2.duty = i_m2
-            self._ESC3.duty = i_m3
+            self._ESC0.value = i_m0
+            self._ESC1.value = i_m1
+            self._ESC2.value = i_m2
+            self._ESC3.value = i_m3
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
             if self._bb:

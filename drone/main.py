@@ -75,7 +75,6 @@ st2.active(1)
 
 ### initializing SimonK PWM
 bb.write(4, 'initializing SimonK ESC')
-# dutys =                 [ init,   min, balance,   max, limit]
 esc_0 = ESC(Pin(6))
 esc_1 = ESC(Pin(7))
 esc_2 = ESC(Pin(8))
@@ -85,16 +84,16 @@ time.sleep(1.0)
 
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
-#                          duties=[init,  min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(duties=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_1 = motor_ctr_fr(duties=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_2 = motor_ctr_fl(duties=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_3 = motor_ctr_bl(duties=[3000, 3780,    4100,  4420, 65535], cr=1.0)
+#                          values=[init,  min, balance,   max, limit]
+motor_ctr_0 = motor_ctr_br(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
+motor_ctr_1 = motor_ctr_fr(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
+motor_ctr_2 = motor_ctr_fl(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
+motor_ctr_3 = motor_ctr_bl(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
 
-esc_0.duty = motor_ctr_0.init_duty
-esc_1.duty = motor_ctr_1.init_duty
-esc_2.duty = motor_ctr_2.init_duty
-esc_3.duty = motor_ctr_3.init_duty
+esc_0.value = motor_ctr_0.init_value
+esc_1.value = motor_ctr_1.init_value
+esc_2.value = motor_ctr_2.init_value
+esc_3.value = motor_ctr_3.init_value
 
 
 ### before taking off, initialize FlightController
