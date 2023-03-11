@@ -37,7 +37,7 @@ class flight_controller():
     INIT_SPEED =  3930
     FINAL_SPEED = 5850
     THIRD_SPEED = 5840
-    CHAGING_STEP =  10
+    CHAGING_STEP =  20
     FIXED_STEP =     1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
