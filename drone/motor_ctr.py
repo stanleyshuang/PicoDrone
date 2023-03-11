@@ -34,8 +34,8 @@ from moving_average import moving_average
 
 class motor_ctr():
     MAX_RPM = 10230
-    MIN_RPM =  3920
-    STEPS =    6310
+    MIN_RPM =  3930
+    STEPS =    6300
     def __init__(self, values, f_cr):
         self._values = values
         self._F_UNIT = (self.max_value - self.min_value)/motor_ctr.STEPS
@@ -85,7 +85,7 @@ class motor_ctr():
         return int((self.min_value + (rpm-motor_ctr.MIN_RPM)*self._F_UNIT) * self._F_CR)
 
     def i_balancer(self, d, p, i, f_baseline):
-        return int((p - f_baseline)*0.0 + d*0.0 + i*0.0)
+        return int((p - f_baseline)*1.0 + d*0.0 + i*0.0)
 
     def i_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.i_balancer(d, p, i, f_baseline)
@@ -118,28 +118,28 @@ class motor_ctr():
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, values=[3000, 3920, 5800, 10230, 20470], cr=1.0):
+    def __init__(self, values=[3000, 3930, 5800, 10230, 20470], cr=1.0):
         super(motor_ctr_fr, self).__init__(values, cr)
         self._I_X =  1
         self._I_Y = -1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, values=[3000, 3920, 5800, 10230, 20470], cr=1.0):
+    def __init__(self, values=[3000, 3930, 5800, 10230, 20470], cr=1.0):
         super(motor_ctr_fl, self).__init__(values, cr)
         self._I_X = -1
         self._I_Y = -1
 
 
 class motor_ctr_bl(motor_ctr):
-    def __init__(self, values=[3000, 3920, 5800, 10230, 20470], cr=1.0):
+    def __init__(self, values=[3000, 3930, 5800, 10230, 20470], cr=1.0):
         super(motor_ctr_bl, self).__init__(values, cr)
         self._I_X = -1
         self._I_Y =  1
 
 
 class motor_ctr_br(motor_ctr):
-    def __init__(self, values=[3000, 3920, 5800, 10230, 20470], cr=1.0):
+    def __init__(self, values=[3000, 3930, 5800, 10230, 20470], cr=1.0):
         super(motor_ctr_br, self).__init__(values, cr)
         self._I_X =  1
         self._I_Y =  1

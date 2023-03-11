@@ -85,10 +85,10 @@ time.sleep(1.0)
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
 #                          values=[init,  min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
-motor_ctr_1 = motor_ctr_fr(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
-motor_ctr_2 = motor_ctr_fl(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
-motor_ctr_3 = motor_ctr_bl(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
+motor_ctr_0 = motor_ctr_br(values=[3000, 3930,    5800, 10230, 20470], cr=1.05)
+motor_ctr_1 = motor_ctr_fr(values=[3000, 3930,    5800, 10230, 20470], cr=1.01)
+motor_ctr_2 = motor_ctr_fl(values=[3000, 3930,    5800, 10230, 20470], cr=1.0)
+motor_ctr_3 = motor_ctr_bl(values=[3000, 3930,    5800, 10230, 20470], cr=1.05)
 
 esc_0.value = int(motor_ctr_0.init_value/10)
 esc_1.value = int(motor_ctr_1.init_value/10)

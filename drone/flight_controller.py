@@ -29,14 +29,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
-import sys, time, utime
+import sys, utime
 from moving_average import moving_average
 
 
 class flight_controller():
-    INIT_SPEED =  3920
-    FINAL_SPEED = 5510
-    THIRD_SPEED = 5500
+    INIT_SPEED =  3930
+    FINAL_SPEED = 5850
+    THIRD_SPEED = 5840
     CHAGING_STEP =  10
     FIXED_STEP =     1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
@@ -137,7 +137,7 @@ class flight_controller():
 
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
-            time.sleep(0.09)
+            utime.sleep_us(90000)
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
 
@@ -217,7 +217,7 @@ class flight_controller():
                 imu_tem = self._IMU.temperature
             except Exception as e:
                 self._bb.write(1, '!!! Exception: ' + str(e))
-                time.sleep(0.01)
+                utime.sleep_us(3000)
                 continue
             else:
                 pass
@@ -272,7 +272,7 @@ class flight_controller():
                                      rpm0, rpm1, rpm2, rpm3, 
                                      diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                      pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
-            time.sleep(0.01) # workload = (0.1 - 0.02)
+            utime.sleep_us(5000) # workload = (0.1 - 0.02)
             i += 1
         if self._bb:
             self._bb.write(4, '    countdown: '+str(int(i/(10)))+' sec.', end='\r')
