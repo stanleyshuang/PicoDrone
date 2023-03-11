@@ -34,11 +34,13 @@ from moving_average import moving_average
 
 
 class flight_controller():
-    INIT_SPEED =  3930
-    FINAL_SPEED = 5910
-    THIRD_SPEED = 5900
-    CHAGING_STEP =  20
-    FIXED_STEP =     1
+    INIT_SPEED =    3930
+    TAKEOFF_SPEED = 5550
+    FINAL_SPEED =   5910
+    THIRD_SPEED =   5900
+    CHAGING_STEP =    80
+    SLOW_STEP =        5
+    FIXED_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3):
@@ -287,7 +289,8 @@ class flight_controller():
 
     def takeoff(self):
         self.set_rpm(flight_controller.INIT_SPEED)
-        self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.CHAGING_STEP)
+        self.simple_mode('    Take off..', flight_controller.TAKEOFF_SPEED, flight_controller.CHAGING_STEP)
+        self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.SLOW_STEP)
 
     def ufo_float(self):
         self.simple_mode('    UFO floating..', flight_controller.THIRD_SPEED, -1*flight_controller.FIXED_STEP)
