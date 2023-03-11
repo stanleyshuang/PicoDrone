@@ -35,8 +35,8 @@ from moving_average import moving_average
 
 class flight_controller():
     INIT_SPEED =  3930
-    FINAL_SPEED = 5850
-    THIRD_SPEED = 5840
+    FINAL_SPEED = 5910
+    THIRD_SPEED = 5900
     CHAGING_STEP =  20
     FIXED_STEP =     1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
