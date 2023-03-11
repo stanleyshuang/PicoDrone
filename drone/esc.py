@@ -148,7 +148,7 @@ def test_dshot():
         esc1.value = m1
         esc2.value = m2
         esc3.value = m3
-        utime.sleep_us(2000)
+        utime.sleep_us(200000)
 
     while True:
         the_input = input("輸入 Dshot value: (例如: a100, 值域：0 - 2047)")
@@ -167,7 +167,7 @@ def test_dshot():
         esc1.value = m1
         esc2.value = m2
         esc3.value = m3
-        utime.sleep_us(2000)
+        utime.sleep_us(20000)
 
 
 if __name__=='__main__':

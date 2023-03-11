@@ -34,11 +34,11 @@ from moving_average import moving_average
 
 
 class flight_controller():
-    INIT_SPEED = 3780
-    FINAL_SPEED = 4250
-    THIRD_SPEED = 4200
-    CHAGING_STEP = 50
-    FIXED_STEP = 1
+    INIT_SPEED =  3920
+    FINAL_SPEED = 5510
+    THIRD_SPEED = 5500
+    CHAGING_STEP =  10
+    FIXED_STEP =     1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3):
@@ -100,10 +100,10 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    figuring out the baseline of acc sum..')
 
-        self._ESC0.value = self._m0.init_value
-        self._ESC1.value = self._m1.init_value
-        self._ESC2.value = self._m2.init_value
-        self._ESC3.value = self._m3.init_value
+        self._ESC0.value = int(self._m0.init_value/10)
+        self._ESC1.value = int(self._m1.init_value/10)
+        self._ESC2.value = int(self._m2.init_value/10)
+        self._ESC3.value = int(self._m3.init_value/10)
 
         increased_value = 0
 
@@ -130,10 +130,10 @@ class flight_controller():
 
             if i%7==6:
                 increased_value += 300
-                self._ESC0.value = self._m0.init_value + increased_value
-                self._ESC1.value = self._m1.init_value + increased_value
-                self._ESC2.value = self._m2.init_value + increased_value
-                self._ESC3.value = self._m3.init_value + increased_value
+                self._ESC0.value = int((self._m0.init_value + increased_value)/10)
+                self._ESC1.value = int((self._m1.init_value + increased_value)/10)
+                self._ESC2.value = int((self._m2.init_value + increased_value)/10)
+                self._ESC3.value = int((self._m3.init_value + increased_value)/10)
 
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
@@ -141,10 +141,10 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
 
-        self._ESC0.value = self._m0.min_value
-        self._ESC1.value = self._m1.min_value
-        self._ESC2.value = self._m2.min_value
-        self._ESC3.value = self._m3.min_value
+        self._ESC0.value = int(self._m0.min_value/10)
+        self._ESC1.value = int(self._m1.min_value/10)
+        self._ESC2.value = int(self._m2.min_value/10)
+        self._ESC3.value = int(self._m3.min_value/10)
 
         acc_base = [0.0, 0.0, 0.0]
         acc_base[0] = acc_sum[0]/ACC_BASE_SAMPLING_COUNT
@@ -181,10 +181,10 @@ class flight_controller():
         i_m1 = self._m1.rpm2value(rpm)
         i_m2 = self._m2.rpm2value(rpm)
         i_m3 = self._m3.rpm2value(rpm)
-        self._ESC0.value = i_m0
-        self._ESC1.value = i_m1
-        self._ESC2.value = i_m2
-        self._ESC3.value = i_m3
+        self._ESC0.value = int(i_m0/10)
+        self._ESC1.value = int(i_m1/10)
+        self._ESC2.value = int(i_m2/10)
+        self._ESC3.value = int(i_m3/10)
 
 
     def b_stop_condition(self, stop, step):
@@ -261,10 +261,10 @@ class flight_controller():
             self._m1.rpm = rpm1
             self._m2.rpm = rpm2
             self._m3.rpm = rpm3
-            self._ESC0.value = i_m0
-            self._ESC1.value = i_m1
-            self._ESC2.value = i_m2
-            self._ESC3.value = i_m3
+            self._ESC0.value = int(i_m0/10)
+            self._ESC1.value = int(i_m1/10)
+            self._ESC2.value = int(i_m2/10)
+            self._ESC3.value = int(i_m3/10)
             if i%10==0 and self._bb:
                 self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
             if self._bb:

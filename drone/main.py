@@ -38,8 +38,8 @@ from imu import MPU6050
 import state_machine
 from state_machine import R8EF_channel
 
-# ZMR SimonK ESC --------------------------------------------------------------
-from esc import ESC
+# ESC --------------------------------------------------------------
+from esc import DSHOT
 
 # Motor Controller -----------------------------------------------------------
 from motor_ctr import motor_ctr_fr, motor_ctr_fl
@@ -74,26 +74,26 @@ st2 = R8EF_channel(2, state_machine.mark, in_base=pin18, jmp_pin=pin18)
 st2.active(1)
 
 ### initializing SimonK PWM
-bb.write(4, 'initializing SimonK ESC')
-esc_0 = ESC(Pin(6))
-esc_1 = ESC(Pin(7))
-esc_2 = ESC(Pin(8))
-esc_3 = ESC(Pin(9))
+bb.write(4, 'initializing ESC')
+esc_0 = DSHOT(Pin(6))
+esc_1 = DSHOT(Pin(7))
+esc_2 = DSHOT(Pin(8))
+esc_3 = DSHOT(Pin(9))
 time.sleep(1.0)
 
 
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
 #                          values=[init,  min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_1 = motor_ctr_fr(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_2 = motor_ctr_fl(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
-motor_ctr_3 = motor_ctr_bl(values=[3000, 3780,    4100,  4420, 65535], cr=1.0)
+motor_ctr_0 = motor_ctr_br(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
+motor_ctr_1 = motor_ctr_fr(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
+motor_ctr_2 = motor_ctr_fl(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
+motor_ctr_3 = motor_ctr_bl(values=[3000, 3920,    5800, 10230, 20470], cr=1.0)
 
-esc_0.value = motor_ctr_0.init_value
-esc_1.value = motor_ctr_1.init_value
-esc_2.value = motor_ctr_2.init_value
-esc_3.value = motor_ctr_3.init_value
+esc_0.value = int(motor_ctr_0.init_value/10)
+esc_1.value = int(motor_ctr_1.init_value/10)
+esc_2.value = int(motor_ctr_2.init_value/10)
+esc_3.value = int(motor_ctr_3.init_value/10)
 
 
 ### before taking off, initialize FlightController
