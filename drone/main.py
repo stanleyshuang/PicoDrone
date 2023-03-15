@@ -112,7 +112,7 @@ flight_ctr = flight_controller(imu, st0, st1, st2, st_matrics,
 # flight_ctr.debug = bb
 flight_ctr.b_pid = True
 
-flight_ctr.acc_sum_base() # figuring out the baseline of acc sum
+flight_ctr.init()
 flight_ctr.takeoff()
 flight_ctr.ufo_float()
 flight_ctr.shutdown()

@@ -33,16 +33,11 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    MAX_RPM = 1023
-    MIN_RPM =  393
-    STEPS =    630
     def __init__(self, values, f_cr):
         self._values = values
-        self._F_UNIT = (self.max_value - self.min_value)/motor_ctr.STEPS
         self._F_CR = f_cr # conversion rate
         self._I_X = 0
         self._I_Y = 0
-        self._F_BASE_ACC_SUM = 0.0
         self._rpm = 0
 
 
@@ -78,35 +73,22 @@ class motor_ctr():
     def i_y(self):
         return self._I_Y
 
-    def value2rpm(self, value):
-        return int((motor_ctr.MIN_RPM + (value-self.min_value)/self._F_UNIT) / self._F_CR)
+    def f_balancer(self, d, p, i, f_baseline):
+        return (p - f_baseline)*0.1 + d*0.0 + i*0.0
 
-    def rpm2value(self, rpm):
-        return int((self.min_value + (rpm-motor_ctr.MIN_RPM)*self._F_UNIT) * self._F_CR)
+    def f_pid_x(self, d, p, i, f_baseline=0.0):
+        return self._I_X * self.f_balancer(d, p, i, f_baseline)
 
-    def i_balancer(self, d, p, i, f_baseline):
-        return int((p - f_baseline)*0.1 + d*0.0 + i*0.0)
+    def f_pid_y(self, d, p, i, f_baseline=0.0):
+        return self._I_Y * self.f_balancer(d, p, i, f_baseline)
 
-    def i_pid_x(self, d, p, i, f_baseline=0.0):
-        return self._I_X * self.i_balancer(d, p, i, f_baseline)
-
-    def i_pid_y(self, d, p, i, f_baseline=0.0):
-        return self._I_Y * self.i_balancer(d, p, i, f_baseline)
-
-    def rpm_bound_check(self, rpm):
-        if rpm<motor_ctr.MIN_RPM:
-            rpm = motor_ctr.MIN_RPM
-        elif rpm > motor_ctr.MAX_RPM:
-            rpm = motor_ctr.MAX_RPM
-        return rpm
-
-    @property
-    def f_based_acc_sum(self):
-        return self._F_BASE_ACC_SUM
-
-    @f_based_acc_sum.setter
-    def f_based_acc_sum(self, f_based_acc_sum):
-        self._F_BASE_ACC_SUM = f_based_acc_sum
+    def i_rpm_bound_check(self, rpm):
+        rpm *= self.f_conversion_rate
+        if rpm<self.min_value:
+            rpm = self.min_value
+        elif rpm > self.max_value:
+            rpm = self.max_value
+        return int(rpm)
 
     @property
     def rpm(self):
