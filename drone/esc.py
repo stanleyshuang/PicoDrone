@@ -41,11 +41,11 @@ class ESC():
 
     @property
     def value(self):
-        return self._value
+        return self._value / 10
     
     @value.setter
     def value(self, value):
-        self._value = value
+        self._value = value * 10
         self._pwm.duty_u16(self._value)
 
 
@@ -103,7 +103,7 @@ def test_escs():
     esc2 = ESC(Pin(8))
     esc3 = ESC(Pin(9))
 
-    values = [3000, 3300, 3600, 3780]
+    values = [300, 330, 360, 378]
     for value in values:
         m0 = m1 = m2 = m3 = value
         print(m0, m1, m2, m3)
@@ -114,7 +114,7 @@ def test_escs():
         utime.sleep_us(200000)
 
     while True:
-        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a3780, 值域：0 - 65535)")
+        the_input = input("輸入馬達 PWM Duty Cycle: (例如: a378, 值域：0 - 6553)")
         if len(the_input)>1:
             value = int(the_input[1:])
             if the_input[0] == 'a':

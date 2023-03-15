@@ -85,15 +85,15 @@ time.sleep(1.0)
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
 #                          values=[init,  min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(values=[3000, 3930,    5800, 10230, 20470], cr=1.037)
-motor_ctr_1 = motor_ctr_fr(values=[3000, 3930,    5800, 10230, 20470], cr=1.003)
-motor_ctr_2 = motor_ctr_fl(values=[3000, 3930,    5800, 10230, 20470], cr=1.0)
-motor_ctr_3 = motor_ctr_bl(values=[3000, 3930,    5800, 10230, 20470], cr=1.034)
+motor_ctr_0 = motor_ctr_br(values=[ 300,  393,     580,  1023,  2047], cr=1.037)
+motor_ctr_1 = motor_ctr_fr(values=[ 300,  393,     580,  1023,  2047], cr=1.003)
+motor_ctr_2 = motor_ctr_fl(values=[ 300,  393,     580,  1023,  2047], cr=1.0)
+motor_ctr_3 = motor_ctr_bl(values=[ 300,  393,     580,  1023,  2047], cr=1.034)
 
-esc_0.value = int(motor_ctr_0.init_value/10)
-esc_1.value = int(motor_ctr_1.init_value/10)
-esc_2.value = int(motor_ctr_2.init_value/10)
-esc_3.value = int(motor_ctr_3.init_value/10)
+esc_0.value = motor_ctr_0.init_value
+esc_1.value = motor_ctr_1.init_value
+esc_2.value = motor_ctr_2.init_value
+esc_3.value = motor_ctr_3.init_value
 
 
 ### before taking off, initialize FlightController
