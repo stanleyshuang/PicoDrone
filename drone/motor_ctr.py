@@ -33,33 +33,33 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    def __init__(self, values, f_cr):
-        self._values = values
+    def __init__(self, _i_values, f_cr):
+        self._i_values = _i_values
         self._F_CR = f_cr # conversion rate
         self._I_X = 0
         self._I_Y = 0
-        self._rpm = 0
+        self._i_rpm = 0
 
 
     @property
     def init_value(self):
-        return self._values[0]
+        return self._i_values[0]
 
     @property
     def min_value(self):
-        return self._values[1]
+        return self._i_values[1]
 
     @property
     def balance_value(self):
-        return self._values[2]
+        return self._i_values[2]
 
     @property
     def max_value(self):
-        return self._values[3]
+        return self._i_values[3]
 
     @property
     def limit_value(self):
-        return self._values[4]
+        return self._i_values[4]
         
     @property
     def f_conversion_rate(self):
@@ -83,7 +83,7 @@ class motor_ctr():
         return self._I_Y * self.f_balancer(d, p, i, f_baseline)
 
     def i_rpm_bound_check(self, rpm):
-        rpm *= self.f_conversion_rate
+        rpm = rpm * self.f_conversion_rate
         if rpm<self.min_value:
             rpm = self.min_value
         elif rpm > self.max_value:
@@ -91,38 +91,38 @@ class motor_ctr():
         return int(rpm)
 
     @property
-    def rpm(self):
-        return self._rpm
+    def i_rpm(self):
+        return self._i_rpm
 
-    @rpm.setter
-    def rpm(self, rpm):
-        self._rpm = rpm
+    @i_rpm.setter
+    def i_rpm(self, rpm):
+        self._i_rpm = int(rpm)
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, values=[300, 393, 580, 1023, 2047], cr=1.0):
-        super(motor_ctr_fr, self).__init__(values, cr)
+    def __init__(self, _i_values=[300, 393, 580, 1023, 2047], f_cr=1.0):
+        super(motor_ctr_fr, self).__init__(_i_values, f_cr)
         self._I_X =  1
         self._I_Y = -1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, values=[300, 393, 580, 1023, 2047], cr=1.0):
-        super(motor_ctr_fl, self).__init__(values, cr)
+    def __init__(self, _i_values=[300, 393, 580, 1023, 2047], f_cr=1.0):
+        super(motor_ctr_fl, self).__init__(_i_values, f_cr)
         self._I_X = -1
         self._I_Y = -1
 
 
 class motor_ctr_bl(motor_ctr):
-    def __init__(self, values=[300, 393, 580, 1023, 2047], cr=1.0):
-        super(motor_ctr_bl, self).__init__(values, cr)
+    def __init__(self, _i_values=[300, 393, 580, 1023, 2047], f_cr=1.0):
+        super(motor_ctr_bl, self).__init__(_i_values, f_cr)
         self._I_X = -1
         self._I_Y =  1
 
 
 class motor_ctr_br(motor_ctr):
-    def __init__(self, values=[300, 393, 580, 1023, 2047], cr=1.0):
-        super(motor_ctr_br, self).__init__(values, cr)
+    def __init__(self, _i_values=[300, 393, 580, 1023, 2047], f_cr=1.0):
+        super(motor_ctr_br, self).__init__(_i_values, f_cr)
         self._I_X =  1
         self._I_Y =  1
 

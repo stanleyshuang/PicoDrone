@@ -161,10 +161,10 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    set RPM to '+str(rpm))
 
-        self._m0.rpm = rpm
-        self._m1.rpm = rpm
-        self._m2.rpm = rpm
-        self._m3.rpm = rpm
+        self._m0.i_rpm = rpm
+        self._m1.i_rpm = rpm
+        self._m2.i_rpm = rpm
+        self._m3.i_rpm = rpm
 
         self._ESC0.value = rpm
         self._ESC1.value = rpm
@@ -174,9 +174,9 @@ class flight_controller():
 
     def b_stop_condition(self, stop, step):
         if step>=0:
-            return self._m0.rpm>=stop and self._m1.rpm>=stop and self._m2.rpm>=stop and self._m3.rpm>=stop
+            return self._m0.i_rpm>=stop and self._m1.i_rpm>=stop and self._m2.i_rpm>=stop and self._m3.i_rpm>=stop
         else:
-            return self._m0.rpm<=stop and self._m1.rpm<=stop and self._m2.rpm<=stop and self._m3.rpm<=stop
+            return self._m0.i_rpm<=stop and self._m1.i_rpm<=stop and self._m2.i_rpm<=stop and self._m3.i_rpm<=stop
 
 
     def simple_mode(self, msg, stop, step):
@@ -232,20 +232,20 @@ class flight_controller():
                 pid_x3 = self._m3.f_pid_x(gyro_currs[0], self._acc_currs[1], acc_sums[1])
                 pid_y3 = self._m3.f_pid_y(gyro_currs[1], self._acc_currs[0], acc_sums[0])
 
-            i_rpm0 = self._m0.i_rpm_bound_check(self._m0.rpm + step + pid_x0 + pid_y0)
-            i_rpm1 = self._m1.i_rpm_bound_check(self._m1.rpm + step + pid_x1 + pid_y1)
-            i_rpm2 = self._m2.i_rpm_bound_check(self._m2.rpm + step + pid_x2 + pid_y2)
-            i_rpm3 = self._m3.i_rpm_bound_check(self._m3.rpm + step + pid_x3 + pid_y3)
+            i_rpm0 = self._m0.i_rpm_bound_check(self._m0.i_rpm + step + pid_x0 + pid_y0)
+            i_rpm1 = self._m1.i_rpm_bound_check(self._m1.i_rpm + step + pid_x1 + pid_y1)
+            i_rpm2 = self._m2.i_rpm_bound_check(self._m2.i_rpm + step + pid_x2 + pid_y2)
+            i_rpm3 = self._m3.i_rpm_bound_check(self._m3.i_rpm + step + pid_x3 + pid_y3)
 
-            diff_rmp0 = i_rpm0 - self._m0.rpm
-            diff_rmp1 = i_rpm1 - self._m1.rpm
-            diff_rmp2 = i_rpm2 - self._m2.rpm
-            diff_rmp3 = i_rpm3 - self._m3.rpm
+            diff_rmp0 = i_rpm0 - self._m0.i_rpm
+            diff_rmp1 = i_rpm1 - self._m1.i_rpm
+            diff_rmp2 = i_rpm2 - self._m2.i_rpm
+            diff_rmp3 = i_rpm3 - self._m3.i_rpm
 
-            self._m0.rpm = i_rpm0
-            self._m1.rpm = i_rpm1
-            self._m2.rpm = i_rpm2
-            self._m3.rpm = i_rpm3
+            self._m0.i_rpm = i_rpm0
+            self._m1.i_rpm = i_rpm1
+            self._m2.i_rpm = i_rpm2
+            self._m3.i_rpm = i_rpm3
 
             self._ESC0.value = i_rpm0
             self._ESC1.value = i_rpm1
