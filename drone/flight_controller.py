@@ -36,10 +36,10 @@ from moving_average import moving_average
 class flight_controller():
     INIT_SPEED =    3930
     TAKEOFF_SPEED = 5550
-    FINAL_SPEED =   5910
+    FINAL_SPEED =   6010
     THIRD_SPEED =   5900
-    CHAGING_STEP =    80
-    SLOW_STEP =        5
+    FAST_STEP =       80
+    SLOW_STEP =       10
     FIXED_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
@@ -117,11 +117,13 @@ class flight_controller():
                 ay = self._IMU.accel.y
                 az = self._IMU.accel.z
             except Exception as e:
-                self._bb.write(1, '!!! Exception: ' + str(e))
-            else:
-                pass
-            finally:
-                pass
+                if self._bb:
+                    self._bb.write(1, '!!! Exception: (acc_sum_base) ' + str(e))
+                else:
+                    print('!!! Exception: (acc_sum_base) ' + str(e))
+                utime.sleep_us(3000)
+                continue
+                    
             self._acc_qs[0].update_val(ax)
             self._acc_qs[1].update_val(ay)
             self._acc_qs[2].update_val(az)
@@ -137,8 +139,11 @@ class flight_controller():
                 self._ESC2.value = int((self._m2.init_value + increased_value)/10)
                 self._ESC3.value = int((self._m3.init_value + increased_value)/10)
 
-            if i%10==0 and self._bb:
-                self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
+            if i%10==0:
+                if self._bb:
+                    self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
+                else:
+                    print(str(i/10), end='\r')
             utime.sleep_us(90000)
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
@@ -218,13 +223,12 @@ class flight_controller():
                 self._gyro_currs[2] = self._IMU.gyro.z
                 imu_tem = self._IMU.temperature
             except Exception as e:
-                self._bb.write(1, '!!! Exception: ' + str(e))
-                utime.sleep_us(3000)
+                if self._bb:
+                    self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e))
+                else:
+                    print('!!! Exception: (simple_mode) ' + str(e))
+                utime.sleep_us(30000)
                 continue
-            else:
-                pass
-            finally:
-                pass
 
             self._acc_qs[0].update_val(self._acc_currs[0])
             self._acc_qs[1].update_val(self._acc_currs[1])
@@ -267,17 +271,22 @@ class flight_controller():
             self._ESC1.value = int(i_m1/10)
             self._ESC2.value = int(i_m2/10)
             self._ESC3.value = int(i_m3/10)
-            if i%10==0 and self._bb:
-                self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
+            if i%10==0:
+                if self._bb:
+                    self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
+                else:
+                    print(str(i/10), end='\r')
             if self._bb:
                 self._bb.show_status(4, self._acc_currs, gyro_currs, acc_sums, imu_tem, 
                                      rpm0, rpm1, rpm2, rpm3, 
                                      diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                      pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
-            utime.sleep_us(5000) # workload = (0.1 - 0.02)
+            # utime.sleep_us(1000) # workload = (0.1 - 0.02)
             i += 1
         if self._bb:
             self._bb.write(4, '    countdown: '+str(int(i/(10)))+' sec.', end='\r')
+        else:
+            print(str(i/10), end='\r')
         end = utime.ticks_ms()
         diff = utime.ticks_diff(end, begin)
         msg_duration = '    duration: '+str(round(diff/1000, 2))+' sec.'
@@ -289,12 +298,13 @@ class flight_controller():
 
     def takeoff(self):
         self.set_rpm(flight_controller.INIT_SPEED)
-        self.simple_mode('    Take off..', flight_controller.TAKEOFF_SPEED, flight_controller.CHAGING_STEP)
+        # self.simple_mode('    Take off..', flight_controller.TAKEOFF_SPEED, flight_controller.FAST_STEP)
+        # self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.SLOW_STEP)
         self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.SLOW_STEP)
 
     def ufo_float(self):
         self.simple_mode('    UFO floating..', flight_controller.THIRD_SPEED, -1*flight_controller.FIXED_STEP)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.CHAGING_STEP)
+        self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.SLOW_STEP)
         self.set_rpm(0)
