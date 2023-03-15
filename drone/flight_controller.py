@@ -123,7 +123,7 @@ class flight_controller():
                     print('!!! Exception: (acc_sum_base) ' + str(e))
                 utime.sleep_us(3000)
                 continue
-                    
+
             self._acc_qs[0].update_val(ax)
             self._acc_qs[1].update_val(ay)
             self._acc_qs[2].update_val(az)
@@ -143,7 +143,7 @@ class flight_controller():
                 if self._bb:
                     self._bb.write(4, '    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
                 else:
-                    print(str(i/10), end='\r')
+                    print('    countdown: '+str(int((ACC_BASE_SAMPLING_COUNT-i)/10))+' sec.', end='\r')
             utime.sleep_us(90000)
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
@@ -275,7 +275,7 @@ class flight_controller():
                 if self._bb:
                     self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
                 else:
-                    print(str(i/10), end='\r')
+                    print('    countdown: '+str(int(i/10))+' sec.', end='\r')
             if self._bb:
                 self._bb.show_status(4, self._acc_currs, gyro_currs, acc_sums, imu_tem, 
                                      rpm0, rpm1, rpm2, rpm3, 
