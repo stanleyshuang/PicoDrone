@@ -161,15 +161,20 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    set RPM to '+str(rpm))
 
-        self._m0.i_rpm = rpm
-        self._m1.i_rpm = rpm
-        self._m2.i_rpm = rpm
-        self._m3.i_rpm = rpm
+        i_rpm0 = self._m0.i_rpm_bound_check(rpm)
+        i_rpm1 = self._m1.i_rpm_bound_check(rpm)
+        i_rpm2 = self._m2.i_rpm_bound_check(rpm)
+        i_rpm3 = self._m3.i_rpm_bound_check(rpm)
 
-        self._ESC0.value = rpm
-        self._ESC1.value = rpm
-        self._ESC2.value = rpm
-        self._ESC3.value = rpm
+        self._m0.i_rpm = i_rpm0
+        self._m1.i_rpm = i_rpm1
+        self._m2.i_rpm = i_rpm2
+        self._m3.i_rpm = i_rpm3
+
+        self._ESC0.value = i_rpm0
+        self._ESC1.value = i_rpm1
+        self._ESC2.value = i_rpm2
+        self._ESC3.value = i_rpm3
 
 
     def b_stop_condition(self, stop, step):
