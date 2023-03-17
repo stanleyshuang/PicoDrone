@@ -36,8 +36,9 @@ from moving_average import moving_average
 class flight_controller():
     INIT_SPEED =    393
     TAKEOFF_SPEED = 555
-    FINAL_SPEED =   601
-    THIRD_SPEED =   590
+    FINAL_SPEED =   761
+    THIRD_SPEED =   750
+    TERM_SPEED =    300
     FAST_STEP =       8
     SLOW_STEP =       1
     FIXED_STEP =      1
@@ -78,7 +79,7 @@ class flight_controller():
         self._m3 = motor_ctr_3
 
         self._bb = None
-        self._b_pid = True
+        self._b_pid = False
 
     @property
     def debug(self):
@@ -117,13 +118,13 @@ class flight_controller():
                 if self._bb:
                     self._bb.write(1, '!!! Exception: (init) ' + str(e))
                 else:
-                    print('!!! Exception: (init) ' + str(e))
+                    print('!!  Exception: (init) ' + str(e))
                 utime.sleep_us(3000)
-                continue
-
-            self._acc_qs[0].update_val(ax)
-            self._acc_qs[1].update_val(ay)
-            self._acc_qs[2].update_val(az)
+                # continue
+            else:
+                self._acc_qs[0].update_val(ax)
+                self._acc_qs[1].update_val(ay)
+                self._acc_qs[2].update_val(az)
 
             if i%7==6:
                 increased_value += 30
@@ -199,25 +200,35 @@ class flight_controller():
         imu_tem = 0.0
 
         while not self.b_stop_condition(stop, step):
+            ax = ay = az = gx = gy = gz = 0.0
+            '''
             try:
-                self._acc_currs[0] = self._IMU.accel.x
-                self._acc_currs[1] = self._IMU.accel.y * -1.0
-                self._acc_currs[2] = self._IMU.accel.z
-                self._gyro_currs[0] = self._IMU.gyro.x * -1.0
-                self._gyro_currs[1] = self._IMU.gyro.y * -1.0
-                self._gyro_currs[2] = self._IMU.gyro.z
+                ax = self._IMU.accel.x
+                ay = self._IMU.accel.y * -1.0
+                az = self._IMU.accel.z
+                gx = self._IMU.gyro.x * -1.0
+                gy = self._IMU.gyro.y * -1.0
+                gz = self._IMU.gyro.z
                 imu_tem = self._IMU.temperature
             except Exception as e:
                 if self._bb:
                     self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e))
                 else:
-                    print('!!! Exception: (simple_mode) ' + str(e))
-                utime.sleep_us(30000)
-                continue
+                    print('!!  Exception: (simple_mode) ' + str(e))
+                utime.sleep_us(3000)
+                # continue
+            else:
+                self._acc_currs[0] = ax
+                self._acc_currs[1] = ay
+                self._acc_currs[2] = az
+                self._gyro_currs[0] = gx
+                self._gyro_currs[1] = gy
+                self._gyro_currs[2] = gz
 
-            self._acc_qs[0].update_val(self._acc_currs[0])
-            self._acc_qs[1].update_val(self._acc_currs[1])
-            self._acc_qs[2].update_val(self._acc_currs[2])
+                self._acc_qs[0].update_val(self._acc_currs[0])
+                self._acc_qs[1].update_val(self._acc_currs[1])
+                self._acc_qs[2].update_val(self._acc_currs[2])
+            '''
 
             acc_sums[0] = self._acc_qs[0].sum
             acc_sums[1] = self._acc_qs[1].sum
@@ -294,5 +305,5 @@ class flight_controller():
         self.simple_mode('    UFO floating..', flight_controller.THIRD_SPEED, -1*flight_controller.FIXED_STEP)
 
     def shutdown(self):
-        self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.SLOW_STEP)
+        self.simple_mode('    Shutdown..', flight_controller.TERM_SPEED, -1*flight_controller.SLOW_STEP)
         self.set_rpm(0)
