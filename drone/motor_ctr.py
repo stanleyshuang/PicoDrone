@@ -74,7 +74,7 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        return (p - f_baseline)*0.000001 + d*0.00001 + i*0.0
+        return (p - f_baseline)*0.0 + d*0.00001 + i*0.0
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.f_balancer(d, p, i, f_baseline)
@@ -83,7 +83,6 @@ class motor_ctr():
         return self._I_Y * self.f_balancer(d, p, i, f_baseline)
 
     def i_rpm_bound_check(self, rpm):
-        rpm = rpm * self.f_conversion_rate
         if rpm<self.init_value:
             rpm = self.init_value
         elif rpm > self.max_value:
