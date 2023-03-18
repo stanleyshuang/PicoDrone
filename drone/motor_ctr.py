@@ -63,7 +63,8 @@ class motor_ctr():
         
     @property
     def f_conversion_rate(self):
-        return self._F_CR
+        # return self._F_CR
+        return ((self._F_CR * self.max_value - self.init_value) - self._i_rpm * (self._F_CR - 1.0)) / (self.max_value - self.init_value)
         
     @property
     def i_x(self):
