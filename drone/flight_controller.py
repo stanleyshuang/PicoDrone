@@ -36,8 +36,8 @@ from moving_average import moving_average
 class flight_controller():
     INIT_SPEED =    393
     TAKEOFF_SPEED = 555
-    FINAL_SPEED =   761
-    THIRD_SPEED =   750
+    FINAL_SPEED =   661
+    THIRD_SPEED =   650
     TERM_SPEED =    300
     FAST_STEP =       8
     SLOW_STEP =       1
@@ -79,7 +79,7 @@ class flight_controller():
         self._m3 = motor_ctr_3
 
         self._bb = None
-        self._b_pid = False
+        self._b_pid = True
 
     @property
     def debug(self):
@@ -201,34 +201,33 @@ class flight_controller():
 
         while not self.b_stop_condition(stop, step):
             ax = ay = az = gx = gy = gz = 0.0
-            '''
-            try:
-                ax = self._IMU.accel.x
-                ay = self._IMU.accel.y * -1.0
-                az = self._IMU.accel.z
-                gx = self._IMU.gyro.x * -1.0
-                gy = self._IMU.gyro.y * -1.0
-                gz = self._IMU.gyro.z
-                imu_tem = self._IMU.temperature
-            except Exception as e:
-                if self._bb:
-                    self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e))
+            if i%15==0:
+                try:
+                    ax = self._IMU.accel.x
+                    ay = self._IMU.accel.y * -1.0
+                    az = self._IMU.accel.z
+                    gx = self._IMU.gyro.x * -1.0
+                    gy = self._IMU.gyro.y * -1.0
+                    gz = self._IMU.gyro.z
+                    imu_tem = self._IMU.temperature
+                except Exception as e:
+                    if self._bb:
+                        self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e))
+                    else:
+                        print('!!  Exception: (simple_mode) ' + str(e))
+                    utime.sleep_us(3000)
+                    # continue
                 else:
-                    print('!!  Exception: (simple_mode) ' + str(e))
-                utime.sleep_us(3000)
-                # continue
-            else:
-                self._acc_currs[0] = ax
-                self._acc_currs[1] = ay
-                self._acc_currs[2] = az
-                self._gyro_currs[0] = gx
-                self._gyro_currs[1] = gy
-                self._gyro_currs[2] = gz
+                    self._acc_currs[0] = ax
+                    self._acc_currs[1] = ay
+                    self._acc_currs[2] = az
+                    self._gyro_currs[0] = gx
+                    self._gyro_currs[1] = gy
+                    self._gyro_currs[2] = gz
 
-                self._acc_qs[0].update_val(self._acc_currs[0])
-                self._acc_qs[1].update_val(self._acc_currs[1])
-                self._acc_qs[2].update_val(self._acc_currs[2])
-            '''
+                    self._acc_qs[0].update_val(self._acc_currs[0])
+                    self._acc_qs[1].update_val(self._acc_currs[1])
+                    self._acc_qs[2].update_val(self._acc_currs[2])
 
             acc_sums[0] = self._acc_qs[0].sum
             acc_sums[1] = self._acc_qs[1].sum
