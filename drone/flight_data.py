@@ -60,6 +60,8 @@ class flight_data():
                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
         if debug_level > self._debug_level:
             return
+        import utime
+        begin = utime.ticks_ms()
 
         x_axis = ''
         x_axis += self.format(int(acc_currs[1]*250), 5)
@@ -131,5 +133,8 @@ class flight_data():
             msg += '='
             msg += self.format(vals[i], lens[i])
             msg += ', '
+        end = utime.ticks_ms()
+        diff = utime.ticks_diff(end, begin)
+        msg += ' (' + str(diff) + ' ms)'
         msg += '        '
         self.write(debug_level, msg, end='\r')
