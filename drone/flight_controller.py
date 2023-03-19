@@ -207,9 +207,9 @@ class flight_controller():
                     imu_tem = self._IMU.temperature
                 except Exception as e:
                     if self._bb:
-                        self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e))
+                        self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                     else:
-                        print('!!  Exception: (simple_mode) ' + str(e))
+                        print('!!  Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                 else:
                     # 取到完整陀螺儀值後，才更新成員變數與 PID。
                     self._acc_currs[0] = ax
