@@ -39,7 +39,7 @@ class flight_controller():
     FINAL_SPEED =   661
     STABLE_SPEED =  650
     TERM_SPEED =    300
-    FAST_STEP =       8
+    FAST_STEP =       1 # 8
     SLOW_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
@@ -185,6 +185,7 @@ class flight_controller():
             self._bb.write(4, msg)
 
         i = 0
+        the_period = 10
         while not self.b_stop_condition(stop, step):
             acc_currs = [0.0, 0.0, 0.0]
             gyro_currs = [0.0, 0.0, 0.0]
@@ -195,7 +196,7 @@ class flight_controller():
             pid_x1, pid_y1 = 0.0, 0.0
             pid_x2, pid_y2 = 0.0, 0.0
             pid_x3, pid_y3 = 0.0, 0.0
-            if i%15==0 and self._b_pid:
+            if i%the_period==0 and self._b_pid:
                 ax = ay = az = gx = gy = gz = 0.0
                 try:
                     ax = self._IMU.accel.x
@@ -241,6 +242,8 @@ class flight_controller():
                     pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[1], acc_sums[1])
                     pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[0], acc_sums[0])
 
+                    pid_x0 = pid_x1 = pid_x2 = pid_x3 = 0.0
+
             i_rpm0 = self._m0.i_rpm_bound_check(int((self._m0.i_rpm + step) * self._m0.f_conversion_rate + pid_x0 + pid_y0))
             i_rpm1 = self._m1.i_rpm_bound_check(int((self._m1.i_rpm + step) * self._m1.f_conversion_rate + pid_x1 + pid_y1))
             i_rpm2 = self._m2.i_rpm_bound_check(int((self._m2.i_rpm + step) * self._m2.f_conversion_rate + pid_x2 + pid_y2))
@@ -261,23 +264,14 @@ class flight_controller():
             self._ESC2.value = i_rpm2
             self._ESC3.value = i_rpm3
 
-            if i%10==0:
-                if self._bb:
-                    self._bb.write(4, '    countdown: '+str(int(i/10))+' sec.', end='\r')
-                else:
-                    print('    countdown: '+str(int(i/10))+' sec.', end='\r')
-
-            if self._bb:
+            if self._bb and i%the_period==0 and self._b_pid:
                 self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 
                                      i_rpm0, i_rpm1, i_rpm2, i_rpm3, 
                                      diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                      pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
-            # utime.sleep_us(1000)
+            else:
+                utime.sleep_us(7000)
             i += 1
-        if self._bb:
-            self._bb.write(4, '    countdown: '+str(int(i/(10)))+' sec.', end='\r')
-        else:
-            print('    countdown: '+str(int(i/(10)))+' sec.', end='\r')
 
         end = utime.ticks_ms()
         diff = utime.ticks_diff(end, begin)
