@@ -30,6 +30,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 import sys, utime
+from motor_ctr import motor_ctr
 from moving_average import moving_average
 
 
@@ -39,7 +40,7 @@ class flight_controller():
     FINAL_SPEED =   661
     STABLE_SPEED =  650
     TERM_SPEED =    300
-    FAST_STEP =       1 # 8
+    FAST_STEP =       1
     SLOW_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
@@ -79,6 +80,7 @@ class flight_controller():
 
         self._bb = None
         self._b_pid = True
+        self._b_arm = False
 
     @property
     def debug(self):
@@ -101,10 +103,11 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    init..')
 
-        self._ESC0.value = self._m0.init_value
-        self._ESC1.value = self._m1.init_value
-        self._ESC2.value = self._m2.init_value
-        self._ESC3.value = self._m3.init_value
+        if self._b_arm:
+            self._ESC0.value = self._m0.init_value
+            self._ESC1.value = self._m1.init_value
+            self._ESC2.value = self._m2.init_value
+            self._ESC3.value = self._m3.init_value
 
         increased_value = 0
         SAMPLING_COUNT = 20
@@ -127,10 +130,11 @@ class flight_controller():
 
             if i%7==6:
                 increased_value += 30
-                self._ESC0.value = self._m0.init_value + increased_value
-                self._ESC1.value = self._m1.init_value + increased_value
-                self._ESC2.value = self._m2.init_value + increased_value
-                self._ESC3.value = self._m3.init_value + increased_value
+                if self._b_arm:
+                    self._ESC0.value = self._m0.init_value + increased_value
+                    self._ESC1.value = self._m1.init_value + increased_value
+                    self._ESC2.value = self._m2.init_value + increased_value
+                    self._ESC3.value = self._m3.init_value + increased_value
 
             if i%10==0:
                 if self._bb:
@@ -143,10 +147,11 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
 
-        self._ESC0.value = self._m0.min_value
-        self._ESC1.value = self._m1.min_value
-        self._ESC2.value = self._m2.min_value
-        self._ESC3.value = self._m3.min_value
+        if self._b_arm:
+            self._ESC0.value = self._m0.min_value
+            self._ESC1.value = self._m1.min_value
+            self._ESC2.value = self._m2.min_value
+            self._ESC3.value = self._m3.min_value
  
         end = utime.ticks_ms()
         diff = utime.ticks_diff(end, begin)
@@ -166,10 +171,11 @@ class flight_controller():
         self._m2.i_rpm = rpm
         self._m3.i_rpm = rpm
 
-        self._ESC0.value = rpm
-        self._ESC1.value = rpm
-        self._ESC2.value = rpm
-        self._ESC3.value = rpm
+        if self._b_arm:
+            self._ESC0.value = rpm
+            self._ESC1.value = rpm
+            self._ESC2.value = rpm
+            self._ESC3.value = rpm
 
 
     def b_stop_condition(self, stop, step):
@@ -191,6 +197,7 @@ class flight_controller():
             gyro_currs = [0.0, 0.0, 0.0]
             acc_sums = [0.0, 0.0, 0.0]
             imu_tem = 0.0
+            pitch = roll = yaw = 0.0
 
             pid_x0, pid_y0 = 0.0, 0.0
             pid_x1, pid_y1 = 0.0, 0.0
@@ -213,18 +220,22 @@ class flight_controller():
                         print('!!  Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                 else:
                     # 取到完整陀螺儀值後，才更新成員變數與 PID。
-                    self._acc_currs[0] = ax
-                    self._acc_currs[1] = ay
+                    pitch = motor_ctr.pitch(ax, ay, az)
+                    roll = motor_ctr.roll(ax, ay, az)
+                    yaw = motor_ctr.yaw(gx, gy, gz)
+
+                    self._acc_currs[0] = roll
+                    self._acc_currs[1] = pitch
                     self._acc_currs[2] = az
                     self._gyro_currs[0] = gx
                     self._gyro_currs[1] = gy
                     self._gyro_currs[2] = gz
-                    self._acc_qs[0].update_val(ax)
-                    self._acc_qs[1].update_val(ay)
+                    self._acc_qs[0].update_val(roll)
+                    self._acc_qs[1].update_val(pitch)
                     self._acc_qs[2].update_val(az)
 
-                    acc_currs[0] = ax
-                    acc_currs[1] = ay
+                    acc_currs[0] = roll
+                    acc_currs[1] = pitch
                     acc_currs[2] = az
                     gyro_currs[0] = gx
                     gyro_currs[1] = gy
@@ -233,16 +244,14 @@ class flight_controller():
                     acc_sums[1] = self._acc_qs[1].sum
                     acc_sums[2] = self._acc_qs[2].sum
 
-                    pid_x0 = self._m0.f_pid_x(gyro_currs[0], acc_currs[1], acc_sums[1])
-                    pid_y0 = self._m0.f_pid_y(gyro_currs[1], acc_currs[0], acc_sums[0])
-                    pid_x1 = self._m1.f_pid_x(gyro_currs[0], acc_currs[1], acc_sums[1])
-                    pid_y1 = self._m1.f_pid_y(gyro_currs[1], acc_currs[0], acc_sums[0])
-                    pid_x2 = self._m2.f_pid_x(gyro_currs[0], acc_currs[1], acc_sums[1])
-                    pid_y2 = self._m2.f_pid_y(gyro_currs[1], acc_currs[0], acc_sums[0])
-                    pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[1], acc_sums[1])
-                    pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[0], acc_sums[0])
-
-                    pid_x0 = pid_x1 = pid_x2 = pid_x3 = 0.0
+                    pid_x0 = self._m0.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
+                    pid_y0 = self._m0.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
+                    pid_x1 = self._m1.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
+                    pid_y1 = self._m1.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
+                    pid_x2 = self._m2.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
+                    pid_y2 = self._m2.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
+                    pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
+                    pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
 
             i_rpm0 = self._m0.i_rpm_bound_check(int((self._m0.i_rpm + step) * self._m0.f_conversion_rate + pid_x0 + pid_y0))
             i_rpm1 = self._m1.i_rpm_bound_check(int((self._m1.i_rpm + step) * self._m1.f_conversion_rate + pid_x1 + pid_y1))
@@ -259,10 +268,11 @@ class flight_controller():
             self._m2.i_rpm = i_rpm2
             self._m3.i_rpm = i_rpm3
 
-            self._ESC0.value = i_rpm0
-            self._ESC1.value = i_rpm1
-            self._ESC2.value = i_rpm2
-            self._ESC3.value = i_rpm3
+            if self._b_arm:
+                self._ESC0.value = i_rpm0
+                self._ESC1.value = i_rpm1
+                self._ESC2.value = i_rpm2
+                self._ESC3.value = i_rpm3
 
             if self._bb and i%the_period==0 and self._b_pid:
                 self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 

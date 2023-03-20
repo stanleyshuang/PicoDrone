@@ -29,6 +29,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 SOFTWARE.
 '''
+import math
+
 from moving_average import moving_average
 
 
@@ -76,13 +78,30 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        return (p - f_baseline)*0.0 + d*0.0 + i*0.7
+        return (p - f_baseline)*0.0 + d*0.0 + i*0.0
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.f_balancer(d, p, i, f_baseline)
 
     def f_pid_y(self, d, p, i, f_baseline=0.0):
         return self._I_Y * self.f_balancer(d, p, i, f_baseline)
+
+
+    @staticmethod
+    def pitch(ax, ay, az):
+        # pitch：atan2(-Ax, sqrt(Ay^2 + Az^2))
+        return math.atan2(ax, math.sqrt(ay*ay + az*az)) * 180.0 / math.pi
+
+    @staticmethod
+    def roll(ax, ay, az):
+        # roll：atan2(Ay, Az)
+        return math.atan2(ay, az) * 180.0 / math.pi
+
+    @staticmethod
+    def yaw(gx, gy, gz):
+        # yaw：atan2(Gx, sqrt(Gy^2 + Gz^2))
+        return math.atan2(gx, math.sqrt(gy*gy + gz*gz)) * 180.0 / math.pi
+
 
     def i_rpm_bound_check(self, rpm):
         if rpm < self.min_value:

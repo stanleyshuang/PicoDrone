@@ -64,25 +64,25 @@ class flight_data():
         begin = utime.ticks_ms()
 
         x_axis = ''
-        x_axis += self.format(int(acc_currs[1]*250), 5)
+        x_axis += self.format(int(acc_currs[0]), 4)
         x_axis += ' '
         x_axis += self.format(int(gyro_currs[0]), 4)
         x_axis += ' '
-        x_axis += self.format(int(acc_sums[1]*25), 4)
+        x_axis += self.format(int(acc_sums[0]/10), 4)
 
         y_axis = ''
-        y_axis += self.format(int(acc_currs[0]*250), 5)
+        y_axis += self.format(int(acc_currs[1]), 4)
         y_axis += ' '
         y_axis += self.format(int(gyro_currs[1]), 4)
         y_axis += ' '
-        y_axis += self.format(int(acc_sums[0]*25), 4)
+        y_axis += self.format(int(acc_sums[1]/10), 4)
 
         z_axis = ''
-        z_axis += self.format(int(acc_currs[2]*250), 5)
+        z_axis += self.format(int(acc_currs[2]*100), 4)
         z_axis += ' '
         z_axis += self.format(int(gyro_currs[2]), 4)
         z_axis += ' '
-        z_axis += self.format(int(acc_sums[2]*25), 4)
+        z_axis += self.format(int(acc_sums[2]*10), 4)
 
         pid_x = self.format(abs(int(pid_x0)), 3)
         pid_xs = [pid_x0, pid_x1, pid_x2, pid_x3]
