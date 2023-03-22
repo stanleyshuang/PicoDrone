@@ -35,9 +35,8 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    def __init__(self, i_values, f_cr):
+    def __init__(self, i_values):
         self._i_values = i_values
-        self._F_CR = f_cr # conversion rate
         self._I_X = 0
         self._I_Y = 0
         self._i_rpm = 0
@@ -62,12 +61,14 @@ class motor_ctr():
     @property
     def limit_value(self):
         return self._i_values[4]
-        
+    
+    '''
     @property
     def f_conversion_rate(self):
         return 1.0
         # return self._F_CR
         # return ((self._F_CR * self.max_value - self.init_value) - self._i_rpm * (self._F_CR - 1.0)) / (self.max_value - self.init_value)
+    '''
         
     @property
     def i_x(self):
@@ -78,7 +79,12 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        return (p - f_baseline)*0.0 + d*0.0 + i*0.0
+        pid = (p - f_baseline)/10.0 + d*0.0 + i*0.0
+        if pid > 1.0:
+            pid = 1.0
+        if pid < -1.0:
+            pid = -1.0
+        return pid
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
         return self._I_X * self.f_balancer(d, p, i, f_baseline)
@@ -90,17 +96,25 @@ class motor_ctr():
     @staticmethod
     def pitch(ax, ay, az):
         # pitch：atan2(-Ax, sqrt(Ay^2 + Az^2))
-        return math.atan2(ax, math.sqrt(ay*ay + az*az)) * 180.0 / math.pi
+        return motor_ctr.angle(math.atan2(ax, math.sqrt(ay*ay + az*az)) * 180.0 / math.pi)
 
     @staticmethod
     def roll(ax, ay, az):
         # roll：atan2(Ay, Az)
-        return math.atan2(ay, az) * 180.0 / math.pi
+        return motor_ctr.angle(math.atan2(ay, az) * 180.0 / math.pi)
 
     @staticmethod
     def yaw(gx, gy, gz):
         # yaw：atan2(Gx, sqrt(Gy^2 + Gz^2))
-        return math.atan2(gx, math.sqrt(gy*gy + gz*gz)) * 180.0 / math.pi
+        return motor_ctr.angle(math.atan2(gx, math.sqrt(gy*gy + gz*gz)) * 180.0 / math.pi)
+
+    @staticmethod
+    def angle(a):
+        while a > 135.0:
+            a -= 180.0
+        while a < -135.0:
+            a += 180.0
+        return a
 
 
     def i_rpm_bound_check(self, rpm):
@@ -120,29 +134,29 @@ class motor_ctr():
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047], f_cr=1.0):
-        super(motor_ctr_fr, self).__init__(i_values, f_cr)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
+        super(motor_ctr_fr, self).__init__(i_values)
         self._I_X =  1
-        self._I_Y = -1
+        self._I_Y =  1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047], f_cr=1.0):
-        super(motor_ctr_fl, self).__init__(i_values, f_cr)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
+        super(motor_ctr_fl, self).__init__(i_values)
+        self._I_X = -1
+        self._I_Y =  1
+
+
+class motor_ctr_bl(motor_ctr):
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
+        super(motor_ctr_bl, self).__init__(i_values)
         self._I_X = -1
         self._I_Y = -1
 
 
-class motor_ctr_bl(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047], f_cr=1.0):
-        super(motor_ctr_bl, self).__init__(i_values, f_cr)
-        self._I_X = -1
-        self._I_Y =  1
-
-
 class motor_ctr_br(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047], f_cr=1.0):
-        super(motor_ctr_br, self).__init__(i_values, f_cr)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
+        super(motor_ctr_br, self).__init__(i_values)
         self._I_X =  1
-        self._I_Y =  1
+        self._I_Y = -1
 

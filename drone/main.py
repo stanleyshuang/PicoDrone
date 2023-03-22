@@ -85,10 +85,10 @@ time.sleep(1.0)
 ### initializing Motor Controllers
 bb.write(4, 'initializing Motor Controllers')
 #                          i_values=[init,  min, balance,   max, limit]
-motor_ctr_0 = motor_ctr_br(i_values=[ 300,  393,     580,  1747,  2047], f_cr=1.00215)
-motor_ctr_1 = motor_ctr_fr(i_values=[ 300,  393,     580,  1747,  2047], f_cr=1.0)
-motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047], f_cr=1.0)
-motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047], f_cr=1.00215)
+motor_ctr_0 = motor_ctr_br(i_values=[ 300,  393,     580,  1747,  2047])
+motor_ctr_1 = motor_ctr_fr(i_values=[ 300,  393,     580,  1747,  2047])
+motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047])
+motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047])
 
 esc_0.value = motor_ctr_0.init_value
 esc_1.value = motor_ctr_1.init_value
@@ -116,4 +116,6 @@ flight_ctr.init()
 flight_ctr.takeoff()
 flight_ctr.ufo_float()
 flight_ctr.shutdown()
-time.sleep(60.0)
+bb.write(4, 'demo complete, log flushing and closed')
+bb.flush()
+bb.close()

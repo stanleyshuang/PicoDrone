@@ -46,13 +46,11 @@ class flight_controller():
                  esc0, esc1, esc2, esc3, 
                  motor_ctr_0, motor_ctr_1, motor_ctr_2, motor_ctr_3):
         self._IMU = imu
-        self._acc_currs = [0.0, 0.0, 0.0]
         i_acc_q_size = 10
         ax_q = moving_average(i_acc_q_size+1)
         ay_q = moving_average(i_acc_q_size+1)
         az_q = moving_average(i_acc_q_size+1)
         self._acc_qs = [ax_q, ay_q, az_q]
-        self._gyro_currs = [0.0, 0.0, 0.0]
 
         self._ST0 = st0
         self._ST1 = st1
@@ -224,12 +222,6 @@ class flight_controller():
                     roll = motor_ctr.roll(ax, ay, az)
                     yaw = motor_ctr.yaw(gx, gy, gz)
 
-                    self._acc_currs[0] = roll
-                    self._acc_currs[1] = pitch
-                    self._acc_currs[2] = az
-                    self._gyro_currs[0] = gx
-                    self._gyro_currs[1] = gy
-                    self._gyro_currs[2] = gz
                     self._acc_qs[0].update_val(roll)
                     self._acc_qs[1].update_val(pitch)
                     self._acc_qs[2].update_val(az)
@@ -253,10 +245,15 @@ class flight_controller():
                     pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
                     pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
 
-            i_rpm0 = self._m0.i_rpm_bound_check(int((self._m0.i_rpm + step) * self._m0.f_conversion_rate + pid_x0 + pid_y0))
-            i_rpm1 = self._m1.i_rpm_bound_check(int((self._m1.i_rpm + step) * self._m1.f_conversion_rate + pid_x1 + pid_y1))
-            i_rpm2 = self._m2.i_rpm_bound_check(int((self._m2.i_rpm + step) * self._m2.f_conversion_rate + pid_x2 + pid_y2))
-            i_rpm3 = self._m3.i_rpm_bound_check(int((self._m3.i_rpm + step) * self._m3.f_conversion_rate + pid_x3 + pid_y3))
+            t_rpm0 = self._m0.i_rpm + step
+            t_rpm1 = self._m1.i_rpm + step 
+            t_rpm2 = self._m2.i_rpm + step
+            t_rpm3 = self._m3.i_rpm + step 
+
+            i_rpm0 = self._m0.i_rpm_bound_check(t_rpm0 + int(pid_x0 + pid_y0))
+            i_rpm1 = self._m1.i_rpm_bound_check(t_rpm1 + int(pid_x1 + pid_y1))
+            i_rpm2 = self._m2.i_rpm_bound_check(t_rpm2 + int(pid_x2 + pid_y2))
+            i_rpm3 = self._m3.i_rpm_bound_check(t_rpm3 + int(pid_x3 + pid_y3))
 
             diff_rmp0 = i_rpm0 - self._m0.i_rpm
             diff_rmp1 = i_rpm1 - self._m1.i_rpm
@@ -274,13 +271,34 @@ class flight_controller():
                 self._ESC2.value = i_rpm2
                 self._ESC3.value = i_rpm3
 
-            if self._bb and i%the_period==0 and self._b_pid:
-                self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 
-                                     i_rpm0, i_rpm1, i_rpm2, i_rpm3, 
-                                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
-                                     pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+            if i%the_period==0 and self._b_pid:
+                utime.sleep_us(3500)
+
+                t_rpm0 = self._m0.i_rpm_bound_check(t_rpm0)
+                t_rpm1 = self._m1.i_rpm_bound_check(t_rpm1)
+                t_rpm2 = self._m2.i_rpm_bound_check(t_rpm2)
+                t_rpm3 = self._m3.i_rpm_bound_check(t_rpm3)
+
+                self._m0.i_rpm = t_rpm0
+                self._m1.i_rpm = t_rpm1
+                self._m2.i_rpm = t_rpm2
+                self._m3.i_rpm = t_rpm3
+
+                if self._b_arm:
+                    self._ESC0.value = t_rpm0
+                    self._ESC1.value = t_rpm1
+                    self._ESC2.value = t_rpm2
+                    self._ESC3.value = t_rpm3
+
+                if self._bb:
+                    self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 
+                                         i_rpm0, i_rpm1, i_rpm2, i_rpm3, 
+                                         diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
+                                         pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+                else:
+                    utime.sleep_us(10000)
             else:
-                utime.sleep_us(7000)
+                utime.sleep_us(10000)
             i += 1
 
         end = utime.ticks_ms()

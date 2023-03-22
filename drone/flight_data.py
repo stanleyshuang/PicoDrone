@@ -45,14 +45,20 @@ class flight_data():
             print(msg, end=end)
             if self._fd:
                 self._fd.write(msg+'\n')
-                self._fd.flush()
+                # self._fd.flush()
 
     def format(self, s, l):
-        msg = ''
-        for i in range(l-len(str(s))):
-            msg += ' '
+        msg = ' ' * (l-len(str(s)))
         msg += str(s)
         return msg
+
+    def flush(self):
+        if self._fd:
+            self._fd.flush()
+
+    def close(self):
+        if self._fd:
+            self._fd.close()
 
     def show_status(self, debug_level, acc_currs, gyro_currs, acc_sums, imu_tem, 
                     rpm0, rpm1, rpm2, rpm3, 
@@ -138,3 +144,6 @@ class flight_data():
         msg += ' (' + str(diff) + ' ms)'
         msg += '        '
         self.write(debug_level, msg, end='\r')
+        # r_end = utime.ticks_ms()
+        # r_diff = utime.ticks_diff(r_end, begin)
+        # print('>flight_data.show_status(' + str(r_diff) + ' ms)')
