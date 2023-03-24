@@ -78,7 +78,7 @@ class flight_controller():
 
         self._bb = None
         self._b_pid = True
-        self._b_arm = False
+        self._b_arm = True
 
     @property
     def debug(self):
@@ -177,20 +177,23 @@ class flight_controller():
 
 
     def b_stop_condition(self, stop, step):
-        if step>=0:
+        if step==0:
+            return False
+        elif step>0:
             return self._m0.i_rpm>=stop and self._m1.i_rpm>=stop and self._m2.i_rpm>=stop and self._m3.i_rpm>=stop
         else:
             return self._m0.i_rpm<=stop and self._m1.i_rpm<=stop and self._m2.i_rpm<=stop and self._m3.i_rpm<=stop
 
 
-    def simple_mode(self, msg, stop, step):
-        begin = utime.ticks_ms()
+    def simple_mode(self, msg, stop, step, duration=10000000):
+        begin = end = utime.ticks_ms()
         if self._bb:
             self._bb.write(4, msg)
 
         i = 0
         the_period = 10
-        while not self.b_stop_condition(stop, step):
+        while not self.b_stop_condition(stop, step) and utime.ticks_diff(end, begin)<duration:
+            end = utime.ticks_ms()
             acc_currs = [0.0, 0.0, 0.0]
             gyro_currs = [0.0, 0.0, 0.0]
             acc_sums = [0.0, 0.0, 0.0]
@@ -272,7 +275,7 @@ class flight_controller():
                 self._ESC3.value = i_rpm3
 
             if i%the_period==0 and self._b_pid:
-                utime.sleep_us(3500)
+                utime.sleep_us(10000)
 
                 t_rpm0 = self._m0.i_rpm_bound_check(t_rpm0)
                 t_rpm1 = self._m1.i_rpm_bound_check(t_rpm1)
@@ -296,9 +299,9 @@ class flight_controller():
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                          pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
                 else:
-                    utime.sleep_us(10000)
+                    utime.sleep_us(30000)
             else:
-                utime.sleep_us(10000)
+                utime.sleep_us(30000)
             i += 1
 
         end = utime.ticks_ms()
@@ -316,7 +319,7 @@ class flight_controller():
         self.simple_mode('    Take off..', flight_controller.FINAL_SPEED, flight_controller.SLOW_STEP)
 
     def ufo_float(self):
-        self.simple_mode('    UFO floating..', flight_controller.STABLE_SPEED, -1*flight_controller.SLOW_STEP)
+        self.simple_mode('    UFO floating..', flight_controller.STABLE_SPEED, 0, duration=15000)
 
     def shutdown(self):
         self.simple_mode('    Shutdown..', flight_controller.INIT_SPEED, -1*flight_controller.SLOW_STEP)
