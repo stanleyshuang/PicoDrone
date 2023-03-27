@@ -40,7 +40,7 @@ class flight_controller():
     FINAL_SPEED =   661
     STABLE_SPEED =  650
     TERM_SPEED =    300
-    FAST_STEP =       1
+    FAST_STEP =      20
     SLOW_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
@@ -191,7 +191,7 @@ class flight_controller():
             self._bb.write(4, msg)
 
         i = 0
-        the_period = 10
+        the_period = 2
         while not self.b_stop_condition(stop, step) and utime.ticks_diff(end, begin)<duration:
             end = utime.ticks_ms()
             acc_currs = [0.0, 0.0, 0.0]
@@ -299,9 +299,9 @@ class flight_controller():
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                          pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
                 else:
-                    utime.sleep_us(30000)
+                    utime.sleep_us(15000)
             else:
-                utime.sleep_us(30000)
+                utime.sleep_us(50000)
             i += 1
 
         end = utime.ticks_ms()
