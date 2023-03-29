@@ -35,12 +35,13 @@ from moving_average import moving_average
 
 
 class flight_controller():
+    ADJ =            50
     INIT_SPEED =    393
     TAKEOFF_SPEED = 555
     FINAL_SPEED =   661
     STABLE_SPEED =  650
     TERM_SPEED =    300
-    FAST_STEP =      20
+    FAST_STEP =       1
     SLOW_STEP =       1
     def __init__(self, imu, st0, st1, st2, st_matrics, 
                  esc0, esc1, esc2, esc3, 
@@ -79,6 +80,7 @@ class flight_controller():
         self._bb = None
         self._b_pid = True
         self._b_arm = True
+        self._b_print = False
 
     @property
     def debug(self):
@@ -117,7 +119,7 @@ class flight_controller():
             except Exception as e:
                 if self._bb:
                     self._bb.write(1, '!!! Exception: (init) ' + str(e))
-                else:
+                elif self._b_print:
                     print('!!  Exception: (init) ' + str(e))
                 utime.sleep_us(3000)
                 # continue
@@ -137,7 +139,7 @@ class flight_controller():
             if i%10==0:
                 if self._bb:
                     self._bb.write(4, '    countdown: '+str(int((SAMPLING_COUNT-i)/10))+' sec.', end='\r')
-                else:
+                elif self._b_print:
                     print('    countdown: '+str(int((SAMPLING_COUNT-i)/10))+' sec.', end='\r')
 
             utime.sleep_us(90000)
@@ -150,13 +152,41 @@ class flight_controller():
             self._ESC1.value = self._m1.min_value
             self._ESC2.value = self._m2.min_value
             self._ESC3.value = self._m3.min_value
+
+        j = 10
+        while j < flight_controller.ADJ:
+            
+            self._m0.i_rpm = self._m0.min_value + j
+            self._m1.i_rpm = self._m1.min_value
+            self._m2.i_rpm = self._m2.min_value
+            self._m3.i_rpm = self._m3.min_value + j
+
+            if self._b_arm:
+                self._ESC0.value = self._m0.min_value + j
+                self._ESC1.value = self._m1.min_value
+                self._ESC2.value = self._m2.min_value
+                self._ESC3.value = self._m3.min_value + j
+                
+            utime.sleep_us(210000)
+            j += 10
+                
+        self._m0.i_rpm = self._m0.min_value + flight_controller.ADJ
+        self._m1.i_rpm = self._m1.min_value
+        self._m2.i_rpm = self._m2.min_value
+        self._m3.i_rpm = self._m3.min_value + flight_controller.ADJ
+
+        if self._b_arm:
+            self._ESC0.value = self._m0.min_value + flight_controller.ADJ
+            self._ESC1.value = self._m1.min_value
+            self._ESC2.value = self._m2.min_value
+            self._ESC3.value = self._m3.min_value + flight_controller.ADJ
  
         end = utime.ticks_ms()
         diff = utime.ticks_diff(end, begin)
         msg_duration = '    duration: '+str(round(diff/1000, 2))+' sec.'
         if self._bb:
             self._bb.write(4, msg_duration)
-        else:
+        elif self._b_print:
             print(msg_duration)
 
 
@@ -164,25 +194,31 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    set RPM to '+str(rpm))
 
-        self._m0.i_rpm = rpm
+        self._m0.i_rpm = rpm + flight_controller.ADJ
         self._m1.i_rpm = rpm
         self._m2.i_rpm = rpm
-        self._m3.i_rpm = rpm
+        self._m3.i_rpm = rpm + flight_controller.ADJ
 
         if self._b_arm:
-            self._ESC0.value = rpm
+            self._ESC0.value = rpm + flight_controller.ADJ
             self._ESC1.value = rpm
             self._ESC2.value = rpm
-            self._ESC3.value = rpm
+            self._ESC3.value = rpm + flight_controller.ADJ
 
 
     def b_stop_condition(self, stop, step):
         if step==0:
             return False
         elif step>0:
-            return self._m0.i_rpm>=stop and self._m1.i_rpm>=stop and self._m2.i_rpm>=stop and self._m3.i_rpm>=stop
+            return self._m0.i_rpm>=stop+flight_controller.ADJ and \
+                   self._m1.i_rpm>=stop and \
+                   self._m2.i_rpm>=stop and \
+                   self._m3.i_rpm>=stop+flight_controller.ADJ
         else:
-            return self._m0.i_rpm<=stop and self._m1.i_rpm<=stop and self._m2.i_rpm<=stop and self._m3.i_rpm<=stop
+            return self._m0.i_rpm<=stop+flight_controller.ADJ and \
+                   self._m1.i_rpm<=stop and \
+                   self._m2.i_rpm<=stop and \
+                   self._m3.i_rpm<=stop+flight_controller.ADJ
 
 
     def simple_mode(self, msg, stop, step, duration=10000000):
@@ -217,7 +253,7 @@ class flight_controller():
                 except Exception as e:
                     if self._bb:
                         self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
-                    else:
+                    elif self._b_print:
                         print('!!  Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                 else:
                     # 取到完整陀螺儀值後，才更新成員變數與 PID。
@@ -309,7 +345,7 @@ class flight_controller():
         msg_duration = '    duration: '+str(round(diff/1000, 2))+' sec.'
         if self._bb:
             self._bb.write(4, msg_duration)
-        else:
+        elif self._b_print:
             print(msg_duration)
 
 
