@@ -35,7 +35,7 @@ from moving_average import moving_average
 
 
 class flight_controller():
-    ADJ =            50
+    ADJ =            60
     INIT_SPEED =    393
     TAKEOFF_SPEED = 555
     FINAL_SPEED =   661
@@ -153,8 +153,9 @@ class flight_controller():
             self._ESC2.value = self._m2.min_value
             self._ESC3.value = self._m3.min_value
 
-        j = 10
+        j = 30
         while j < flight_controller.ADJ:
+            utime.sleep_us(90000*7)
             
             self._m0.i_rpm = self._m0.min_value + j
             self._m1.i_rpm = self._m1.min_value
@@ -166,10 +167,10 @@ class flight_controller():
                 self._ESC1.value = self._m1.min_value
                 self._ESC2.value = self._m2.min_value
                 self._ESC3.value = self._m3.min_value + j
-                
-            utime.sleep_us(210000)
-            j += 10
-                
+            
+            j += 30
+
+        utime.sleep_us(90000*7)        
         self._m0.i_rpm = self._m0.min_value + flight_controller.ADJ
         self._m1.i_rpm = self._m1.min_value
         self._m2.i_rpm = self._m2.min_value
