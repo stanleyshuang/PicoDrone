@@ -51,7 +51,7 @@ from flight_controller import flight_controller
 # debug module ----------------------------------------------------------------
 from flight_data import flight_data
 bb = flight_data()
-bb.debug_level = 0 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
+bb.debug_level = 4 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
 
 
 ### initializing MPU-6050

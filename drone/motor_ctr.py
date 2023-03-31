@@ -79,7 +79,7 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        pid = (p - f_baseline)/8.0 + d*1.0 + i*0.0
+        pid = (p - f_baseline)/32.0 + d*0.0 + i*0.0
         return pid
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
