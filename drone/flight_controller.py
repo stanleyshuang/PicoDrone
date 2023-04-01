@@ -340,7 +340,7 @@ class flight_controller():
                     self._ESC2.value = t_rpm2
                     self._ESC3.value = t_rpm3
 
-                if self._bb:
+                if self._bb and self._bb.debug_level == 4:
                     self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 
                                          i_rpm0, i_rpm1, i_rpm2, i_rpm3, 
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
