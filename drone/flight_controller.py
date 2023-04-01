@@ -117,9 +117,9 @@ class flight_controller():
                 az = self._IMU.accel.z
             except Exception as e:
                 if self._bb:
-                    self._bb.write(1, '!!! Exception: (init) ' + str(e))
+                    self._bb.write(1, '!!! Exception: (init) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                 elif self._b_print:
-                    print('!!  Exception: (init) ' + str(e))
+                    print('!!  Exception: (init) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                 utime.sleep_ms(30)
                 # continue
             else:
@@ -265,6 +265,7 @@ class flight_controller():
                         self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
                     elif self._b_print:
                         print('!!  Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
+                    utime.sleep_us(30 * 1000)
                 else:
                     # 取到完整陀螺儀值後，才更新成員變數與 PID。
                     pitch = motor_ctr.pitch(ax, ay, az)
@@ -321,7 +322,7 @@ class flight_controller():
                 self._ESC3.value = i_rpm3
 
             if i%the_period==0 and self._b_pid:
-                utime.sleep_us(10000)
+                utime.sleep_us(10 * 1000)
 
                 t_rpm0 = self._m0.i_rpm_bound_check(t_rpm0)
                 t_rpm1 = self._m1.i_rpm_bound_check(t_rpm1)
@@ -345,9 +346,9 @@ class flight_controller():
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
                                          pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
                 else:
-                    utime.sleep_us(35000)
+                    utime.sleep_us(35 * 1000)
             else:
-                utime.sleep_us(50000)
+                utime.sleep_us(50 * 1000)
             i += 1
 
         end = utime.ticks_ms()
