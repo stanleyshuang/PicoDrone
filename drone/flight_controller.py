@@ -79,7 +79,7 @@ class flight_controller():
         self._bb = None
         self._b_pid = False
         self._b_arm = True
-        self._b_print = True
+        self._b_print = False
 
     @property
     def debug(self):
@@ -109,7 +109,7 @@ class flight_controller():
             self._ESC3.value = self._m3.init_value
 
         increased_value = 0
-        SAMPLING_COUNT = 20
+        SAMPLING_COUNT = 21
         for i in range(SAMPLING_COUNT):
             try:
                 ax = self._IMU.accel.x
@@ -120,7 +120,7 @@ class flight_controller():
                     self._bb.write(1, '!!! Exception: (init) ' + str(e))
                 elif self._b_print:
                     print('!!  Exception: (init) ' + str(e))
-                utime.sleep_ms(3)
+                utime.sleep_ms(30)
                 # continue
             else:
                 self._acc_qs[0].update_val(ax)
@@ -141,11 +141,12 @@ class flight_controller():
                 elif self._b_print:
                     print('    countdown: '+str(int((SAMPLING_COUNT-i)/10))+' sec.', end='\r')
 
-            utime.sleep_ms(90)
+            utime.sleep_ms(100)
 
         if self._bb:
             self._bb.write(4, '    countdown: 0 sec.')
 
+        utime.sleep_ms(100*7)
         if self._b_arm:
             self._ESC0.value = self._m0.min_value
             self._ESC1.value = self._m1.min_value
@@ -155,7 +156,7 @@ class flight_controller():
         j = 10
         i_max_adjst = max(max(self._m0.i_adjst, self._m1.i_adjst), max(self._m2.i_adjst, self._m3.i_adjst))
         while j < i_max_adjst:
-            utime.sleep_ms(90*7)
+            utime.sleep_ms(100*7)
             
             if j < self._m0.i_adjst:
                 self._m0.i_rpm = self._m0.min_value + j            
@@ -178,7 +179,7 @@ class flight_controller():
             
             j += 10
 
-        utime.sleep_ms(90*7)        
+        utime.sleep_ms(100*7)
         self._m0.i_rpm = self._m0.min_value + self._m0.i_adjst
         self._m1.i_rpm = self._m1.min_value + self._m1.i_adjst
         self._m2.i_rpm = self._m2.min_value + self._m2.i_adjst

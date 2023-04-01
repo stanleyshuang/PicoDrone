@@ -84,7 +84,7 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        pid = (p - f_baseline)*0.0 + d*0.0 + i*0.0
+        pid = (p - f_baseline)/15.0 + d*0.0 + i*0.0
         return pid
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
@@ -111,10 +111,14 @@ class motor_ctr():
 
     @staticmethod
     def angle(a):
-        while a > 135.0:
+        while a > 180.0:
             a -= 180.0
-        while a < -135.0:
+        if a > 90.0:
+            a = a - 180.0
+        while a < -180.0:
             a += 180.0
+        if a < -90.0:
+            a = a + 180.0
         return a
 
 
