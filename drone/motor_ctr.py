@@ -35,8 +35,9 @@ from moving_average import moving_average
 
 
 class motor_ctr():
-    def __init__(self, i_values):
+    def __init__(self, i_values, i_adjst=0):
         self._i_values = i_values
+        self._i_adjst = i_adjst
         self._I_X = 0
         self._I_Y = 0
         self._i_rpm = 0
@@ -62,6 +63,10 @@ class motor_ctr():
     def limit_value(self):
         return self._i_values[4]
     
+    @property
+    def i_adjst(self):
+        return self._i_adjst
+    
     '''
     @property
     def f_conversion_rate(self):
@@ -79,7 +84,7 @@ class motor_ctr():
         return self._I_Y
 
     def f_balancer(self, d, p, i, f_baseline):
-        pid = (p - f_baseline)/32.0 + d*0.0 + i*0.0
+        pid = (p - f_baseline)*0.0 + d*0.0 + i*0.0
         return pid
 
     def f_pid_x(self, d, p, i, f_baseline=0.0):
@@ -130,29 +135,29 @@ class motor_ctr():
 
 
 class motor_ctr_fr(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
-        super(motor_ctr_fr, self).__init__(i_values)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047], i_adjst=0):
+        super(motor_ctr_fr, self).__init__(i_values, i_adjst)
         self._I_X =  1
         self._I_Y =  1
 
 
 class motor_ctr_fl(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
-        super(motor_ctr_fl, self).__init__(i_values)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047], i_adjst=0):
+        super(motor_ctr_fl, self).__init__(i_values, i_adjst)
         self._I_X = -1
         self._I_Y =  1
 
 
 class motor_ctr_bl(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
-        super(motor_ctr_bl, self).__init__(i_values)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047], i_adjst=0):
+        super(motor_ctr_bl, self).__init__(i_values, i_adjst)
         self._I_X = -1
         self._I_Y = -1
 
 
 class motor_ctr_br(motor_ctr):
-    def __init__(self, i_values=[300, 393, 580, 1747, 2047]):
-        super(motor_ctr_br, self).__init__(i_values)
+    def __init__(self, i_values=[300, 393, 580, 1747, 2047], i_adjst=0):
+        super(motor_ctr_br, self).__init__(i_values, i_adjst)
         self._I_X =  1
         self._I_Y = -1
 
