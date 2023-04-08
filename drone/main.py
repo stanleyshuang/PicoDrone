@@ -51,7 +51,7 @@ from flight_controller import flight_controller
 # debug module ----------------------------------------------------------------
 from flight_data import flight_data
 bb = flight_data()
-bb.debug_level = 1 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
+bb.debug_level = 4 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
 
 
 ### initializing MPU-6050
@@ -86,12 +86,12 @@ time.sleep(1.0)
 bb.write(4, 'initializing Motor Controllers')
 #                          i_values=[init,  min, balance,   max, limit]
 '''
-Stanley-0408: 21, 0, 12, 25
+Stanley-0408: 21, 0, 11, 26
 '''
 motor_ctr_0 = motor_ctr_br(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=21)
 motor_ctr_1 = motor_ctr_fr(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=0)
-motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=12)
-motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=25)
+motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=11)
+motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=26)
 
 esc_0.value = motor_ctr_0.init_value
 esc_1.value = motor_ctr_1.init_value
