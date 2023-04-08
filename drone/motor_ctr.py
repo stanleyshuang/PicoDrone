@@ -83,19 +83,23 @@ class motor_ctr():
     def i_y(self):
         return self._I_Y
 
-    def f_balancer(self, d, p, i, f_baseline):
+    def f_balancer(self, d, p, i, f_tar_ang, f_tar_ang_velo):
         '''
             Leo-0408: 2.0, 5.0, 0.0
         Stanley-0408: 1.0, 1.5, 0.0
         '''
-        pid = (p - f_baseline)*1.0 + d*1.5 + i*0.0
+        pid = (p - f_tar_ang)*2.0 + (d - f_tar_ang_velo)*2.0 + i*0.1
+        if pid > 30.0:
+            pid = 30.0
+        elif pid < -30.0:
+            pid = -30.0
         return pid
 
-    def f_pid_x(self, d, p, i, f_baseline=0.0):
-        return self._I_X * self.f_balancer(d, p, i, f_baseline)
+    def f_pid_x(self, d, p, i, f_tar_ang=0.0, f_tar_ang_velo=0.0):
+        return self._I_X * self.f_balancer(d, p, i, f_tar_ang, f_tar_ang_velo)
 
-    def f_pid_y(self, d, p, i, f_baseline=0.0):
-        return self._I_Y * self.f_balancer(d, p, i, f_baseline)
+    def f_pid_y(self, d, p, i, f_tar_ang=0.0, f_tar_ang_velo=0.0):
+        return self._I_Y * self.f_balancer(d, p, i, f_tar_ang, f_tar_ang_velo)
 
 
     @staticmethod
