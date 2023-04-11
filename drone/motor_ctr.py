@@ -85,8 +85,8 @@ class motor_ctr():
 
     def f_balancer(self, d, p, i, f_tar_ang, f_tar_ang_velo):
         '''
-            Leo-0408: 2.0, 5.0, 0.0
-        Stanley-0408: 1.0, 1.5, 0.0
+        v0.82b05: 1.0, 1.5, 0.0, PD 皆沒有發揮功能
+        Leo-0408: 2.0, 5.0, 0.0
         '''
         pid = (p - f_tar_ang)*2.0 + (d - f_tar_ang_velo)*2.0 + i*0.1
         if pid > 30.0:
