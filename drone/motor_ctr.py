@@ -87,12 +87,13 @@ class motor_ctr():
         '''
         v0.82b05: 1.0, 1.5, 0.0, PD 皆沒有發揮功能
         Leo-0408: 2.0, 5.0, 0.0
+        v0.82b08: 2.0, 4.0, 0.2, max 30 -> 40。升空後向右後方飛，無法停下來。
         '''
-        pid = (p - f_tar_ang)*2.0 + (d - f_tar_ang_velo)*2.0 + i*0.1
-        if pid > 30.0:
-            pid = 30.0
-        elif pid < -30.0:
-            pid = -30.0
+        pid = (p - f_tar_ang)*2.0 + (d - f_tar_ang_velo)*4.0 + i*0.2
+        if pid > 40.0:
+            pid = 40.0
+        elif pid < -40.0:
+            pid = -40.0
         return pid
 
     def f_pid_x(self, d, p, i, f_tar_ang=0.0, f_tar_ang_velo=0.0):
