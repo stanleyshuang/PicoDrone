@@ -36,7 +36,7 @@ from moving_average import moving_average
 
 class flight_controller():
     INIT_SPEED =    393
-    TAKEOFF_SPEED = 555
+    TAKEOFF_SPEED = 650
     FINAL_SPEED =   721
     STABLE_SPEED =  710
     TERM_SPEED =    300
@@ -118,9 +118,10 @@ class flight_controller():
             except Exception as e:
                 if self._bb:
                     self._bb.write(1, '!!! Exception: (init) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
+                    self._bb.flush()
                 elif self._b_print:
                     print('!!  Exception: (init) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
-                utime.sleep_ms(30)
+                    utime.sleep_ms(30)
                 # continue
             else:
                 self._acc_qs[0].update_val(ax)
@@ -263,9 +264,10 @@ class flight_controller():
                 except Exception as e:
                     if self._bb:
                         self._bb.write(1, '!!! Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
+                        self._bb.flush()
                     elif self._b_print:
-                        print('!!  Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
-                    utime.sleep_us(30 * 1000)
+                        print('!!   Exception: (simple_mode) ' + str(e) + ' (' + str(utime.ticks_ms())  + ' ms)')
+                        utime.sleep_us(30 * 1000)
                 else:
                     # 取到完整陀螺儀值後，才更新成員變數與 PID。
                     pitch = motor_ctr.pitch(ax, ay, az)
@@ -286,14 +288,14 @@ class flight_controller():
                     acc_sums[1] = self._acc_qs[1].sum
                     acc_sums[2] = self._acc_qs[2].sum
 
-                    pid_x0 = self._m0.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
-                    pid_y0 = self._m0.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
-                    pid_x1 = self._m1.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
-                    pid_y1 = self._m1.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
-                    pid_x2 = self._m2.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
-                    pid_y2 = self._m2.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
-                    pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0])
-                    pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1])
+                    pid_x0 = self._m0.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0], acc_sums[2])
+                    pid_y0 = self._m0.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1], acc_sums[2])
+                    pid_x1 = self._m1.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0], acc_sums[2])
+                    pid_y1 = self._m1.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1], acc_sums[2])
+                    pid_x2 = self._m2.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0], acc_sums[2])
+                    pid_y2 = self._m2.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1], acc_sums[2])
+                    pid_x3 = self._m3.f_pid_x(gyro_currs[0], acc_currs[0], acc_sums[0], acc_sums[2])
+                    pid_y3 = self._m3.f_pid_y(gyro_currs[1], acc_currs[1], acc_sums[1], acc_sums[2])
 
             t_rpm0 = self._m0.i_rpm + step
             t_rpm1 = self._m1.i_rpm + step 

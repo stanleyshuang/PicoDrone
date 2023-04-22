@@ -54,7 +54,12 @@ class flight_data():
 
     def flush(self):
         if self._fd:
+            import utime
+            begin = utime.ticks_ms()
             self._fd.flush()
+            end = utime.ticks_ms()
+            diff = utime.ticks_diff(end, begin)
+            print('--> flight_data.flush(' + str(diff) + ' ms)')
 
     def close(self):
         if self._fd:

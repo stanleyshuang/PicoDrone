@@ -82,25 +82,34 @@ class motor_ctr():
     @property
     def i_y(self):
         return self._I_Y
+    
+    @staticmethod
+    def compare_with_max(x, max_value):
+        if x >= max_value:
+            return max_value
+        else:
+            return x
 
-    def f_balancer(self, d, p, i, f_tar_ang, f_tar_ang_velo):
+    def f_balancer(self, d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo):
         '''
         v0.82b05: 1.0, 1.5, 0.0, PD 皆沒有發揮功能
         Leo-0408: 2.0, 5.0, 0.0
-        v0.82b08: 2.0, 4.0, 0.2, max 30 -> 40。升空後向右後方飛，無法停下來。
+        v0.82b08: 2.0, 4.0, 0.2, MAX 30 升空後向右後方飛，無法停下來。
         '''
-        pid = (p - f_tar_ang)*2.0 + (d - f_tar_ang_velo)*4.0 + i*0.2
-        if pid > 40.0:
-            pid = 40.0
-        elif pid < -40.0:
-            pid = -40.0
+        MAX = 30.0
+        max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), MAX)
+        pid = (p - f_tar_ang)*0.0 + (d - f_tar_ang_velo)*0.0 + i*0.0
+        if pid > max:
+            pid = max
+        elif pid < -1.0 * max:
+            pid = -1.0 * max
         return pid
 
-    def f_pid_x(self, d, p, i, f_tar_ang=0.0, f_tar_ang_velo=0.0):
-        return self._I_X * self.f_balancer(d, p, i, f_tar_ang, f_tar_ang_velo)
+    def f_pid_x(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
+        return self._I_X * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
 
-    def f_pid_y(self, d, p, i, f_tar_ang=0.0, f_tar_ang_velo=0.0):
-        return self._I_Y * self.f_balancer(d, p, i, f_tar_ang, f_tar_ang_velo)
+    def f_pid_y(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
+        return self._I_Y * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
 
 
     @staticmethod
