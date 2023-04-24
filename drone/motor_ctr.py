@@ -95,10 +95,11 @@ class motor_ctr():
         v0.82b05: 1.0, 1.5, 0.0, PD 皆沒有發揮功能
         Leo-0408: 2.0, 5.0, 0.0
         v0.82b08: 2.0, 4.0, 0.2, MAX 30 升空後向右後方飛，無法停下來。
+        v0.82b11: 1.0, 1.0, 0.1, MAX 50 升空後向右後方飛，無法停下來。
         '''
-        MAX = 30.0
-        max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), MAX)
-        pid = (p - f_tar_ang)*0.0 + (d - f_tar_ang_velo)*0.0 + i*0.0
+        MAX = 50.0
+        max = 100 - motor_ctr.compare_with_max(abs(z_accsum*10.0), MAX)
+        pid = (p - f_tar_ang)*1.0 + (d - f_tar_ang_velo)*1.0 + i*0.1
         if pid > max:
             pid = max
         elif pid < -1.0 * max:

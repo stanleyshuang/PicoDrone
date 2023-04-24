@@ -87,13 +87,13 @@ bb.write(4, 'initializing Motor Controllers')
 #                          i_values=[init,  min, balance,   max, limit]
 '''
 v0.82b05: 21, 0, 11, 26
-v0.82b09: 29, 0, 11, 34 TAKEOFF_SPEED 調整為 650 後，後方馬達須加速。
+v0.82b10: 30, 0,  4, 35 TAKEOFF_SPEED 調整為 650 後，後方馬達須加速。
+v0.82b11: 28, 0,  6, 33 TAKEOFF_SPEED 調整為 600 後，後方馬達須加速。
 '''
-motor_ctr_0 = motor_ctr_br(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=29)
+motor_ctr_0 = motor_ctr_br(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=28)
 motor_ctr_1 = motor_ctr_fr(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=0)
-motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=11)
-motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=34)
-
+motor_ctr_2 = motor_ctr_fl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=6)
+motor_ctr_3 = motor_ctr_bl(i_values=[ 300,  393,     580,  1747,  2047], i_adjst=33)
 esc_0.value = motor_ctr_0.init_value
 esc_1.value = motor_ctr_1.init_value
 esc_2.value = motor_ctr_2.init_value

@@ -36,9 +36,9 @@ from moving_average import moving_average
 
 class flight_controller():
     INIT_SPEED =    393
-    TAKEOFF_SPEED = 650
-    FINAL_SPEED =   721
-    STABLE_SPEED =  710
+    TAKEOFF_SPEED = 600
+    FINAL_SPEED =   611
+    STABLE_SPEED =  600
     TERM_SPEED =    300
     FAST_STEP =      10
     SLOW_STEP =       1
