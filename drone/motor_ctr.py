@@ -102,7 +102,15 @@ class motor_ctr():
         c_zacc = 92.0
         MAX = 200.0 + c_zacc
         max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc)
-        pid = ((p - f_tar_ang)**0.5)*3.0 + (d - f_tar_ang_velo)*7.0 + (i**0.5)*0.3
+        if p - f_tar_ang > 0:
+            p_sign = 1.0
+        else:
+            p_sign = -1.0
+        if i > 0:
+            i_sign = 1.0
+        else:
+            i_sign = -1.0
+        pid = p_sign*(abs(p - f_tar_ang)**0.5)*3.0 + (d - f_tar_ang_velo)*7.0 + i_sign*(abs(i)**0.5)*0.3
         if pid > max:
             pid = max
         elif pid < -1.0 * max:
