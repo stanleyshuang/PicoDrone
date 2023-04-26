@@ -96,14 +96,17 @@ class motor_ctr():
         Leo-0408: 2.0, 5.0, 0.0
         v0.82b08: 2.0, 4.0, 0.2, MAX 30 升空後向右後方飛，無法停下來。
         v0.82b11: 1.0, 1.0, 0.1, MAX 50 升空後向右後方飛，無法停下來。
+        v0.82b13: 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
         '''
         MAX = 50.0
-        max = 100 - motor_ctr.compare_with_max(abs(z_accsum*10.0), MAX)
-        pid = (p - f_tar_ang)*1.0 + (d - f_tar_ang_velo)*1.0 + i*0.1
+        # max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), MAX)
+        pid = ((p - f_tar_ang)**1.0)*3.0 + (d - f_tar_ang_velo)*7.0 + (i**1.0)*0.3
+        '''
         if pid > max:
             pid = max
         elif pid < -1.0 * max:
             pid = -1.0 * max
+        '''
         return pid
 
     def f_pid_x(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
