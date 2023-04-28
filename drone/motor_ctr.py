@@ -92,29 +92,23 @@ class motor_ctr():
 
     def f_balancer(self, d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo):
         '''
-        v0.82b05: 1.0, 1.5, 0.0, PD 皆沒有發揮功能
-        Leo-0408: 2.0, 5.0, 0.0
-        v0.82b08: 2.0, 4.0, 0.2, MAX 30 升空後向右後方飛，無法停下來。
-        v0.82b11: 1.0, 1.0, 0.1, MAX 50 升空後向右後方飛，無法停下來。
-        v0.82b13: 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
-        v0.82b14: **0.5*3.0, 7.0, **0.5*0.3, MAX 200.0  P放大時不如顯示的值這麼大，D加大才能克服尾巴的重量。
+        v0.82b05: Ang 1.00, PID 1.0, 1.5, 0.0, MAX N/A PD 皆沒有發揮功能
+        Leo-0408: Ang 1.00, PID 2.0, 5.0, 0.0, MAX N/A
+        v0.82b08: Ang 1.00, PID 2.0, 4.0, 0.2, MAX 30  升空後向右後方飛，無法停下來。
+        v0.82b13: Ang 1.00, PID 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
+        v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象，D加大才能克服尾巴的重量。
+        v0.82b17: Ang 0.75, PID 9.0, 3.5, 0.9, MAX N/A P要比D大才能讓震動逐漸變小？縮小Ang以符合觀察現象，D加大才能克服尾巴的重量。
         '''
         c_zacc = 92.0
         MAX = 200.0 + c_zacc
         max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc)
-        if p - f_tar_ang > 0:
-            p_sign = 1.0
-        else:
-            p_sign = -1.0
-        if i > 0:
-            i_sign = 1.0
-        else:
-            i_sign = -1.0
-        pid = p_sign*(abs(p - f_tar_ang)**0.5)*3.0 + (d - f_tar_ang_velo)*7.0 + i_sign*(abs(i)**0.5)*0.3
+        pid = (p - f_tar_ang)*9.0 + (d - f_tar_ang_velo)*3.5 + i*0.9
+        '''
         if pid > max:
             pid = max
         elif pid < -1.0 * max:
             pid = -1.0 * max
+        '''
         return pid
 
     def f_pid_x(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
@@ -122,7 +116,6 @@ class motor_ctr():
 
     def f_pid_y(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
         return self._I_Y * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
-
 
     @staticmethod
     def pitch(ax, ay, az):
@@ -149,6 +142,12 @@ class motor_ctr():
             a += 180.0
         if a < -90.0:
             a = a + 180.0
+ 
+        if a > 0:
+            sign = 1.0
+        else:
+            sign = -1.0
+        a = sign * (abs(a) ** 0.75)
         return a
 
 
