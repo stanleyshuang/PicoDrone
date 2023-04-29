@@ -152,4 +152,5 @@ class flight_data():
         # r_end = utime.ticks_ms()
         # r_diff = utime.ticks_diff(r_end, begin)
         # print('>flight_data.show_status(' + str(r_diff) + ' ms)')
-        self.flush()
+        if self._fd:
+            self._fd.flush()

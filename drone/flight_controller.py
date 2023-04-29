@@ -78,7 +78,7 @@ class flight_controller():
 
         self._bb = None
         self._b_pid = False
-        self._b_arm = True
+        self._b_arm = False
         self._b_print = False
 
     @property
