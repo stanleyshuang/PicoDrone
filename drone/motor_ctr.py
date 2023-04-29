@@ -117,10 +117,17 @@ class motor_ctr():
     def f_pid_y(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
         return self._I_Y * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
 
+    '''
     @staticmethod
     def pitch(ax, ay, az):
         # pitch：atan2(-Ax, sqrt(Ay^2 + Az^2))
         return motor_ctr.angle(math.atan2(ax, math.sqrt(ay*ay + az*az)) * 180.0 / math.pi)
+    '''
+
+    @staticmethod
+    def pitch(ax, ay, az):
+        # pitch：atan2(Ax, Az)
+        return motor_ctr.angle(math.atan2(ax, az) * 180.0 / math.pi)
 
     @staticmethod
     def roll(ax, ay, az):
