@@ -85,10 +85,10 @@ class motor_ctr():
     
     @staticmethod
     def compare_with_max(x, max_value):
-        if x >= max_value:
-            return max_value
+        if abs(x) >= max_value:
+            return 0
         else:
-            return x
+            return max_value - abs(x)
 
     def f_balancer(self, d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo):
         '''
@@ -96,13 +96,13 @@ class motor_ctr():
         Leo-0408: Ang 1.00, PID 2.0, 5.0, 0.0, MAX N/A
         v0.82b08: Ang 1.00, PID 2.0, 4.0, 0.2, MAX 30  升空後向右後方飛，無法停下來。
         v0.82b13: Ang 1.00, PID 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
-        v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象，D加大才能克服尾巴的重量。
-        v0.82b17: Ang 0.75, PID 9.0, 3.5, 0.9, MAX N/A P要比D大才能讓震動逐漸變小？縮小Ang以符合觀察現象，D加大才能克服尾巴的重量。
+        v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象。
+        v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小？
         '''
         c_zacc = 92.0
-        MAX = 200.0 + c_zacc
-        max = MAX - motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc)
-        pid = (p - f_tar_ang)*9.0 + (d - f_tar_ang_velo)*3.5 + i*0.9
+        MAX = 500.0
+        max = motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc) * MAX / c_zacc
+        pid = (p - f_tar_ang)*65.0 + (d - f_tar_ang_velo)*5.0 + i*4.5
         '''
         if pid > max:
             pid = max
