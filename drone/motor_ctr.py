@@ -96,19 +96,11 @@ class motor_ctr():
         else:
             return max_value - abs(x)
 
-    def f_balancer(self, d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo):
-        '''
-        v0.82b05: Ang 1.00, PID 1.0, 1.5, 0.0, MAX N/A PD 皆沒有發揮功能
-        Leo-0408: Ang 1.00, PID 2.0, 5.0, 0.0, MAX N/A
-        v0.82b08: Ang 1.00, PID 2.0, 4.0, 0.2, MAX 30  升空後向右後方飛，無法停下來。
-        v0.82b13: Ang 1.00, PID 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
-        v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象。
-        v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小？
-        '''
+    def f_balancer(self, gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro):
         c_zacc = 92.0
         MAX = 500.0
         max = motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc) * MAX / c_zacc
-        pid = (p - f_tar_ang)*65.0 + (d - f_tar_ang_velo)*5.0 + i*4.5
+        pid = (euler_ang - f_tar_ang)*cp + (gyro - f_tar_gyro)*cd + euler_sum*ci
         '''
         if pid > max:
             pid = max
@@ -117,11 +109,19 @@ class motor_ctr():
         '''
         return pid
 
-    def f_pid_x(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
-        return self._I_X * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
+    '''
+    v0.82b05: Ang 1.00, PID 1.0, 1.5, 0.0, MAX N/A PD 皆沒有發揮功能
+    Leo-0408: Ang 1.00, PID 2.0, 5.0, 0.0, MAX N/A
+    v0.82b08: Ang 1.00, PID 2.0, 4.0, 0.2, MAX 30  升空後向右後方飛，無法停下來。
+    v0.82b13: Ang 1.00, PID 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
+    v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象。
+    v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小？
+    '''
+    def f_pid_x(self, gyro, euler_ang, euler_sum, z_accsum, cd=2.5, cp=32.5, ci=2.25, f_tar_ang=0.0, f_tar_gyro=0.0):
+        return self._I_X * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
-    def f_pid_y(self, d, p, i, z_accsum, f_tar_ang=0.0, f_tar_ang_velo=0.0):
-        return self._I_Y * self.f_balancer(d, p, i, z_accsum, f_tar_ang, f_tar_ang_velo)
+    def f_pid_y(self, gyro, euler_ang, euler_sum, z_accsum, cd=5.0, cp=65.0, ci=4.5, f_tar_ang=0.0, f_tar_gyro=0.0):
+        return self._I_Y * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
     '''
     @staticmethod
