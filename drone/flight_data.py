@@ -68,7 +68,9 @@ class flight_data():
     def show_status(self, debug_level, acc_currs, gyro_currs, acc_sums, imu_tem, 
                     rpm0, rpm1, rpm2, rpm3, 
                     diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
-                    pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, indent=4):
+                    pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3, 
+                    rpm_avg0, rpm_avg1, rpm_avg2, rpm_avg3, 
+                    indent=4):
         if debug_level > self._debug_level:
             return
         import utime
@@ -133,10 +135,19 @@ class flight_data():
         diff_rpm += ' '
         diff_rpm += self.format(int(diff_rmp3), 4)
 
+        rpm_avgs = ''
+        rpm_avgs += self.format(int(rpm_avg0), 4)
+        rpm_avgs += ' '
+        rpm_avgs += self.format(int(rpm_avg1), 4)
+        rpm_avgs += ' '
+        rpm_avgs += self.format(int(rpm_avg2), 4)
+        rpm_avgs += ' '
+        rpm_avgs += self.format(int(rpm_avg3), 4)
+
         msg = ''
-        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpms', 'diff']
-        lens = [15, 8, 15, 8, 15, 4, 19, 19]
-        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, rpms, diff_rpm]
+        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpms', 'diff', 'rpm_avgs']
+        lens = [15, 8, 15, 8, 15, 4, 19, 19, 19]
+        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, rpms, diff_rpm, rpm_avgs]
         for i in range(indent):
             msg += ' '
         for i in range(len(keys)):

@@ -160,13 +160,13 @@ class flight_controller():
             utime.sleep_ms(100*7)
             
             if j < self._m0.i_adjst:
-                self._m0.i_rpm = self._m0.min_value + j            
+                self._m0.i_rpm_adj(self._m0.min_value + j)
             if j < self._m1.i_adjst:
-                self._m1.i_rpm = self._m1.min_value + j            
+                self._m1.i_rpm_adj(self._m1.min_value + j)
             if j < self._m2.i_adjst:
-                self._m2.i_rpm = self._m2.min_value + j            
+                self._m2.i_rpm_adj(self._m2.min_value + j)
             if j < self._m3.i_adjst:
-                self._m3.i_rpm = self._m3.min_value + j
+                self._m3.i_rpm_adj(self._m3.min_value + j)
 
             if self._b_arm:
                 if j < self._m0.i_adjst:
@@ -181,10 +181,10 @@ class flight_controller():
             j += 10
 
         utime.sleep_ms(100*7)
-        self._m0.i_rpm = self._m0.min_value + self._m0.i_adjst
-        self._m1.i_rpm = self._m1.min_value + self._m1.i_adjst
-        self._m2.i_rpm = self._m2.min_value + self._m2.i_adjst
-        self._m3.i_rpm = self._m3.min_value + self._m3.i_adjst
+        self._m0.i_rpm_adj(self._m0.min_value + self._m0.i_adjst)
+        self._m1.i_rpm_adj(self._m1.min_value + self._m1.i_adjst)
+        self._m2.i_rpm_adj(self._m2.min_value + self._m2.i_adjst)
+        self._m3.i_rpm_adj(self._m3.min_value + self._m3.i_adjst)
 
         if self._b_arm:
             self._ESC0.value = self._m0.min_value + self._m0.i_adjst
@@ -205,10 +205,10 @@ class flight_controller():
         if self._bb:
             self._bb.write(4, '    set RPM to '+str(rpm))
 
-        self._m0.i_rpm = rpm + self._m0.i_adjst
-        self._m1.i_rpm = rpm + self._m1.i_adjst
-        self._m2.i_rpm = rpm + self._m2.i_adjst
-        self._m3.i_rpm = rpm + self._m3.i_adjst
+        self._m0.i_rpm_adj(rpm + self._m0.i_adjst)
+        self._m1.i_rpm_adj(rpm + self._m1.i_adjst)
+        self._m2.i_rpm_adj(rpm + self._m2.i_adjst)
+        self._m3.i_rpm_adj(rpm + self._m3.i_adjst)
 
         if self._b_arm:
             self._ESC0.value = rpm + self._m0.i_adjst
@@ -312,10 +312,10 @@ class flight_controller():
             diff_rmp2 = i_rpm2 - self._m2.i_rpm
             diff_rmp3 = i_rpm3 - self._m3.i_rpm
 
-            self._m0.i_rpm = i_rpm0
-            self._m1.i_rpm = i_rpm1
-            self._m2.i_rpm = i_rpm2
-            self._m3.i_rpm = i_rpm3
+            self._m0.i_rpm_adj(i_rpm0)
+            self._m1.i_rpm_adj(i_rpm1)
+            self._m2.i_rpm_adj(i_rpm2)
+            self._m3.i_rpm_adj(i_rpm3)
 
             if self._b_arm:
                 self._ESC0.value = i_rpm0
@@ -346,7 +346,8 @@ class flight_controller():
                     self._bb.show_status(4, acc_currs, gyro_currs, acc_sums, imu_tem, 
                                          i_rpm0, i_rpm1, i_rpm2, i_rpm3, 
                                          diff_rmp0, diff_rmp1, diff_rmp2, diff_rmp3,
-                                         pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3)
+                                         pid_x0, pid_y0, pid_x1, pid_y1, pid_x2, pid_y2, pid_x3, pid_y3,
+                                         self._m0.i_rpm_q_avg, self._m1.i_rpm_q_avg, self._m2.i_rpm_q_avg, self._m3.i_rpm_q_avg)
                 else:
                     utime.sleep_us(35 * 1000)
             else:

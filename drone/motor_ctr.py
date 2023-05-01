@@ -41,6 +41,8 @@ class motor_ctr():
         self._I_X = 0
         self._I_Y = 0
         self._i_rpm = 0
+        i_rpm_q_size = 10
+        self._i_rpm_q = moving_average(i_rpm_q_size+1)
 
 
     @property
@@ -66,6 +68,10 @@ class motor_ctr():
     @property
     def i_adjst(self):
         return self._i_adjst
+    
+    @property
+    def i_rpm_q_avg(self):
+        return self._i_rpm_q.average
     
     '''
     @property
@@ -172,6 +178,10 @@ class motor_ctr():
     @i_rpm.setter
     def i_rpm(self, rpm):
         self._i_rpm = int(rpm)
+
+    def i_rpm_adj(self, rpm):
+        self._i_rpm = int(rpm)
+        self._i_rpm_q.update_val(int(rpm))
 
 
 class motor_ctr_fr(motor_ctr):
