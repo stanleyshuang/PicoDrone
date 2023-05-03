@@ -126,15 +126,6 @@ class flight_data():
         rpms += ' '
         rpms += self.format(int(rpm3), 4)
 
-        diff_rpm = ''
-        diff_rpm += self.format(int(diff_rmp0), 4)
-        diff_rpm += ' '
-        diff_rpm += self.format(int(diff_rmp1), 4)
-        diff_rpm += ' '
-        diff_rpm += self.format(int(diff_rmp2), 4)
-        diff_rpm += ' '
-        diff_rpm += self.format(int(diff_rmp3), 4)
-
         rpm_avgs = ''
         rpm_avgs += self.format(int(rpm_avg0), 4)
         rpm_avgs += ' '
@@ -144,10 +135,19 @@ class flight_data():
         rpm_avgs += ' '
         rpm_avgs += self.format(int(rpm_avg3), 4)
 
+        diff_rpm = ''
+        diff_rpm += self.format(int(diff_rmp0), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp1), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp2), 4)
+        diff_rpm += ' '
+        diff_rpm += self.format(int(diff_rmp3), 4)
+
         msg = ''
-        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpms', 'diff', 'rpm_avgs']
+        keys = ['x', 'pid', 'y', 'pid', 'z', 'rpms', 'rpm_avgs', 'diff']
         lens = [15, 8, 15, 8, 15, 4, 19, 19, 19]
-        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, rpms, diff_rpm, rpm_avgs]
+        vals = [x_axis, pid_x, y_axis, pid_y, z_axis, rpms, rpm_avgs, diff_rpm]
         for i in range(indent):
             msg += ' '
         for i in range(len(keys)):

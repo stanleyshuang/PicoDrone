@@ -115,12 +115,13 @@ class motor_ctr():
     v0.82b08: Ang 1.00, PID 2.0, 4.0, 0.2, MAX 30  升空後向右後方飛，無法停下來。
     v0.82b13: Ang 1.00, PID 3.0, 7.0, 0.3, MAX N/A D 加大才能克服尾巴的重量。
     v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象。
-    v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小？
+    v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小。
+    v0.82b24: Ang 0.81, YPID 91.0, 8.0, 9.1, XPID 48.5, 3.8, 4.85, MAX N/A XY軸獨立。(RPM轉速極值出現)
     '''
-    def f_pid_x(self, gyro, euler_ang, euler_sum, z_accsum, cd=2.5, cp=32.5, ci=2.25, f_tar_ang=0.0, f_tar_gyro=0.0):
+    def f_pid_x(self, gyro, euler_ang, euler_sum, z_accsum, cd=3.8, cp=48.5, ci=4.85, f_tar_ang=0.0, f_tar_gyro=0.0):
         return self._I_X * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
-    def f_pid_y(self, gyro, euler_ang, euler_sum, z_accsum, cd=5.0, cp=65.0, ci=4.5, f_tar_ang=0.0, f_tar_gyro=0.0):
+    def f_pid_y(self, gyro, euler_ang, euler_sum, z_accsum, cd=8.0, cp=91.0, ci=9.1, f_tar_ang=0.0, f_tar_gyro=0.0):
         return self._I_Y * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
     '''
@@ -160,7 +161,7 @@ class motor_ctr():
             sign = 1.0
         else:
             sign = -1.0
-        a = sign * (abs(a) ** 0.75)
+        a = sign * (abs(a) ** 0.81)
         return a
 
 
