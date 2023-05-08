@@ -117,24 +117,27 @@ class motor_ctr():
     v0.82b16: Ang 0.75, PID 3.0, 7.0, 0.3, MAX N/A 縮小Ang以符合觀察現象。
     v0.82b18: Ang 0.75, PID 65.0, 5.0, 4.5, MAX N/A P要比D大才能讓震動逐漸變小。
     v0.82b24: Ang 0.81, YPID 91.0, 8.0, 9.1, XPID 48.5, 3.8, 4.85, MAX N/A XY軸獨立。(RPM轉速極值出現)
+    BOSS LEO:           PID 0.2, 5.0, 0.1, MAX N/A 往右偏移@_@
+    v0.82b25: Ang 0.81, YPID 91.0, 8.0, 9.1, XPID 24.0, 2.0, 2.4, MAX N/A
+    v0.82b26: Ang 0.81, YPID 91.0, 8.0, 9.1, XPID 91.0, 8.0, 9.1, MAX N/A 
     '''
-    def f_pid_x(self, gyro, euler_ang, euler_sum, z_accsum, cd=3.8, cp=48.5, ci=4.85, f_tar_ang=0.0, f_tar_gyro=0.0):
+    def f_pid_x(self, gyro, euler_ang, euler_sum, z_accsum, cd=8.0, cp=91.0, ci=9.1, f_tar_ang=0.0, f_tar_gyro=0.0):
         return self._I_X * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
     def f_pid_y(self, gyro, euler_ang, euler_sum, z_accsum, cd=8.0, cp=91.0, ci=9.1, f_tar_ang=0.0, f_tar_gyro=0.0):
         return self._I_Y * self.f_balancer(gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro)
 
-    '''
     @staticmethod
     def pitch(ax, ay, az):
         # pitch：atan2(-Ax, sqrt(Ay^2 + Az^2))
         return motor_ctr.angle(math.atan2(ax, math.sqrt(ay*ay + az*az)) * 180.0 / math.pi)
-    '''
 
+    '''
     @staticmethod
     def pitch(ax, ay, az):
         # pitch：atan2(Ax, Az)
         return motor_ctr.angle(math.atan2(ax, az) * 180.0 / math.pi)
+    '''
 
     @staticmethod
     def roll(ax, ay, az):
