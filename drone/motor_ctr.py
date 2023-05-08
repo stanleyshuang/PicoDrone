@@ -98,15 +98,13 @@ class motor_ctr():
 
     def f_balancer(self, gyro, euler_ang, euler_sum, z_accsum, cd, cp, ci, f_tar_ang, f_tar_gyro):
         c_zacc = 92.0
-        MAX = 500.0
+        MAX = 920.0
         max = motor_ctr.compare_with_max(abs(z_accsum*10.0), c_zacc) * MAX / c_zacc
         pid = (euler_ang - f_tar_ang)*cp + (gyro - f_tar_gyro)*cd + euler_sum*ci
-        '''
         if pid > max:
             pid = max
         elif pid < -1.0 * max:
             pid = -1.0 * max
-        '''
         return pid
 
     '''
