@@ -53,6 +53,8 @@ from flight_data import flight_data
 bb = flight_data()
 bb.debug_level = 4 # 0: disable, 1: exception, 2: error, 3: warning, 4: information
 
+freq = machine.freq()
+bb.write(4, 'CPU時脈速度: {freq}'.format(freq=freq))
 
 ### initializing MPU-6050
 bb.write(4, 'initializing MPU-6050')
